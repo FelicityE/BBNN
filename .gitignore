@@ -1,2 +1,9 @@
 .vscode
+
 build/*
+!build/*.sh
+!build/CMakeLists.txt
+!build/make
+
+build/make/*
+!build/make/*.sh

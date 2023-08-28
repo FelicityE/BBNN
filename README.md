@@ -6,3 +6,6 @@ For fancy folder stuff
 `cmake ..`
 `make`
 `./BBNN`
+
+For complicated stuff
+`bash BBNN.sh`
