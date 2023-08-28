@@ -1,5 +1,5 @@
-For just files
-`g++ -o BBNN bbnn.cpp`
+For Convenience
+`bash BBNN.sh`
 
 For fancy folder stuff
 `cd build`
@@ -7,5 +7,5 @@ For fancy folder stuff
 `make`
 `./BBNN`
 
-For complicated stuff
-`bash BBNN.sh`
+For just files
+`g++ -o BBNN bbnn.cpp`
