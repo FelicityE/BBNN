@@ -1,22 +1,180 @@
-#include "header.h"
+#include "bbnn.h"
 
+///////////////////////////////////////////////////////////////////////////////
+/// Activation Functions
+///////////////////////////////////////////////////////////////////////////////
+DTYPE sigmoid(DTYPE activation){
+  return 1.0 / (1.0+exp(-1.0*activation));
+}
 
-int main(){
+DTYPE sigmoidPrime(DTYPE activation){
+  return sigmoid(activation)*(1.0 - sigmoid(activation));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Error Functions
+///////////////////////////////////////////////////////////////////////////////
+DTYPE halfSquaredError(DTYPE x, DTYPE y){
+  return 0.5*(x-y)*(x-y);
+}
+
+DTYPE halfSquaredErrorPrime(DTYPE x, DTYPE y){
+  return (x-y);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Matrix Functions
+///////////////////////////////////////////////////////////////////////////////
+void matrixMultiply(
+  DTYPE * A, unsigned int aRow, unsigned int aCol, 
+  DTYPE * B, unsigned int bRow, unsigned int bCol, 
+  DTYPE * C
+){
+  if(aCol != bRow){
+    std::cout << "Wrong Matrix Sizes in Multiply" << std::endl << std::flush;
+    return;
+  }
+
+  unsigned int cRow = aRow;
+  unsigned int cCol = bCol;
+  
+  for(unsigned int i = 0; i < cRow; i++){
+    for(unsigned int j = 0; j < cCol; j++){
+      DTYPE temp = 0;
+      for(unsigned int k = 0; k < aCol; k++){
+        temp += A[i*aCol+k] * B[k*bCol+j];
+      }
+      C[i*cCol+j] = temp;      
+    }
+  }
+  return;
+}
+
+void matrixAdd(
+  DTYPE * A, unsigned int aRow, unsigned int aCol, 
+  DTYPE * B, unsigned int bRow, unsigned int bCol, 
+  DTYPE * C
+){
+  if(aCol != bCol || aRow != bRow){
+    std::cout << "Wrong Matrix Sizes in Add" << std::endl << std::flush;
+    return;
+  }
+
+  unsigned int cRow = aRow;
+  unsigned int cCol = bCol;
+
+  for(unsigned int i = 0; i < cRow*cCol; i++){
+    C[i] = A[i] + B[i];
+  }
+
+  return;
+}
+
+void matrixSubtract(
+  DTYPE * A, unsigned int aRow, unsigned int aCol,
+  DTYPE * B, unsigned int bRow, unsigned int bCol, 
+  DTYPE * C
+){
+  if(aCol != bCol || aRow != bRow){
+    std::cout << "Wrong Matrix Sizes in Add" << std::endl << std::flush;
+    return;
+  }
+
+  unsigned int cRow = aRow;
+  unsigned int cCol = bCol;
+  
+  for(unsigned int i = 0; i < cRow*cCol; i++){
+    C[i] = A[i] - B[i];
+  }
+  return;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// ANN Functions
+///////////////////////////////////////////////////////////////////////////////
+void updateLayer(
+  unsigned int inCount, unsigned int outCount, 
+  DTYPE * Lin, DTYPE * Lout, DTYPE * W, DTYPE * B, 
+  activationFunc ActivationFunction
+){
+  DTYPE * temp1 = (DTYPE*)malloc(sizeof(DTYPE*)*outCount);
+  
+  matrixMultiply(W, outCount, inCount, Lin, inCount, 1, temp1);
+  matrixAdd(temp1, outCount, 1, B, outCount, 1, Lout);
+  
+  free(temp1);
+  
+  for(unsigned int i = 0; i < outCount; i++){
+    Lout[i] = (*ActivationFunction)(Lout[i]);
+  }
+
+  return;
+}
+
+void runForward(
+  DTYPE ** layers, unsigned int numLayers, unsigned int * layerSizes, 
+  DTYPE ** weights, DTYPE ** bias, activationFunc * ActivationFunction
+){
+  for(unsigned int i = 0; i < numLayers-1; i++){
+    updateLayer(
+      layerSizes[i], layerSizes[i+1], layers[i], layers[i+1], 
+      weights[i], bias[i], ActivationFunction[i]
+    );
+  }
+
+}
+
+void backProbGradDecent(
+  DTYPE ** layers, 
+  unsigned int numLayers, 
+  unsigned int * layerSizes,
+  DTYPE * expectedOutcome,
+  DTYPE ** weights, 
+  DTYPE ** bias, 
+  lossFunc LossFuncPrime, 
+  activationFunc * ActivationFunctionPrime, 
+  DTYPE learningRate
+){
+  // Allocating Memory
+  DTYPE ** deltas = (DTYPE **)malloc(sizeof(DTYPE*)*numLayers);
+  for(unsigned int i = 0 ; i < numLayers; i ++){
+    deltas[i] = (DTYPE *)malloc(sizeof(DTYPE)*layerSizes[i]);
+  }
+
+  for(unsigned int i = 0; i < layerSizes[numLayers-1]; i++){
+    // get derivatives of the loss values
+    deltas[numLayers-1][i] = 
+      (*LossFuncPrime)(layers[numLayers-1][i], expectedOutcome[i]);
     
-    DTYPE A[4] = {1,2,3,4};
-    DTYPE B[4] = {5,6,7,8};
-    
-    DTYPE C[4];
-    
-    matrixMultiply(A,2,2,B,2,2,C);
+    // get the derivatives of the activation functions
+    deltas[numLayers-1][i] = 
+      deltas[numLayers-1][i] * 
+      (*ActivationFunctionPrime[numLayers-1])(layers[numLayers-1][i]);
+  }
 
-    std::cout << C[3] << std::endl;
+  // For each layer
+  for(unsigned int i = numLayers-2; i > 0; i--){
+    // For each node in the current layer
+    for(unsigned int j = 0; j < layerSizes[i]; j++){
+      deltas[i][j] = (*ActivationFunctionPrime[i])(layers[i][j]);
+      DTYPE sum = 0;
+      // For each node in the next layer
+      for(unsigned int k = 0; k < layerSizes[i+1]; k++){
+        sum += weights[i][j*layerSizes[i] + k]*deltas[i+1][k];
+      }
+      deltas[i][j] = deltas[i][j]*sum;
+    }
+  }
 
-    DTYPE D[4];
-    matrixAdd(A,2,2,B,2,2,D);
-
-    std::cout << D[3] << std::endl;
-
-
- 
+  // For each layer
+  for(unsigned int l = 0; l < numLayers-1; l++){
+    // For node in the current layer / weights columns
+    for(unsigned int i = 0; i < layerSizes[l]; i++){
+      // For each node in the next layer / weights rows
+      for(unsigned int j = 0; j < layerSizes[l+1]; j++){
+        weights[l][i*layerSizes[l] + j] -= learningRate * layers[l][i] 
+          * deltas[l+1][j];
+      }
+    }
+  }
 }

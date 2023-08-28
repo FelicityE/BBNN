@@ -54,14 +54,14 @@ then
   if  ! command -v $EX /dev/null;
   then
     echo "$EX not found";
-    # echo "make clean";
+    echo "make clean";
     bash makeclean.sh;
-    # echo "cmake";
-    cmake;
-    # echo "make";
+    echo "cmake ..";
+    cmake ..;
+    echo "make";
     make;
     if [ -z "$LOG" ]; then
-      # echo "$EX $FILE";
+      echo "$EX $FILE";
       $EX ../../$FILE;
     else
       echo "$EX $FILE > $LOG"
@@ -69,7 +69,7 @@ then
     fi
   else
     if [ -z "$LOG" ]; then
-      # echo "$EX $FILE";
+      echo "$EX $FILE";
       $EX ../../$FILE;
     else
       echo "$EX $FILE > $LOG";

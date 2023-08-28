@@ -6,4 +6,4 @@ INCLUDE_DIRECTORIES (../include/)
 
 FILE (GLOB SOURCE_CODE "../src/*")
 
-ADD_EXECUTABLE(BBNN ../src/bbnn.cpp ${SOURCE_CODE})
+ADD_EXECUTABLE(BBNN ../src/main.cpp ${SOURCE_CODE})
