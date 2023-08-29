@@ -2,11 +2,11 @@
 # Developer Parameters
 ###############################################################################
 ## Make clean
-MC=true
+MC=false
 ## Make New
-MN=false
+MN=true
 ## Run Program
-RUN=false
+RUN=true
 ## Clean for Github
 CLEAN=false
 

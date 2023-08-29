@@ -3,10 +3,9 @@
 #include "tests.h"
 
 int main(int numInputs, char * inputs[]){
+  cout << endl;
   // Testing readFile Function
   // TEST::readIn(numInputs, inputs);
-  // Testing Matrix Functions
-  // TEST::matrix();
 
   // Testing Forward
   TEST::forward();
