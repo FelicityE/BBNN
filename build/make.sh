@@ -43,7 +43,16 @@ cd make
 # Run Makeclean and Make
 ###############################################################################
 if $MC ; then bash makeclean.sh; fi
-if $MN ; then make; fi
+if $MN ; 
+  then 
+  if [[ -f "Makefile" ]]
+    then
+    echo "Makefile found"
+    make;
+  else 
+    echo "Makefile not found"
+  fi
+fi
 
 ###############################################################################
 # Run BBNN
