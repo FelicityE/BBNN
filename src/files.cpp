@@ -1,11 +1,28 @@
-#include "data.h"
+#include "files.h"
 
-
+///////////////////////////////////////////////////////////////////////////////
+/// Utility
+///////////////////////////////////////////////////////////////////////////////
 bool fExist(const std::string& name){
   struct stat buffer;
   return (stat (name.c_str(), &buffer) == 0); 
 }
 
+void rmSpace(string &str){
+    bool start = false;
+  string s = "";
+  for(int i = 0; i < str.length(); i++){
+    if(str[i] == ' '){
+      continue;
+    }
+    s += str[i];
+  }
+  str=s;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Read
+///////////////////////////////////////////////////////////////////////////////
 void readFile(string filename, vector<vector<string>> &data){
   // Creating Vector to hold Content
   std::vector<std::vector<std::string>> content;
@@ -57,18 +74,9 @@ char*** readFile(string filename, char*** data){
   return temp;
 }
 
-void rmSpace(string &str){
-    bool start = false;
-  string s = "";
-  for(int i = 0; i < str.length(); i++){
-    if(str[i] == ' '){
-      continue;
-    }
-    s += str[i];
-  }
-  str=s;
-}
-
+///////////////////////////////////////////////////////////////////////////////
+/// Print
+///////////////////////////////////////////////////////////////////////////////
 void printData(vector<vector<string>> data){
   for(unsigned int  i = 0; i < data.size(); i++){
     for(unsigned int j = 0; j < data[i].size(); j++){

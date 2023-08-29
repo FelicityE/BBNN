@@ -92,6 +92,62 @@ namespace TEST{
     for(int i = 0; i < (lSize[nLayers-1]); i++){
       cout << layers[nLayers-1][i] << " ";
     }
-    cout << endl << endl;
+    cout << endl << endl; 
   }
+
+
+  void forward2(){
+    unsigned int nLayers = 3;
+    unsigned int lSize [nLayers] = {3, 4, 2};
+
+    // Allocating Space
+    DTYPE ** layers = allocate(nLayers, lSize);
+
+    unsigned int * wSize = (DTYPE*)malloc(sizeof(DTYPE)*(nLayers-1));
+    for(int i = 0; i < nLayers-1; i++){
+      wSize[i] = lSize[i]*lSize[i+1];
+    }
+    DTYPE ** weights = allocate(nLayers-1, wSize, true);
+
+    DTYPE ** biad = allocate(nLayers-1, &lSize[1]);
+
+    activationFunc * activations = 
+      (activationFunc*)malloc(sizeof(activationFunc)*(nLayers-1));
+
+    for(unsigned int i = 0; i < nLayers-1; i++){
+      activations[i] = sigmoid;
+    }
+
+    // Printing Weights
+    for(unsigned int i = 0; i < nLayers-1; i++){
+      for(unsigned int j = 0; j < (lSize[i]*lSize[i+1])); j++{
+        cout << weights[i][j] << " "
+      }
+      cout << endl;
+    }
+    cout << endl;
+
+    // Giving random input values
+    for(int i = 0; i < lSize[0]; i++){
+      layers[0][i] = ((DTYPE)rand()/RAND_MAX);
+      cout << layers[0][i] << " ";
+    }
+    cout << endl << endl;
+
+    // Running Forward function
+    runForward(
+      layers, 
+      nLayers, 
+      lSize, 
+      weights, 
+      bias, 
+      activations
+    );
+
+    for(int i = 0; i < (lSize[nLayers-1]); i++){
+      cout << layers[nLayers-1][i] << " ";
+    }
+    cout << endl << endl; 
+  }
+  
 }

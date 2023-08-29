@@ -1,25 +1,23 @@
-#pragma once 
-
-#include <iostream> // For std::cout and others 
-#include <fstream> // For reading files
-#include <string> // For strings
-#include <vector> // For vectors
-#include <sstream> // For read/writing strings
-
-
-#include <sys/stat.h> // For Function fExist
-#include <unistd.h> // For Function fExist
-
+#pragma once
 
 using namespace std;
 
-bool fExist(const string& name);
+///////////////////////////////////////////////////////////////////////////////
+/// Allocating Memory
+///////////////////////////////////////////////////////////////////////////////
+DTYPE** allocate(unsigned int N, unsigned int * n, bool rand = false){
+  DTYPE** temp = (DTYPE**)malloc(sizeof(DTYPE*)*N);
+  for(unsigned int i = 0; i < N; i++){
+    temp[i] = (DTYPE *)malloc(sizeof(DTYPE)*n[i]);
+    for(unsigned int j = 0; j < n[i]; j++){
+      if(rand){
+        srand(42);
+        temp[i][j] =  ((DTYPE)rand()/RAND_MAX);
+      }else{
+        temp[i][j] = 0;
+      }
+    }
+  } 
 
-void readFile(string filename, vector<vector<string>> &data);
-char*** readFile(string filename, char*** data);
-
-void rmSpace(string &str);
-
-void printData(vector<vector<string>> data);
-
-void printData(char*** data);
+  return temp;
+}
