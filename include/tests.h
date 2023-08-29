@@ -79,7 +79,7 @@ namespace TEST{
     }
     cout << endl << endl;
 
-    // Runing Forward function
+    // Running Forward function
     runForward(
       layers, 
       nLayers, 
