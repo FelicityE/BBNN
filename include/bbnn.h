@@ -29,18 +29,30 @@ DTYPE halfSquaredErrorPrime(DTYPE x, DTYPE y);
 /// Matrix Functions
 ///////////////////////////////////////////////////////////////////////////////
 void matrixMultiply(
-  DTYPE * A, unsigned int aRow, unsigned int aCol, 
-  DTYPE * B, unsigned int bRow, unsigned int bCol, 
+  DTYPE * A, 
+  unsigned int aRow, 
+  unsigned int aCol, 
+  DTYPE * B, 
+  unsigned int bRow, 
+  unsigned int bCol, 
   DTYPE * C
 );
 void matrixAdd(
-  DTYPE * A, unsigned int aRow, unsigned int aCol, 
-  DTYPE * B, unsigned int bRow, unsigned int bCol, 
+  DTYPE * A, 
+  unsigned int aRow, 
+  unsigned int aCol, 
+  DTYPE * B, 
+  unsigned int bRow, 
+  unsigned int bCol, 
   DTYPE * C
 );
 void matrixSubtract(
-  DTYPE * A, unsigned int aRow, unsigned int aCol, 
-  DTYPE * B, unsigned int bRow, unsigned int bCol, 
+  DTYPE * A, 
+  unsigned int aRow, 
+  unsigned int aCol, 
+  DTYPE * B, 
+  unsigned int bRow, 
+  unsigned int bCol, 
   DTYPE * C
 );
 
@@ -48,13 +60,21 @@ void matrixSubtract(
 /// ANN Functions
 ///////////////////////////////////////////////////////////////////////////////
 void updateLayer(
-  unsigned int inCount, unsigned int outCount, 
-  DTYPE * Lin, DTYPE * Lout, DTYPE * W, DTYPE * B, 
+  unsigned int inCount, 
+  unsigned int outCount, 
+  DTYPE * Lin, 
+  DTYPE * Lout, 
+  DTYPE * W, 
+  DTYPE * B, 
   activationFunc ActivationFunction
 );
 void runForward(
-  DTYPE ** layers, unsigned int numLayers, unsigned int * layerSizes,
-  DTYPE ** weights, DTYPE ** bias, activationFunc * ActivationFunction
+  DTYPE ** layers, 
+  unsigned int numLayers, 
+  unsigned int * layerSizes,
+  DTYPE ** weights, 
+  DTYPE ** bias, 
+  activationFunc * ActivationFunction
 );
 void backProbGradDecent(
   DTYPE ** layers, 

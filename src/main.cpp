@@ -1,17 +1,15 @@
-#include "bbnn.h"
+// #include "bbnn.h"
+// #include "data.h"
+#include "tests.h"
 
-int main(){
-  DTYPE A[4] = {1,2,3,4};
-  DTYPE B[4] = {5,6,7,8};
-  
-  DTYPE C[4];
-  
-  matrixMultiply(A,2,2,B,2,2,C);
+int main(int numInputs, char * inputs[]){
+  // Testing readFile Function
+  // TEST::readIn(numInputs, inputs);
+  // Testing Matrix Functions
+  // TEST::matrix();
 
-  std::cout << C[3] << std::endl;
+  // Testing Forward
+  TEST::forward();
 
-  DTYPE D[4];
-  matrixAdd(A,2,2,B,2,2,D);
-
-  std::cout << D[3] << std::endl; 
+  return 0;
 }

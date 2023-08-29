@@ -2,7 +2,7 @@ For Convenience
 `bash BBNN.sh`
 
 For fancy folder stuff
-`cd build`
+`cd build/make/`
 `cmake ..`
 `make`
 `./BBNN`

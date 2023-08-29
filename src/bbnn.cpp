@@ -26,8 +26,12 @@ DTYPE halfSquaredErrorPrime(DTYPE x, DTYPE y){
 /// Matrix Functions
 ///////////////////////////////////////////////////////////////////////////////
 void matrixMultiply(
-  DTYPE * A, unsigned int aRow, unsigned int aCol, 
-  DTYPE * B, unsigned int bRow, unsigned int bCol, 
+  DTYPE * A, 
+  unsigned int aRow, 
+  unsigned int aCol, 
+  DTYPE * B, 
+  unsigned int bRow, 
+  unsigned int bCol, 
   DTYPE * C
 ){
   if(aCol != bRow){
@@ -51,8 +55,12 @@ void matrixMultiply(
 }
 
 void matrixAdd(
-  DTYPE * A, unsigned int aRow, unsigned int aCol, 
-  DTYPE * B, unsigned int bRow, unsigned int bCol, 
+  DTYPE * A, 
+  unsigned int aRow, 
+  unsigned int aCol, 
+  DTYPE * B, 
+  unsigned int bRow, 
+  unsigned int bCol, 
   DTYPE * C
 ){
   if(aCol != bCol || aRow != bRow){
@@ -71,8 +79,12 @@ void matrixAdd(
 }
 
 void matrixSubtract(
-  DTYPE * A, unsigned int aRow, unsigned int aCol,
-  DTYPE * B, unsigned int bRow, unsigned int bCol, 
+  DTYPE * A, 
+  unsigned int aRow, 
+  unsigned int aCol,
+  DTYPE * B, 
+  unsigned int bRow, 
+  unsigned int bCol, 
   DTYPE * C
 ){
   if(aCol != bCol || aRow != bRow){
@@ -93,8 +105,12 @@ void matrixSubtract(
 /// ANN Functions
 ///////////////////////////////////////////////////////////////////////////////
 void updateLayer(
-  unsigned int inCount, unsigned int outCount, 
-  DTYPE * Lin, DTYPE * Lout, DTYPE * W, DTYPE * B, 
+  unsigned int inCount, 
+  unsigned int outCount, 
+  DTYPE * Lin, 
+  DTYPE * Lout, 
+  DTYPE * W, 
+  DTYPE * B, 
   activationFunc ActivationFunction
 ){
   DTYPE * temp1 = (DTYPE*)malloc(sizeof(DTYPE*)*outCount);
@@ -112,13 +128,22 @@ void updateLayer(
 }
 
 void runForward(
-  DTYPE ** layers, unsigned int numLayers, unsigned int * layerSizes, 
-  DTYPE ** weights, DTYPE ** bias, activationFunc * ActivationFunction
+  DTYPE ** layers, 
+  unsigned int numLayers, 
+  unsigned int * layerSizes, 
+  DTYPE ** weights, 
+  DTYPE ** bias, 
+  activationFunc * ActivationFunction
 ){
   for(unsigned int i = 0; i < numLayers-1; i++){
     updateLayer(
-      layerSizes[i], layerSizes[i+1], layers[i], layers[i+1], 
-      weights[i], bias[i], ActivationFunction[i]
+      layerSizes[i], 
+      layerSizes[i+1], 
+      layers[i], 
+      layers[i+1], 
+      weights[i], 
+      bias[i], 
+      ActivationFunction[i]
     );
   }
 
