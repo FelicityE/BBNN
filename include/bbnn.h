@@ -4,8 +4,7 @@
 #include <iostream>
 #include <math.h>
 
-
-#define DTYPE double
+#include "data.h"
 
 typedef DTYPE (*lossFunc)(DTYPE,DTYPE);
 typedef DTYPE (*activationFunc)(DTYPE);

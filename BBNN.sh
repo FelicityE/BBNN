@@ -1,15 +1,15 @@
-#!/bin/bash
+# # !/bin/bash
 
-#SBATCH --job-name=BBNN
+# # SBATCH --job-name=BBNN
 
-#SBATCH --output=/home/fhe2/Code/BBNN/log.out
+# # SBATCH --output=/home/fhe2/Code/BBNN/log.out
 
-#SBATCH --error=/home/fhe2/Code/BBNN/log.err
+# # SBATCH --error=/home/fhe2/Code/BBNN/log.err
 
-#SBATCH --time=1:00     ## for all ranks
+# # SBATCH --time=1:00     ## for all ranks
 
-#SBATCH --mem=10     
-#SBATCH --nodes=1
+# # SBATCH --mem=10     
+# # SBATCH --nodes=1
 
 
 ###############################################################################

@@ -160,22 +160,36 @@ void backProbGradDecent(
   activationFunc * ActivationFunctionPrime, 
   DTYPE learningRate
 ){
+  cout << "\nBackprop" << endl;
   // Allocating Memory
   DTYPE ** deltas = (DTYPE **)malloc(sizeof(DTYPE*)*numLayers);
+  cout << "Malloc deltas: ";
   for(unsigned int i = 0 ; i < numLayers; i ++){
+    cout << i << "/" << numLayers-1 << " ";
     deltas[i] = (DTYPE *)malloc(sizeof(DTYPE)*layerSizes[i]);
   }
-
+  cout << endl;
+  
+  cout << "Math deltas: ";
   for(unsigned int i = 0; i < layerSizes[numLayers-1]; i++){
+    cout << i << "/" << layerSizes[numLayers-1]-1;
     // get derivatives of the loss values
     deltas[numLayers-1][i] = 
       (*LossFuncPrime)(layers[numLayers-1][i], expectedOutcome[i]);
     
+    
+    cout 
+      << ", Delta pt. 1: " << deltas[numLayers-1][i]
+      << ", Output Layer Value: " << layers[numLayers-1][i]
+      << ", Node: " << i
+    << " " << flush;
+    
     // get the derivatives of the activation functions
-    deltas[numLayers-1][i] = 
-      deltas[numLayers-1][i] * 
-      (*ActivationFunctionPrime[numLayers-1])(layers[numLayers-1][i]);
+    deltas[numLayers-1][i] = deltas[numLayers-1][i] * (*ActivationFunctionPrime[numLayers-2])(layers[numLayers-1][i]);
+    cout << deltas[numLayers-1][i] << " " << flush;
+
   }
+  cout << endl;
 
   // For each layer
   for(unsigned int i = numLayers-2; i > 0; i--){
@@ -202,4 +216,24 @@ void backProbGradDecent(
       }
     }
   }
+}
+
+void train(
+  // Samples
+  DTYPE ** sampleInputs, // Given: list of sample features
+  DTYPE ** observedOutputs, // Given: list of true classification
+  DTYPE ** predictedOutputs, // Return: list of predicted classification
+  unsigned int * nSamples, // Given: number of samples (one input/output layer for each sample!)
+
+  // ANN 
+  unsigned int nLayers, // Exp: Number of layers
+  unsigned int * lSize, // Exp: size of each layer
+  activationFunc activations // Exp: list of activations for each layer (could become a list of activations for each node?)
+){
+  // Allocating Space
+  DTYPE ** layers = allocate(nLayers, lSize);
+  unsigned int * wSize = allocateUint((nLayers-1), lSize, (int)1);
+  DTYPE ** weights = allocate(nLayers-1, wSize, true);
+  DTYPE ** bias = allocate(nLayers-1, &lSize[1]);
+
 }

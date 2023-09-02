@@ -9,6 +9,7 @@ int main(int numInputs, char * inputs[]){
 
   // Testing Forward
   TEST::forward();
+  TEST::cosTest();
 
   return 0;
 }
