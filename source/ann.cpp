@@ -101,7 +101,9 @@ std::vector<double> get_inner_dB(
 ){
   std::vector<double> dW = get_dW(delta, fprimeL);
   if(W.size() != dW.size()){
-    std::cout << "ERROR - get_inner_dB: dW size is not the same as W." << std::endl;
+    std::cout << "ERROR - get_inner_dB: dW " << dW.size() 
+      << " size is not the same as W " << W.size()  << "."
+    << std::endl;
     return dW;
   }
   for(unsigned int i = 0; i < dW.size(); i++){
@@ -271,7 +273,7 @@ void runBackprop(
       }
     }
     if(actType[i] == 2){
-      temp_dA = (*dActFun[i][0])(layers[i+1], layers.size(), 0);
+      temp_dA = (*dActFun[i][0])(layers[i+1], layers[i+1].size(), classN);
     }
     addVec(dBias[i],get_inner_dB(dBias[i+1],weights[i+1],temp_dA));
     addVec(dWeights[i], get_dW(dBias[i], Acts[i]));

@@ -256,14 +256,11 @@ int main(int numInputs, char * inputs[]){
     std::cout << "Printing " << std::endl;
   )
 
-  double testPC = double(sumVectR(results))/results.size()*100;
-  std::cout << "Testing: " << testPC << "%" << std::endl;
-  
-  // double trainPC = percentCorrect[percentCorrect.size()-1];
-  std::cout << "Training: " << trainPC << "%" << std::endl;
-
-  double totalPC = ((trainPC/100)*train.size() + (testPC/100)*test.size())/(train.size()+test.size())*100;
-  std::cout << "Total: " << totalPC << "%" << std::endl;
+  std::cout << "Training Error: " << trainPC << std::endl;
+  double testPC = 1-double(sumVectR(results))/results.size();
+  std::cout << "Testing Error: " << testPC << std::endl;
+  double totalPC = (trainPC*train.size() + testPC*test.size())/(train.size()+test.size());
+  std::cout << "Total Error: " << totalPC << std::endl;
   
   
   std::cout << std::endl;

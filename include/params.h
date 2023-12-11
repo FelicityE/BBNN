@@ -2,7 +2,7 @@
 
 #define ERRPRINT true
 #define TRAINPRINT false
-#define DEBUG true
+#define DEBUG false
 
 #define DTYPE double
 
