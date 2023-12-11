@@ -1,0 +1,2 @@
+g++  -fopenmp -O3  -I. -c -o build/utility.o source/utility.cpp -lm
+g++  -fopenmp -O3  -I. -o build/main build/main.o build/ann.o build/utility.o
