@@ -2,6 +2,7 @@
 
 #define ERRPRINT true
 #define TRAINPRINT false
+#define DEBUG true
 
 #define DTYPE double
 
@@ -16,3 +17,10 @@ typedef  std::vector<double> (*lossFunction)(
 // typedef std::vector<double> (*activationFunction)(double*, int, int);
 typedef std::vector<double> (*activationFunction)(std::vector<double>, int, int);
 // typedef  std::vector<double> (*dActivationFunction)(double*, int);
+
+
+#if(DEBUG)
+  #define BUGT1(x) x
+#else 
+  #define BUGT1(x)
+#endif

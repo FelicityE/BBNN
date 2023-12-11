@@ -1,4 +1,5 @@
 #include "include/activationFunctions.h"
+#include "include/utility.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Add new activation functions below
@@ -34,10 +35,18 @@ std::vector<double> ReLu(std::vector<double> layer, int stop, int meta){
   return activation;
 }
 std::vector<double> dReLu(std::vector<double> layer, int stop, int meta){
+  BUGT1(
+    std::cout << "\nRunning dReLu" << std::endl;
+    std::cout << "Stop: " << stop << std::endl;
+  )
   std::vector<double> dA;
   for(unsigned int i = 0; i < stop; i++){
     dA.push_back(dReLu(layer[i]));
   }
+
+  BUGT1(
+    std::cout << "\nReturning" << std::endl;
+  )
   return dA;
 }
 
@@ -45,12 +54,16 @@ std::vector<double> dReLu(std::vector<double> layer, int stop, int meta){
 // Layer Functions
 ///////////////////////////////////////////////////////////////////////////////
 std::vector<double> softMax(std::vector<double> layer, int stop, int meta){
+  BUGT1(
+    std::cout << "\nRunning SoftMax" << std::endl;
+    std::cout << "Layer Size: " << layer.size() << std::endl;
+  )
   std::vector<double> predictiveProbability;
   double denom = 0; 
-  for(unsigned int i = 0; i < stop; i++){
+  for(unsigned int i = 0; i < layer.size(); i++){
     denom += exp(layer[i]);
   }
-  for(unsigned int i = 0; i < stop; i++){
+  for(unsigned int i = 0; i < layer.size(); i++){
     predictiveProbability.push_back(exp(layer[i])/denom);
   }
   return predictiveProbability;
@@ -58,7 +71,10 @@ std::vector<double> softMax(std::vector<double> layer, int stop, int meta){
 
 std::vector<double> dSoftMax(std::vector<double> layer, int stop, int obs){
   // dp_i/da_j e.g. dpda[0] = dp0/da0, dpda[1] = dp0/da1, dpda[2] = dp1/da0 etc.
-
+  BUGT1(
+    std::cout << "\nRunning dSoftMax" << std::endl;
+    std::cout << "Layer Size: " << layer.size() << std::endl;
+  )
   std::vector<std::vector<double>> dpda;
 
   double denom = 0;
@@ -79,7 +95,9 @@ std::vector<double> dSoftMax(std::vector<double> layer, int stop, int obs){
     dpda.push_back(obs);
   }
   
-
+  BUGT1(
+    std::cout << "\nReturning" << std::endl;
+  )
   return dpda[obs];
 }
 

@@ -118,48 +118,6 @@ std::vector<double> get_inner_dB(
 ///////////////////////////////////////////////////////////////////////////////
 /// ANN Functions
 ///////////////////////////////////////////////////////////////////////////////
-// Forward
-// std::vector<double> runForward(
-//   std::vector<double> features, 
-//   unsigned int nLayers, 
-//   std::vector<unsigned int> nNodes, 
-//   std::vector<std::vector<double>> weights,
-//   std::vector<std::vector<double>> bias
-// ){
-//   std::vector<std::vector<double>> layers;
-//   std::vector<std::vector<double>> Acts;
-
-//   // Set first Layer
-//   layers.push_back(features);
-//   Acts.push_back(features);
-
-//   // For each hidden layer
-//   for(unsigned int i = 1; i < nLayers-1; i++){
-//     unsigned int l = i-1;
-//     layers.push_back(
-//       addVecR(
-//         multMat(weights[l],nNodes[i],nNodes[l], Acts[l],nNodes[l],1), 
-//         bias[l]
-//       )
-//     );
-
-//     Acts.push_back(ReLu(layers[i]));
-//   }
-
-//   // Set last Layer
-//   unsigned int ln = nLayers-1;
-//   unsigned int lm = nLayers-2;
-
-//   layers.push_back(
-//     addVecR(
-//       multMat(weights[lm],nNodes[ln],nNodes[lm], Acts[lm],nNodes[lm],1), 
-//       bias[lm]
-//     )
-//   );
-//   Acts.push_back(argMax(layers[ln]));
-
-//   return Acts[ln];
-// }
 void runForward(
   // std::vector<double> features, 
   // unsigned int nLayers, 
@@ -171,15 +129,16 @@ void runForward(
   activationFunction ** actFun,
   int * actType
 ){
-  // Set first Layer // Should be set already
-  // layers.resize(nLayers); 
-  // layers[0] = features; 
-  // Acts.resize(nLayers); 
-  // Acts[0] = features;
-
   // For each hidden layer
+  BUGT1(
+    std::cout << "\nRunning Forward Prop" << std::endl;
+    std::cout << "For each layer" << std::endl;
+  )
   for(unsigned int i = 1; i < nNodes.size(); i++){
     unsigned int l = i-1;
+    BUGT1(
+      std::cout << "\tGetting Layer " << i << std::endl;
+    )
     layers[i] = (
       addVecR(
         multMat(weights[l],nNodes[i],nNodes[l], Acts[l],nNodes[l],1), 
@@ -188,33 +147,28 @@ void runForward(
     );
 
     //uses a single node at a time
-    if (actType[i] == 1){
+    BUGT1(
+      std::cout << "\tApplying Activation function " << i-1 << std::endl;
+    )
+    if (actType[i-1] == 1){
       Acts[i].resize(layers[i].size());
       // for each node
       for(unsigned int k = 0; k < layers[i].size(); k++){
         std::vector<double> temp{layers[i][k]};
-        std::vector<double> tempVector = (*actFun[i][k])(temp, 1, 0);
+        std::vector<double> tempVector = (*actFun[i-1][k])(temp, 1, 0);
         Acts[i][k] = tempVector[0];
       }
     }
 
     // uses the whole layer at once and returns an array
-    if (actType[i] == 2){
-      Acts[i] = (*actFun[i][0])(layers[i], layers[i].size(), 1);
+    if (actType[i-1] == 2){
+      Acts[i] = (*actFun[i-1][0])(layers[i], layers[i].size(), 1);
     }
   }
 
-  // // Set last Layer
-  // unsigned int ln = nLayers-1;
-  // unsigned int lm = nLayers-2;
-
-  // layers[i] = (
-  //   addVecR(
-  //     multMat(weights[lm],nNodes[ln],nNodes[lm], Acts[lm],nNodes[lm],1), 
-  //     bias[lm]
-  //   )
-  // );
-  // Acts.push_back(softMax(layers[ln]));
+  BUGT1(
+    std::cout << "Returning\n" << std::endl;
+  )
   
   return;
 }
@@ -234,39 +188,68 @@ void runBackprop(
   activationFunction ** dActFun,
   int * actType
 ){
+  BUGT1(
+    std::cout << "\nRunning Back Prop" << std::endl;
+    std::cout << "Init Variables" << std::endl;
+  )
   unsigned int llp = layers.size()-1; // Last Layer Position
   unsigned int lap = llp-1; // Last activation/weight matrix/bias vector position
-  // unsigned int ln = nLayers-1; // number of layers from zero
-  // unsigned int lm = nLayers-2; // number of weights, bias, and activation functions from zero
+  BUGT1(
+    std::cout << "Getting correct class" << std::endl;
+  )
+  int classN = -1;
+  for(unsigned int i = 0; i < obs.size(); i++){
+    // check if the current class is the observed class
+    if(obs[i] == 1){
+      // get the layer derivative w.r.t the observed class
+      classN = int(i);
+      break;
+    }
+  }
+  if(classN == -1){
+    std::cout << "ERROR - runBackprop: No class assigned." << std::endl;
+    return;
+  }
 
   /////////////////////////////////////////////////////////
   // Getting the loss and derivative of the final layer
   /////////////////////////////////////////////////////////
+  BUGT1(
+    std::cout << "Getting derivative of last layer " << llp << std::endl;
+  )
   // Creating initial derivative vector
   std::vector<double> dVect(layers[llp].size(),0.0);
   // If the final activation function is applied to a specific node
   if(actType[lap] == 1){
     // for each node
+    BUGT1(
+      std::cout << "For each node in layer " << llp << std::endl;
+    )
     for(unsigned int i = 0; i < layers[llp].size(); i++){
+      BUGT1(
+        std::cout << "\tNode " << i << std::endl;
+      ) 
       // get the derivative for this node
       std::vector<double> tempVal{layers[llp][i]};
+      BUGT1(
+        std::cout << "\tApply Activation Function Derivative [" << lap << "][" << i << "]" << std::endl;
+      )
       std::vector<double> temp = (*dActFun[lap][i])(tempVal,1,0);
       dVect[i] = temp[0];
     }
   }
   // If the final activation function is applied to a layer
   if(actType[lap] == 2){
-    // for each observation class
-    for(unsigned int i = 0; i < obs.size(); i++){
-      // check if the current class is the observed class
-      if(obs[i] == 1){
-        // get the layer derivative w.r.t the observed class
-        dVect = (*dActFun[lap][0])(layers[llp], layers.size(), i);
-        break;
-      }
-    }
+    BUGT1(
+      std::cout << "Apply Activation Function Derivative [" << lap << "][" << 0 << "]" << std::endl;
+      std::cout << *dActFun[lap][0] << std::endl;
+    )
+    dVect = (*dActFun[lap][0])(layers[llp], layers[llp].size(), classN);
   }
 
+  BUGT1(
+    std::cout << "Using Vector Math" << std::endl;
+  )
   // Multiply the derivative of the loss function
   multVec(dVect, (*dLossFun)(Acts[llp], obs));
   addVec(dBias[lap], dVect);
@@ -275,6 +258,9 @@ void runBackprop(
   /////////////////////////////////////////////////////////
   // Getting change for weigths and bias
   /////////////////////////////////////////////////////////
+  BUGT1(
+    std::cout << " For each layer in reverse " << std::endl;
+  )
   for(unsigned int i = lap-1; i == 0; i--){
     std::vector<double> temp_dA(layers[i+1].size());
     if(actType[i] == 1){
@@ -290,6 +276,10 @@ void runBackprop(
     addVec(dBias[i],get_inner_dB(dBias[i+1],weights[i+1],temp_dA));
     addVec(dWeights[i], get_dW(dBias[i], Acts[i]));
   }
+
+  BUGT1(
+    std::cout << "Returning\n" << std::endl;
+  )
 }
 
 
@@ -363,6 +353,10 @@ double trainSNN(
   std::vector<double> abbe,
   double gamma // convergance threshold
 ){
+  BUGT1(
+    std::cout << "Training " << std::endl;
+  )
+  
   double trainErr;
   std::vector<double> tempTrainErr;
   // Get number of layers
@@ -386,12 +380,19 @@ double trainSNN(
     vtW = initZero(weights); // 2nd Moment std::vector
     vtB = initZero(bias); // 2nd Moment std::vector
   }else{
-    std::cout << "\nalpha: " << abbe[0] << std::endl;
+    std::cout << "alpha: " << abbe[0] << std::endl;
   }
 
+
+  BUGT1(
+    std::cout << "\tEntering While Loop " << std::endl;
+  )
   // While not converged do:
   while(epoch < stop && !converged){
     epoch++;
+    BUGT1(
+      std::cout << "\t\tInitializing Variables" << std::endl;
+    )
     // init deltas
     std::vector<std::vector<double>> dWeights = initZero(weights);
     std::vector<std::vector<double>> dBias = initZero(bias);
@@ -400,13 +401,22 @@ double trainSNN(
     std::vector<std::vector<double>> tempPVal;
     std::vector<bool> tempNCorrect;
     
+    BUGT1(
+      std::cout << "\t\tRunning for Each Sample" << std::endl;
+    )
     // For each training sample
     for(unsigned int s = 0; s < sample.size(); s++){
+      BUGT1(
+        std::cout << "\t\t\tInitializing Variables" << std::endl;
+      )
       // Init Layers and Activations
       std::vector<std::vector<double>> layers(nLayers);
       std::vector<std::vector<double>> Acts(nLayers);
       layers[0] = sample[s];
       Acts[0] = sample[s];
+      BUGT1(
+        std::cout << "\t\t\tRunning Forward Prop" << std::endl;
+      )
       // runForward
       runForward(
         // sample[s], 
@@ -420,9 +430,16 @@ double trainSNN(
         actType
       );
       
+      BUGT1(
+        std::cout << "\t\t\tGetting Error" << std::endl;
+      )
       // Get Error for plotting (for each sample)
       tempPVal.push_back(argMax(layers[layers.size()-1],layers[layers.size()-1].size(),0));
 
+
+      BUGT1(
+        std::cout << "\t\t\tRunning Back Prop" << std::endl;
+      )
       // init sample deltas
       std::vector<std::vector<double>> sdWeights = initZero(weights);
       std::vector<std::vector<double>> sdBias = initZero(bias);
@@ -442,20 +459,29 @@ double trainSNN(
         actType
       );
 
+      BUGT1(
+        std::cout << "\t\t\tUpdating deltas" << std::endl;
+      )
       addMat(dWeights, sdWeights);
       addMat(dBias, sdBias);
       
     }
 
+    BUGT1(
+      std::cout << "\t\tChecking Accuracy" << std::endl;
+    )
+    // For Each training sample check if correct
     for(unsigned int i = 0; i < tempPVal.size(); i++){
       bool correct = match(tempPVal[i], obs[i]);
       tempNCorrect.push_back(correct);
     }
-
     // Get Error for plotting (for each epoch)
     trainErr = 1-double(sumVectR(tempNCorrect))/tempNCorrect.size();
     if(TRAINPRINT){tempTrainErr.push_back(trainErr);}
 
+    BUGT1(
+      std::cout << "\t\tUpdating Weights and Bias" << std::endl;
+    )
     // update weights and bias
     if(Adam){
       double alphat = abbe[0]*sqrt(1-pow(abbe[2],epoch))/(1-pow(abbe[1],epoch));
@@ -495,9 +521,9 @@ double trainSNN(
     double sumdW = AvgAbsSum(dWeights);
     double sumdB = AvgAbsSum(dBias);
 
-
-
-
+    BUGT1(
+      std::cout << "\t\tChecking if Converged" << std::endl;
+    )
     if(sumdW < gamma && sumdB < gamma){
       converged = true;
       std::cout << "Epoch: " << epoch << std::endl;
@@ -506,13 +532,18 @@ double trainSNN(
 
     
   }
+  BUGT1(
+    std::cout << "\tExiting While Loop " << std::endl;
+  )
   if(!converged){std::cout << "Epoch: " << epoch << std::endl;}
 
   if(ERRPRINT){
     fprintf(stderr, "%u, ", epoch);
   }
   if(TRAINPRINT){writeLineTo("TrainingError.txt",tempTrainErr);}
-  
+  BUGT1(
+    std::cout << "\tReturning " << std::endl;
+  )
   return trainErr;
 }
 

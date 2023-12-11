@@ -115,7 +115,7 @@ int main(int numInputs, char * inputs[]){
   // std::cout << "Observed Trainging Size: " << obsTrain.size() << std::endl;
   std::cout << "Test Size: " << test.size() << std::endl;
   // std::cout << "Observed Test Size: " << obsTest.size() << std::endl;
-  
+
   // Set/Get Adam, if not set default
   std::vector<double> abbe = {
     alpha, // alpha: Learning rate, step-size
@@ -129,23 +129,42 @@ int main(int numInputs, char * inputs[]){
 
   // Get number of Nodes for each layer
   unsigned int nFeatures = samples[0].size();
+  std::cout << "Number of features: " << nFeatures << std::endl;
   
   unsigned int nOutputs = obs[0].size();
+  std::cout << "Number of nOutputs: " << nOutputs << std::endl;
 
   std::vector<unsigned int> nNodes{nFeatures};
   vecAppend(nNodes, nHiddenNodes);
   nNodes.push_back(nOutputs);
+  std::cout << "Number of Layers: " << nLayers << std::endl;
+  std::cout << "Number of nodes per Layer: ";
+  for(unsigned int i = 0; i < nNodes.size(); i++){
+    std::cout << nNodes[i] << ", ";
+  }
+  std::cout << std::endl;
+
 
   int * actType = (int*)malloc(sizeof(int)*nLayers);
   for(unsigned int i = 0; i < nLayers; i++){
     actType[i] = 2;
   }
 
+  BUGT1(
+    std::cout << "Creating activation function arrays." << std::endl;
+  )
+
+  unsigned int nActs = nLayers-1;
   // Allocating activation functions and activation function derivatives
-  activationFunction ** actFun = (activationFunction**)malloc(sizeof(activationFunction*)*nLayers);
-  activationFunction ** actFunTest = (activationFunction**)malloc(sizeof(activationFunction*)*nLayers);
-  activationFunction ** dActFun = (activationFunction**)malloc(sizeof(activationFunction*)*nLayers);
-  for(unsigned int i = 0; i < nLayers-1; i++){
+  activationFunction ** actFun = (activationFunction**)malloc(sizeof(activationFunction*)*nActs);
+  activationFunction ** actFunTest = (activationFunction**)malloc(sizeof(activationFunction*)*nActs);
+  activationFunction ** dActFun = (activationFunction**)malloc(sizeof(activationFunction*)*nActs);
+  
+  BUGT1(
+    std::cout << "\t Malloced" << std::endl;
+  )
+
+  for(unsigned int i = 0; i < nActs-1; i++){
     if(actType[i] == 1){
       actFun[i] = (activationFunction*)malloc(sizeof(activationFunction)*nNodes[i]);
       actFunTest[i] = (activationFunction*)malloc(sizeof(activationFunction)*nNodes[i]);
@@ -164,15 +183,31 @@ int main(int numInputs, char * inputs[]){
       actFunTest[i][0] = ReLu;
       dActFun[i][0] = dReLu;
     }
+    BUGT1(
+      std::cout << "\t L " << i << " finished."<< std::endl;
+    )
   }
-  actFun[nLayers-1][0] = softMax;
-  actFunTest[nLayers-1][0] = argMax;
-  actFun[nLayers-1][0] = dSoftMax;
+
+  BUGT1(
+    std::cout << "\t setting final layer" << std::endl;
+    std::cout << "\t nActs-1: " << nActs-1 << std::endl;
+  )
+  actFun[nActs-1] = (activationFunction*)malloc(sizeof(activationFunction)*1);
+  actFunTest[nActs-1] = (activationFunction*)malloc(sizeof(activationFunction)*1);
+  dActFun[nActs-1] = (activationFunction*)malloc(sizeof(activationFunction)*1);
+  actFun[nActs-1][0] = softMax;
+  actFunTest[nActs-1][0] = argMax;
+  dActFun[nActs-1][0] = dSoftMax;
+
+  BUGT1(
+    std::cout << "\t Setting Loss Function" << std::endl;
+  )
 
   lossFunction dLossFun = dCrossEntropy;
   
-
-
+  BUGT1(
+    std::cout << "Running Training " << std::endl;
+  )
   srand(weights_seed);
   double trainPC = trainSNN(
     train,
@@ -188,6 +223,10 @@ int main(int numInputs, char * inputs[]){
     Adam,
     abbe
   );
+
+  BUGT1(
+    std::cout << "Running Tests " << std::endl;
+  )
 
   std::vector<std::vector<double>> resultVals;
   std::vector<bool> results;
@@ -213,7 +252,9 @@ int main(int numInputs, char * inputs[]){
   // }
   // std::cout << std::endl;
 
- 
+  BUGT1(
+    std::cout << "Printing " << std::endl;
+  )
 
   double testPC = double(sumVectR(results))/results.size()*100;
   std::cout << "Testing: " << testPC << "%" << std::endl;
