@@ -56,21 +56,57 @@ void rmSpace(std::string &str){
 ///////////////////////////////////////////////////////////////////////////////
 /// Print
 ///////////////////////////////////////////////////////////////////////////////
-template <typename T> void print(std::vector<T> data){
+// template <typename T> void print(std::vector<T> data){
+//   for(unsigned int i = 0; i < data.size(); i++){
+//     std::cout << data[i] << ", ";
+//   }
+//   std::cout << std::endl;
+// }
+// template <typename T> void print(std::string head, std::vector<T> data){
+//   std::cout << head << ": ";
+//   for(unsigned int i = 0; i < data.size(); i++){
+//     std::cout << data[i] << ", ";
+//   }
+//   std::cout << std::endl;
+// }
+// template <typename T> void print(std::vector<std::vector<T>> data){
+//   for(unsigned int i = 0; i < data.size(); i++){
+//     for(unsigned int j = 0; j < data[i].size(); j++){
+//       std::cout << data[i][j] << ", ";    
+//     }
+//     std::cout << std::endl;
+//   }
+//   std::cout << std::endl;
+// }
+// template <typename T> void print(std::string head, std::vector<std::vector<T>> data){
+//   std::cout << head << ": " << std::endl;
+//   for(unsigned int i = 0; i < data.size(); i++){
+//     for(unsigned int j = 0; j < data[i].size(); j++){
+//       std::cout << data[i][j] << ", ";    
+//     }
+//     std::cout << std::endl;
+//   }
+//   std::cout << std::endl;
+// }
+
+// Print Doubles
+void print(std::string head, double data){
+  std::cout << head << ": " << data << std::endl;
+}
+void print(std::vector<double> data){
   for(unsigned int i = 0; i < data.size(); i++){
     std::cout << data[i] << ", ";
   }
   std::cout << std::endl;
 }
-template <typename T> void print(std::string head, std::vector<T> data){
+void print(std::string head, std::vector<double> data){
   std::cout << head << ": ";
   for(unsigned int i = 0; i < data.size(); i++){
     std::cout << data[i] << ", ";
   }
   std::cout << std::endl;
 }
-
-template <typename T> void print(std::vector<std::vector<T>> data){
+void print(std::vector<std::vector<double>> data){
   for(unsigned int i = 0; i < data.size(); i++){
     for(unsigned int j = 0; j < data[i].size(); j++){
       std::cout << data[i][j] << ", ";    
@@ -79,7 +115,7 @@ template <typename T> void print(std::vector<std::vector<T>> data){
   }
   std::cout << std::endl;
 }
-template <typename T> void print(std::string head, std::vector<std::vector<T>> data){
+void print(std::string head, std::vector<std::vector<double>> data){
   std::cout << head << ": " << std::endl;
   for(unsigned int i = 0; i < data.size(); i++){
     for(unsigned int j = 0; j < data[i].size(); j++){
@@ -109,7 +145,6 @@ void writeTo(std::string filename, std::vector<double> data){
   file << data[data.size()-1];
   file.close();
 }
-
 void writeLine(std::string filename, std::vector<double> data){
   std::ofstream file(filename);
   for(unsigned int i = 0; i < data.size()-1; i++){

@@ -27,15 +27,22 @@ void rmSpace(std::string &str);
 ///////////////////////////////////////////////////////////////////////////////
 /// Print
 ///////////////////////////////////////////////////////////////////////////////
-template <typename T> void print(std::vector<T> data);
-template <typename T> void print(std::string head, std::vector<T> data);
-template <typename T> void print(std::vector<std::vector<T>> data);
-template <typename T> void print(std::string head, std::vector<std::vector<T>> data);
+// template <typename T> void print(std::vector<T> data);
+// template <typename T> void print(std::string head, std::vector<T> data);
+// template <typename T> void print(std::vector<std::vector<T>> data);
+// template <typename T> void print(std::string head, std::vector<std::vector<T>> data);
+
+// Print Doubles
+void print(std::string head, double data);
+void print(std::vector<double> data);
+void print(std::string head, std::vector<double> data);
+void print(std::vector<std::vector<double>> data);
+void print(std::string head, std::vector<std::vector<double>> data);
+
 
 // Print to file
 void write(std::string filename, std::vector<double> data);
 void writeTo(std::string filename, std::vector<double> data);
-
 void writeLine(std::string filename, std::vector<double> data);
 void writeLineTo(std::string filename, std::vector<double> data);
 

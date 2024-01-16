@@ -178,7 +178,7 @@ void runForward(
 // Backprop
 void runBackprop(
   // unsigned int nLayers,
-  // std::vector<unsigned int> nNodes,
+  std::vector<unsigned int> nNodes,
   std::vector<std::vector<double>> weights,
   std::vector<std::vector<double>> bias, 
   std::vector<std::vector<double>> layers, 
@@ -190,15 +190,13 @@ void runBackprop(
   activationFunction ** dActFun,
   int * actType
 ){
-  BUGT1(
+  BUGT2(
     std::cout << "\nRunning Back Prop" << std::endl;
-    std::cout << "Init Variables" << std::endl;
+    // std::cout << "Init Variables" << std::endl;
   )
   unsigned int llp = layers.size()-1; // Last Layer Position
   unsigned int lap = llp-1; // Last activation/weight matrix/bias vector position
-  BUGT1(
-    std::cout << "Getting correct class" << std::endl;
-  )
+  BUGT1(std::cout << "Getting correct class" << std::endl;)
   int classN = -1;
   for(unsigned int i = 0; i < obs.size(); i++){
     // check if the current class is the observed class
@@ -216,9 +214,7 @@ void runBackprop(
   /////////////////////////////////////////////////////////
   // Getting the loss and derivative of the final layer
   /////////////////////////////////////////////////////////
-  BUGT1(
-    std::cout << "Getting derivative of last layer " << llp << std::endl;
-  )
+  BUGT2(std::cout << "Getting derivative of last layer " << llp << std::endl;)
   // Creating initial derivative vector
   std::vector<double> dVect(layers[llp].size(),0.0);
   // If the final activation function is applied to a specific node
@@ -234,52 +230,86 @@ void runBackprop(
       // get the derivative for this node
       std::vector<double> tempVal{layers[llp][i]};
       BUGT1(
-        std::cout << "\tApply Activation Function Derivative [" << lap << "][" << i << "]" << std::endl;
+        std::cout << "\tApply Activation Function Derivative [" << lap << "][" 
+          << i << "]" 
+        << std::endl;
       )
-      std::vector<double> temp = (*dActFun[lap][i])(tempVal,1,0);
+      std::vector<double> temp = (*dActFun[lap][i])(tempVal,1,classN);
       dVect[i] = temp[0];
     }
   }
   // If the final activation function is applied to a layer
   if(actType[lap] == 2){
     BUGT1(
-      std::cout << "Apply Activation Function Derivative [" << lap << "][" << 0 << "]" << std::endl;
-      std::cout << *dActFun[lap][0] << std::endl;
+      std::cout << "Apply Activation Function Derivative [" << lap << "][" 
+        << 0 << "]" 
+      << std::endl;
+      // std::cout << *dActFun[lap][0] << std::endl;
     )
     dVect = (*dActFun[lap][0])(layers[llp], layers[llp].size(), classN);
+    BUGT2(print("dVect", dVect);)
   }
 
-  BUGT1(
-    std::cout << "Using Vector Math" << std::endl;
-  )
+  BUGT1(std::cout << "Using Vector Math" << std::endl;)
   // Multiply the derivative of the loss function
   multVec(dVect, (*dLossFun)(Acts[llp], obs));
+  BUGT2(
+    print("Acts[LastLayer]",Acts[llp]);
+    print("dVect*dE(Act[LL])", dVect);
+  )
   addVec(dBias[lap], dVect);
+  BUGT2(print("dBias[LL]",dBias[lap]));
   addVec(dWeights[lap], get_dW(dBias[lap], Acts[lap]));
+  BUGT2(print("dWeights[LL]",dWeights[lap]));
+
+  // BUGT2(
+  //   std::cout << "dW and dB of Last Layer" << std::endl;
+  //   printWB(dWeights, dBias, nNodes);
+  // )
 
   /////////////////////////////////////////////////////////
   // Getting change for weigths and bias
   /////////////////////////////////////////////////////////
-  BUGT1(
-    std::cout << " For each layer in reverse " << std::endl;
+  BUGT2(
+    std::cout << "For each layer in reverse from "<< lap-1 << std::endl;
   )
   for(unsigned int i = lap-1; i == 0; i--){
+    BUGT2(
+      std::cout << "\tL" << i << std::endl;
+    )
     std::vector<double> temp_dA(layers[i+1].size());
     if(actType[i] == 1){
+      BUGT2(
+        std::cout << "\tFor each node to "<< layers[i+1].size()-1 << std::endl;
+      )
       for(unsigned int j = 0; j < layers[i+1].size(); j++){
+        BUGT2(
+          std::cout << "\t\tNode "<< j << std::endl;
+        )
         std::vector<double> tempVal{layers[i+1][j]};
-        std::vector<double> temp = (*dActFun[i][j])(tempVal,1, 0);
+        std::vector<double> temp = (*dActFun[i][j])(tempVal, 1, classN);
         temp_dA[j] = temp[0];
       }
     }
     if(actType[i] == 2){
+      BUGT2(
+        print("\tlayers[i+1]",layers[i+1]);
+      )
       temp_dA = (*dActFun[i][0])(layers[i+1], layers[i+1].size(), classN);
+      BUGT2(
+        print("\ttemp_dA",temp_dA);
+      )
     }
     addVec(dBias[i],get_inner_dB(dBias[i+1],weights[i+1],temp_dA));
     addVec(dWeights[i], get_dW(dBias[i], Acts[i]));
   }
 
-  BUGT1(
+  BUGT2(
+    std::cout << "dW and dB" << std::endl;
+    printWB(dWeights, dBias, nNodes);
+  )
+
+  BUGT2(
     std::cout << "Returning\n" << std::endl;
   )
 }
@@ -448,7 +478,7 @@ double trainSNN(
       // runBackprop, save sums of delta
       runBackprop(
         // nLayers,
-        // nNodes,
+        nNodes,
         weights,
         bias, 
         layers, 
@@ -583,47 +613,6 @@ void testSNN(
       actFun, 
       actType
     );
-
-    // // For each hidden layer
-    // for(unsigned int j = 1; j < nLayers; j++){
-    //   unsigned int l = j-1;
-    //   layers[j] = (
-    //     addVecR(
-    //       multMat(weights[l],nNodes[j],nNodes[l], Acts[l],nNodes[l],1), 
-    //       bias[l]
-    //     )
-    //   );
-
-    //   //uses a single node at a time
-    //   if (actType[j] == 1){
-    //     Acts[j].resize(layers[j].size());
-    //     // for each node
-    //     for(unsigned int k = 0; k < layers[j].size(); k++){
-    //       std::vector<double> tempVector = (*actFun[j][k])(&layers[j][k], 1);
-    //       Acts[j][k] = tempVector[0];
-    //     }
-    //   }
-
-    //   // uses the whole layer at once and returns an array
-    //   if (actType[j] == 2){
-    //     Acts[j] = (*actFun[j][0])(&layers[j], layers[j].size())
-    //   }
-      
-    // }
-
-    // // Set last Layer
-    // unsigned int ln = nLayers-1;
-    // unsigned int lm = nLayers-2;
-
-    // layers.push_back(
-    //   addVecR(
-    //     multMat(weights[lm],nNodes[ln],nNodes[lm], Acts[lm],nNodes[lm],1), 
-    //     bias[lm]
-    //   )
-    // );
-
-
-    // Acts.push_back(argMax(layers[ln]));
     outVal[i] = Acts[nLayers-1];
   }
 

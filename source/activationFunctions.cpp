@@ -29,7 +29,7 @@ double dReLu(double x){
 
 std::vector<double> ReLu(std::vector<double> layer, int stop, int meta){
   std::vector<double> activation;
-  for(unsigned int i = 0; i < stop; i++){
+  for(unsigned int i = 0; i < layer.size(); i++){
     activation.push_back(ReLu(layer[i]));
   }
   return activation;
@@ -37,15 +37,16 @@ std::vector<double> ReLu(std::vector<double> layer, int stop, int meta){
 std::vector<double> dReLu(std::vector<double> layer, int stop, int meta){
   BUGT1(
     std::cout << "\nRunning dReLu" << std::endl;
-    std::cout << "Stop: " << stop << std::endl;
+    // std::cout << "Layer Size: " << layer.size() << std::endl;
   )
   std::vector<double> dA;
-  for(unsigned int i = 0; i < stop; i++){
+  for(unsigned int i = 0; i < layer.size(); i++){
     dA.push_back(dReLu(layer[i]));
   }
 
   BUGT1(
-    std::cout << "\nReturning" << std::endl;
+    print("dA", dA);
+    std::cout << "Returning\n" << std::endl;
   )
   return dA;
 }
@@ -69,7 +70,7 @@ std::vector<double> softMax(std::vector<double> layer, int stop, int meta){
   return predictiveProbability;
 }
 
-std::vector<double> dSoftMax(std::vector<double> layer, int stop, int obs){
+std::vector<double> dSoftMax(std::vector<double> layer, int stop, int g_obs){
   // dp_i/da_j e.g. dpda[0] = dp0/da0, dpda[1] = dp0/da1, dpda[2] = dp1/da0 etc.
   BUGT1(
     std::cout << "\nRunning dSoftMax" << std::endl;
@@ -78,14 +79,25 @@ std::vector<double> dSoftMax(std::vector<double> layer, int stop, int obs){
   std::vector<std::vector<double>> dpda;
 
   double denom = 0;
-  for(unsigned int i = 0; i < stop; i++){
+  for(unsigned int i = 0; i < layer.size(); i++){
     denom += exp(layer[i]);
   }
-
-  for(unsigned int i = 0; i < stop; i++){
+  BUGT1(
+    print("denominator",denom);
+    std::cout << "For each Node" << std::endl;
+  )
+  for(unsigned int i = 0; i < layer.size(); i++){
     double numer = exp(layer[i]);
+    BUGT1(
+      std::cout << "\tNode: " << i << std::endl;
+      print("\tnumerator", numer);
+      std::cout << "For each Node" << std::endl;
+    )
     std::vector<double> obs;
-    for(unsigned int j = 0; j < stop; j++){
+    for(unsigned int j = 0; j < layer.size(); j++){
+      BUGT1(
+        std::cout << "\t\tNode: " << j << std::endl;
+      )
       if(j == i){
         obs.push_back(((numer*denom)-(exp(layer[j])*numer))/(denom*denom));
       }else{
@@ -93,19 +105,24 @@ std::vector<double> dSoftMax(std::vector<double> layer, int stop, int obs){
       }
     }
     dpda.push_back(obs);
+    BUGT1(
+      print("dpda", dpda[dpda.size()-1]);
+    )
   }
   
   BUGT1(
-    std::cout << "\nReturning" << std::endl;
+    std::cout << "g_obs" << g_obs << std::endl;
+    print("dpda",dpda[g_obs]);
+    std::cout << "Returning\n" << std::endl;
   )
-  return dpda[obs];
+  return dpda[g_obs];
 }
 
 std::vector<double> argMax(std::vector<double> layer, int stop, int meta){
   double max = layer[0];
   unsigned int index = 0;
 
-  for(unsigned int i = 1; i < stop; i++){
+  for(unsigned int i = 1; i < layer.size(); i++){
     if(layer[i] > max){
       max = layer[i];
       index = i;
@@ -113,7 +130,7 @@ std::vector<double> argMax(std::vector<double> layer, int stop, int meta){
   }
 
   std::vector<double> out;
-  for(unsigned int i = 0; i < stop; i++){
+  for(unsigned int i = 0; i < layer.size(); i++){
     if(i == index){
       out.push_back(1);
     }else{

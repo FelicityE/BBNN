@@ -2,7 +2,7 @@
 
 #define ERRPRINT true
 #define TRAINPRINT false
-#define DEBUG false
+#define DEBUG true
 
 #define DTYPE double
 
@@ -19,8 +19,14 @@ typedef std::vector<double> (*activationFunction)(std::vector<double>, int, int)
 // typedef  std::vector<double> (*dActivationFunction)(double*, int);
 
 
-#if(DEBUG)
+#if(false)
   #define BUGT1(x) x
 #else 
   #define BUGT1(x)
+#endif
+
+#if(DEBUG)
+  #define BUGT2(x) x
+#else 
+  #define BUGT2(x)
 #endif

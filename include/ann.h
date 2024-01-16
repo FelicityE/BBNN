@@ -63,7 +63,7 @@ void runForward(
 // Backprop
 void runBackprop(
   // unsigned int nLayers,
-  // std::vector<unsigned int> nNodes,
+  std::vector<unsigned int> nNodes,
   std::vector<std::vector<double>> weights,
   std::vector<std::vector<double>> bias, 
   std::vector<std::vector<double>> layers, 
