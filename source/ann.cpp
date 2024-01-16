@@ -190,19 +190,18 @@ void runBackprop(
   activationFunction ** dActFun,
   int * actType
 ){
-  BUGT2(
-    std::cout << "\nRunning Back Prop" << std::endl;
-    // std::cout << "Init Variables" << std::endl;
-  )
+  std::cout << "\n\nrunBackprop" << std::endl;
+  print("obs",obs);
   unsigned int llp = layers.size()-1; // Last Layer Position
   unsigned int lap = llp-1; // Last activation/weight matrix/bias vector position
-  BUGT1(std::cout << "Getting correct class" << std::endl;)
   int classN = -1;
+  
   for(unsigned int i = 0; i < obs.size(); i++){
     // check if the current class is the observed class
     if(obs[i] == 1){
       // get the layer derivative w.r.t the observed class
       classN = int(i);
+      std::cout << "\nObserved Class: " <<  classN << std::endl;
       break;
     }
   }
@@ -220,47 +219,31 @@ void runBackprop(
   // If the final activation function is applied to a specific node
   if(actType[lap] == 1){
     // for each node
-    BUGT1(
-      std::cout << "For each node in layer " << llp << std::endl;
-    )
     for(unsigned int i = 0; i < layers[llp].size(); i++){
-      BUGT1(
-        std::cout << "\tNode " << i << std::endl;
-      ) 
       // get the derivative for this node
       std::vector<double> tempVal{layers[llp][i]};
-      BUGT1(
-        std::cout << "\tApply Activation Function Derivative [" << lap << "][" 
-          << i << "]" 
-        << std::endl;
-      )
       std::vector<double> temp = (*dActFun[lap][i])(tempVal,1,classN);
       dVect[i] = temp[0];
     }
   }
   // If the final activation function is applied to a layer
   if(actType[lap] == 2){
-    BUGT1(
-      std::cout << "Apply Activation Function Derivative [" << lap << "][" 
-        << 0 << "]" 
-      << std::endl;
-      // std::cout << *dActFun[lap][0] << std::endl;
-    )
     dVect = (*dActFun[lap][0])(layers[llp], layers[llp].size(), classN);
-    BUGT2(print("dVect", dVect);)
   }
+  
+  print("dVect",dVect);
 
-  BUGT1(std::cout << "Using Vector Math" << std::endl;)
   // Multiply the derivative of the loss function
+  // std::cout << "dLoss: "<< dCrossEntropy(Acts[ln][i]) << std::endl;
+  print("\nActs[llp]",Acts[llp]);
   multVec(dVect, (*dLossFun)(Acts[llp], obs));
-  BUGT2(
-    print("Acts[LastLayer]",Acts[llp]);
-    print("dVect*dE(Act[LL])", dVect);
-  )
+  print("dLoss*dVect",dVect);
+
   addVec(dBias[lap], dVect);
-  BUGT2(print("dBias[LL]",dBias[lap]));
+  print("dBias",dBias);
+  std::cout << "\n" << std::endl;
+
   addVec(dWeights[lap], get_dW(dBias[lap], Acts[lap]));
-  BUGT2(print("dWeights[LL]",dWeights[lap]));
 
   // BUGT2(
   //   std::cout << "dW and dB of Last Layer" << std::endl;
@@ -398,6 +381,8 @@ double trainSNN(
   if(weights.empty()){
     weights = initWeights(nLayers, nNodes, true);
     bias = initBias(nLayers, nNodes);
+    std::cout << "\nInit Weights and Bias" << std::endl;
+    printWB(weights,bias,nNodes);
   }
 
   std::vector<std::vector<double>> mtW;
@@ -406,7 +391,7 @@ double trainSNN(
   std::vector<std::vector<double>> vtB;
 
   if(Adam){
-    // print("\nAdam", abbe);
+    print("\nAdam", abbe);
     mtW = initZero(weights); // 1st Moment std::vector
     mtB = initZero(bias); // 1st Moment std::vector
     vtW = initZero(weights); // 2nd Moment std::vector
@@ -428,6 +413,8 @@ double trainSNN(
     // init deltas
     std::vector<std::vector<double>> dWeights = initZero(weights);
     std::vector<std::vector<double>> dBias = initZero(bias);
+    std::cout << "\nInit dWeights and dBias" << std::endl;
+    printWB(dWeights,dBias,nNodes);
 
     // Get Error for plotting (for each sample)
     std::vector<std::vector<double>> tempPVal;
@@ -496,6 +483,9 @@ double trainSNN(
       )
       addMat(dWeights, sdWeights);
       addMat(dBias, sdBias);
+
+      std::cout << "Sample " << s << " dWeights and dBias" << std::endl;
+      printWB(dWeights,dBias,nNodes);
       
     }
 
