@@ -190,8 +190,10 @@ void runBackprop(
   activationFunction ** dActFun,
   int * actType
 ){
-  std::cout << "\n\nrunBackprop" << std::endl;
-  print("obs",obs);
+  BUGT3(
+    std::cout << "\n\nrunBackprop" << std::endl;
+    print("obs",obs);
+  )
   unsigned int llp = layers.size()-1; // Last Layer Position
   unsigned int lap = llp-1; // Last activation/weight matrix/bias vector position
   int classN = -1;
@@ -201,7 +203,7 @@ void runBackprop(
     if(obs[i] == 1){
       // get the layer derivative w.r.t the observed class
       classN = int(i);
-      std::cout << "\nObserved Class: " <<  classN << std::endl;
+      // std::cout << "Observed Class: " <<  classN << std::endl;
       break;
     }
   }
@@ -213,7 +215,6 @@ void runBackprop(
   /////////////////////////////////////////////////////////
   // Getting the loss and derivative of the final layer
   /////////////////////////////////////////////////////////
-  BUGT2(std::cout << "Getting derivative of last layer " << llp << std::endl;)
   // Creating initial derivative vector
   std::vector<double> dVect(layers[llp].size(),0.0);
   // If the final activation function is applied to a specific node
@@ -231,17 +232,20 @@ void runBackprop(
     dVect = (*dActFun[lap][0])(layers[llp], layers[llp].size(), classN);
   }
   
-  print("dVect",dVect);
+  BUGT3(print("dVect",dVect));
 
   // Multiply the derivative of the loss function
   // std::cout << "dLoss: "<< dCrossEntropy(Acts[ln][i]) << std::endl;
-  print("\nActs[llp]",Acts[llp]);
-  multVec(dVect, (*dLossFun)(Acts[llp], obs));
-  print("dLoss*dVect",dVect);
+  // print("\nActs[llp]",Acts[llp]);
+  // multVec(dVect, (*dLossFun)(Acts[llp], obs));
+  multScal(dVect, (*dLossFun)(Acts[llp], obs)[classN]);
+  BUGT3(print("dLoss*dVect",dVect));
 
   addVec(dBias[lap], dVect);
-  print("dBias",dBias);
-  std::cout << "\n" << std::endl;
+  BUGT3(
+    print("dBias",dBias);
+    std::cout << "\n" << std::endl;
+  )
 
   addVec(dWeights[lap], get_dW(dBias[lap], Acts[lap]));
 
@@ -262,13 +266,7 @@ void runBackprop(
     )
     std::vector<double> temp_dA(layers[i+1].size());
     if(actType[i] == 1){
-      BUGT2(
-        std::cout << "\tFor each node to "<< layers[i+1].size()-1 << std::endl;
-      )
       for(unsigned int j = 0; j < layers[i+1].size(); j++){
-        BUGT2(
-          std::cout << "\t\tNode "<< j << std::endl;
-        )
         std::vector<double> tempVal{layers[i+1][j]};
         std::vector<double> temp = (*dActFun[i][j])(tempVal, 1, classN);
         temp_dA[j] = temp[0];
@@ -279,22 +277,10 @@ void runBackprop(
         print("\tlayers[i+1]",layers[i+1]);
       )
       temp_dA = (*dActFun[i][0])(layers[i+1], layers[i+1].size(), classN);
-      BUGT2(
-        print("\ttemp_dA",temp_dA);
-      )
     }
     addVec(dBias[i],get_inner_dB(dBias[i+1],weights[i+1],temp_dA));
     addVec(dWeights[i], get_dW(dBias[i], Acts[i]));
   }
-
-  BUGT2(
-    std::cout << "dW and dB" << std::endl;
-    printWB(dWeights, dBias, nNodes);
-  )
-
-  BUGT2(
-    std::cout << "Returning\n" << std::endl;
-  )
 }
 
 
@@ -381,8 +367,10 @@ double trainSNN(
   if(weights.empty()){
     weights = initWeights(nLayers, nNodes, true);
     bias = initBias(nLayers, nNodes);
-    std::cout << "\nInit Weights and Bias" << std::endl;
-    printWB(weights,bias,nNodes);
+    BUGT3(
+      std::cout << "\nInit Weights and Bias" << std::endl;
+      printWB(weights,bias,nNodes)
+    );
   }
 
   std::vector<std::vector<double>> mtW;
@@ -413,8 +401,10 @@ double trainSNN(
     // init deltas
     std::vector<std::vector<double>> dWeights = initZero(weights);
     std::vector<std::vector<double>> dBias = initZero(bias);
-    std::cout << "\nInit dWeights and dBias" << std::endl;
-    printWB(dWeights,dBias,nNodes);
+    BUGT3(
+      std::cout << "\nInit dWeights and dBias" << std::endl;
+      printWB(dWeights,dBias,nNodes)
+    );
 
     // Get Error for plotting (for each sample)
     std::vector<std::vector<double>> tempPVal;
@@ -484,8 +474,10 @@ double trainSNN(
       addMat(dWeights, sdWeights);
       addMat(dBias, sdBias);
 
-      std::cout << "Sample " << s << " dWeights and dBias" << std::endl;
-      printWB(dWeights,dBias,nNodes);
+      BUGT3(
+        std::cout << "Sample " << s << " dWeights and dBias" << std::endl;
+        printWB(dWeights,dBias,nNodes);
+      )
       
     }
 

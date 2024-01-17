@@ -17,6 +17,7 @@ int main(int numInputs, char * inputs[]){
   unsigned int IDposition = 0; // Class ID column number
   unsigned int nLayers = 3;  // Number of layers including input and output layer
   std::vector<unsigned int> nHiddenNodes{2}; // number of nodes for each hidden layer
+  unsigned int skipRow = 1;
   unsigned int skipCol = 0; // Number of columns to skip at the begining of the dataset
   unsigned int skipColPat = 0; // Number of columns to skip in a pattern (everyother, every third, etc.)
 
@@ -69,6 +70,9 @@ int main(int numInputs, char * inputs[]){
       }else if(match(inputs[i], "skip_column")){
         skipCol = std::stoi(inputs[i+1]);
         i++;
+      }else if(match(inputs[i], "skip_row")){
+        skipCol = std::stoi(inputs[i+1]);
+        i++;
       }
       
       else if(match(inputs[i],"maxIter")){
@@ -102,7 +106,7 @@ int main(int numInputs, char * inputs[]){
   // Data Read In
   std::vector<std::vector<double>> samples;
   std::vector<std::vector<double>> obs;
-  getDataID(dataFilePath, samples, obs, IDposition, 1, skipCol);
+  getDataID(dataFilePath, samples, obs, IDposition, skipRow, skipCol);
   
 
   std::vector<std::vector<double>> train;

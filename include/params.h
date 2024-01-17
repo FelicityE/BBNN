@@ -19,7 +19,7 @@ typedef std::vector<double> (*activationFunction)(std::vector<double>, int, int)
 // typedef  std::vector<double> (*dActivationFunction)(double*, int);
 
 
-#if(false)
+#if(DEBUG)
   #define BUGT1(x) x
 #else 
   #define BUGT1(x)
@@ -29,4 +29,10 @@ typedef std::vector<double> (*activationFunction)(std::vector<double>, int, int)
   #define BUGT2(x) x
 #else 
   #define BUGT2(x)
+#endif
+
+#if(DEBUG)
+  #define BUGT3(x) x
+#else 
+  #define BUGT3(x)
 #endif

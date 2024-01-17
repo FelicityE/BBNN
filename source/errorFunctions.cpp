@@ -37,6 +37,8 @@ std::vector<double> dCrossEntropy(
   for(unsigned int i = 0; i < layer.size(); i++){
     dcross.push_back(dCrossEntropy(layer[i]));
   }
+
+  BUGT3(print("dLoss", dcross));
   return dcross;
 }
 

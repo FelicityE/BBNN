@@ -3,6 +3,7 @@
 #include <math.h> // For sqrt() pow()
 #include <vector> // For vectors
 #include "params.h"
+#include "utility.h"
 
 
 double crossEntropy(double predictiveProbability);

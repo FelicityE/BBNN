@@ -109,6 +109,10 @@ std::vector<double> dSoftMax(std::vector<double> layer, int stop, int g_obs){
       print("dpda", dpda[dpda.size()-1]);
     )
   }
+
+  BUGT3(
+    print("dPP",dpda);
+  )
   
   BUGT1(
     std::cout << "g_obs" << g_obs << std::endl;
