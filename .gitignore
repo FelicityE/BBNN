@@ -1,3 +1,6 @@
 build/*
+!build/
 results/*
+!results/
 data/*
+!data/
