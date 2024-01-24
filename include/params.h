@@ -1,38 +1,22 @@
 #pragma once
 
+#include <string>
+#include <iostream>
+#include <vector>
+#include <math.h>
+
 #define ERRPRINT true
 #define TRAINPRINT false
 #define DEBUG false
 
 #define DTYPE double
 
-typedef  std::vector<double> (*lossFunction)(
-  std::vector<double>, /*lastLayer*/
-  std::vector<double> /*observations*/
-);
-// typedef  std::vector<double> (*dlossFunction)(
-//   std::vector<double>, /*lastLayer*/
-//   std::vector<double> /*observations*/
-// );
-// typedef std::vector<double> (*activationFunction)(double*, int, int);
-typedef std::vector<double> (*activationFunction)(std::vector<double>, int, int);
-// typedef  std::vector<double> (*dActivationFunction)(double*, int);
-
+typedef std::vector<DTYPE> (*lossF)(std::vector<DTYPE> /*last Layer*/, int /*observed class*/);
+typedef std::vector<DTYPE> (*actF)(std::vector<DTYPE> /*Layer*/, std::vector<DTYPE>);
 
 #if(DEBUG)
-  #define BUGT1(x) x
-#else 
-  #define BUGT1(x)
+  #define BUG(x) x
+#else
+  #define BUG(x)
 #endif
 
-#if(DEBUG)
-  #define BUGT2(x) x
-#else 
-  #define BUGT2(x)
-#endif
-
-#if(DEBUG)
-  #define BUGT3(x) x
-#else 
-  #define BUGT3(x)
-#endif
