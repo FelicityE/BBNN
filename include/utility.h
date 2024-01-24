@@ -77,7 +77,7 @@ std::vector<double> multScalR(std::vector<double> A, double scaler);
 // Append two vectors
 void vecAppend(std::vector<unsigned int> &A, std::vector<unsigned int> B);
 
-// Seach in Vector for value
+// Seach in Vector of unsigned ints for value
 bool inVec(std::vector<unsigned int> v, unsigned int val);
 
 ///////////////////////////////////////////////////////////
@@ -157,6 +157,12 @@ void getDataID(
   unsigned int skipColumn = 0,
   unsigned int skipColPattern = 0
 );
+
+///////////////////////////////////////////////////////////////////////////////
+/// String functions
+///////////////////////////////////////////////////////////////////////////////
+bool find(char * A[], int nA, std::string B);
+bool find(char * A[], int strt, int end, std::string B);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Get Activation Matrix 

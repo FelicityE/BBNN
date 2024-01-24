@@ -21,7 +21,7 @@ int main(int numInputs, char * inputs[]){
   unsigned int skipCol = 0; // Number of columns to skip at the begining of the dataset
   unsigned int skipColPat = 0; // Number of columns to skip in a pattern (everyother, every third, etc.)
 
-  bool Adam = true;
+  bool Adam = false;
   double alpha = 0.01; // The learning rate
   double beta1 = 0.9; // The first moment rate of decay
   double beta2 = 0.999; // The second moment rate of decay
@@ -31,10 +31,12 @@ int main(int numInputs, char * inputs[]){
   int sample_seed = 0; // sample selection seed 
   int weights_seed = 42; // Initial weights seed
 
+  std::vector<std::string> actFunList;
+
   if(numInputs > 2){
     for(unsigned int i = 2; i < numInputs; i++){
       if(match(inputs[i],"-Adam")){
-        Adam = false;
+        Adam = true;
       }else if(match(inputs[i], "alpha")){
         alpha = std::stod(inputs[i+1]);
         i++;
@@ -89,7 +91,18 @@ int main(int numInputs, char * inputs[]){
         i++;
       }
 
-      // else if(match(inputs[i], "actFuns"))
+      else if(match(inputs[i], "acts")){
+        i++;
+        if(!find(inputs, i, numInputs-i, "-acts")){
+          std::cout << "ERROR - main input: -acts missing." << std::endl;
+          std::cout << "All activation functions will be set to default, ReLu." << std::endl;
+        }else{
+          while(!match(inputs[i], "-acts") ){
+            actFunList.push_back(inputs[i]);
+            i++;
+          }
+        }
+      }
       
       else{
         std::cout << "ERROR - main input: input["<< i <<"], " << inputs[i] <<  ", not found." << std::endl;
@@ -174,18 +187,18 @@ int main(int numInputs, char * inputs[]){
       actFunTest[i] = (activationFunction*)malloc(sizeof(activationFunction)*nNodes[i]);
       dActFun[i] = (activationFunction*)malloc(sizeof(activationFunction)*nNodes[i]);
       for(unsigned int j = 0; j < nNodes[i]; j++){
-        actFun[i][j] = ReLu;
-        actFunTest[i][j] = ReLu;
-        dActFun[i][j] = dReLu;
+        actFun[i][j] = relu;
+        actFunTest[i][j] = relu;
+        dActFun[i][j] = drelu;
       }
     }
     if(actType[i] == 2){
       actFun[i] = (activationFunction*)malloc(sizeof(activationFunction)*1);
       actFunTest[i] = (activationFunction*)malloc(sizeof(activationFunction)*1);
       dActFun[i] = (activationFunction*)malloc(sizeof(activationFunction)*1);
-      actFun[i][0] = ReLu;
-      actFunTest[i][0] = ReLu;
-      dActFun[i][0] = dReLu;
+      actFun[i][0] = relu;
+      actFunTest[i][0] = relu;
+      dActFun[i][0] = drelu;
     }
     BUGT1(
       std::cout << "\t L " << i << " finished."<< std::endl;
@@ -199,9 +212,9 @@ int main(int numInputs, char * inputs[]){
   actFun[nActs-1] = (activationFunction*)malloc(sizeof(activationFunction)*1);
   actFunTest[nActs-1] = (activationFunction*)malloc(sizeof(activationFunction)*1);
   dActFun[nActs-1] = (activationFunction*)malloc(sizeof(activationFunction)*1);
-  actFun[nActs-1][0] = softMax;
-  actFunTest[nActs-1][0] = argMax;
-  dActFun[nActs-1][0] = dSoftMax;
+  actFun[nActs-1][0] = softmax;
+  actFunTest[nActs-1][0] = argmax;
+  dActFun[nActs-1][0] = dsoftmax;
 
   BUGT1(
     std::cout << "\t Setting Loss Function" << std::endl;

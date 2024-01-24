@@ -443,7 +443,7 @@ double trainSNN(
         std::cout << "\t\t\tGetting Error" << std::endl;
       )
       // Get Error for plotting (for each sample)
-      tempPVal.push_back(argMax(layers[layers.size()-1],layers[layers.size()-1].size(),0));
+      tempPVal.push_back(argmax(layers[layers.size()-1],layers[layers.size()-1].size(),0));
 
 
       BUGT1(
@@ -605,3 +605,9 @@ void testSNN(
 
   return;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+/// Build Functions
+///////////////////////////////////////////////////////////////////////////////
+// void getActivationFunction();
+// void setActivationFunction(acti);

@@ -12,7 +12,7 @@ make
 
 # Options
 # first option must always be the filename
-# -Adam -> turns off Adam; default on
+# -Adam -> turns on Adam; default off
 # alpha x -> set learning rate alpha = x; default 0.01
 # beta x y -> set first moment decay  = x and second moment decay = y; default 0.9 0.99
 
@@ -27,6 +27,14 @@ make
 # sseed x -> set sample seed to x; default 0
 # wseed x -> set random initial weights to x; default 42
 
+# Activation Functions: default ReLu
+# acts ... -acts -> all activation instructions should start with acts and end with -acts otherwise code WILL endless loop.
+# L x y -> Starting from layer x repeat for y layers, set y to R to repeat for remaining layers
+# N x y -> Starting from node x repeat for y nodes, set y to R to repeat for remaining nodes
+# <name> -> name should be the name of the function to be used. 
+# example: acts L 0 0 N 0 2 sigmoid N 3 R elu -acts
+# The example would create an ANN with Layer 0 nodes 0 to 2 sigmoid and nodes 3 to the end of layer elu, all other layers will be default
+
 echo -e "maxIter,alpha,ratio,sseed,wseed,epoch,test,train,total" >&2 
 cd build/
-./main ../data/Test.txt
+./main ../data/Test.txt -Adam

@@ -18,30 +18,30 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Activation Functions
 ///////////////////////////////////////////////////////////////////////////////
-double ReLu(double x){
+double relu(double x){
   if(x <= 0){return 0;}
   return x;
 }
-double dReLu(double x){
+double drelu(double x){
   if(x <= 0){return 0;}
   return 1;
 }
 
-std::vector<double> ReLu(std::vector<double> layer, int stop, int meta){
+std::vector<double> relu(std::vector<double> layer, int stop, int meta){
   std::vector<double> activation;
   for(unsigned int i = 0; i < layer.size(); i++){
-    activation.push_back(ReLu(layer[i]));
+    activation.push_back(relu(layer[i]));
   }
   return activation;
 }
-std::vector<double> dReLu(std::vector<double> layer, int stop, int meta){
+std::vector<double> drelu(std::vector<double> layer, int stop, int meta){
   BUGT1(
     std::cout << "\nRunning dReLu" << std::endl;
     // std::cout << "Layer Size: " << layer.size() << std::endl;
   )
   std::vector<double> dA;
   for(unsigned int i = 0; i < layer.size(); i++){
-    dA.push_back(dReLu(layer[i]));
+    dA.push_back(drelu(layer[i]));
   }
 
   BUGT1(
@@ -54,7 +54,7 @@ std::vector<double> dReLu(std::vector<double> layer, int stop, int meta){
 ///////////////////////////////////////////////////////////////////////////////
 // Layer Functions
 ///////////////////////////////////////////////////////////////////////////////
-std::vector<double> softMax(std::vector<double> layer, int stop, int meta){
+std::vector<double> softmax(std::vector<double> layer, int stop, int meta){
   BUGT1(
     std::cout << "\nRunning SoftMax" << std::endl;
     std::cout << "Layer Size: " << layer.size() << std::endl;
@@ -70,7 +70,7 @@ std::vector<double> softMax(std::vector<double> layer, int stop, int meta){
   return predictiveProbability;
 }
 
-std::vector<double> dSoftMax(std::vector<double> layer, int stop, int g_obs){
+std::vector<double> dsoftmax(std::vector<double> layer, int stop, int g_obs){
   // dp_i/da_j e.g. dpda[0] = dp0/da0, dpda[1] = dp0/da1, dpda[2] = dp1/da0 etc.
   BUGT1(
     std::cout << "\nRunning dSoftMax" << std::endl;
@@ -122,7 +122,7 @@ std::vector<double> dSoftMax(std::vector<double> layer, int stop, int g_obs){
   return dpda[g_obs];
 }
 
-std::vector<double> argMax(std::vector<double> layer, int stop, int meta){
+std::vector<double> argmax(std::vector<double> layer, int stop, int meta){
   double max = layer[0];
   unsigned int index = 0;
 
