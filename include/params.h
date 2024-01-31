@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
+#include <climits>
 
 #define ERRPRINT true
 #define TRAINPRINT false

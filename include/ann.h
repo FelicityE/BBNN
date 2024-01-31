@@ -1,50 +1,57 @@
 #pragma once
 
-#include "params.h"
 #include "utility.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Init Functions
+/// Special Utility
 ///////////////////////////////////////////////////////////////////////////////
-struct Ann{
-  Ann(): nFeatures(2), nClasses(2), nLayers(2), nNodes(nLayers, nClasses){
-    nNodes[0] = nFeatures;
-    tNodes = sum(nNodes);
-    actsList = std::vector<unsigned int> (tNodes, 1);
-  }
-  unsigned int nFeatures;
-  unsigned int nClasses;
-  unsigned int nLayers;
-  std::vector<unsigned int> nNodes;
-  unsigned int tNodes;
-  std::vector<unsigned int> actsList;
-  std::vector<std::vector<DTYPE>> weights;
-  std::vector<DTYPE> bias;
-};
-void setnLayers(Ann &ann, unsigned int value);
-void setnNodes(
-  std::vector<unsigned int> &nNodes, 
-  unsigned int value, 
-  unsigned int layer
-);
-void setnNodes(
-  std::vector<unsigned int> &nNodes, 
-  unsigned int value, 
-  unsigned int layerStart,
-  unsigned int layerEnd
-);
+void print(Ann ann);
 
+///////////////////////////////////////////////////////////////////////////////
+/// Initializers
+///////////////////////////////////////////////////////////////////////////////
+void initWeights(
+  std::vector<std::vector<DTYPE>> &weights, 
+  std::vector<unsigned int> nNodes
+);
 void initWeights(Ann &ann);
-void initBias(Ann &ann);
+Ann initANN(
+  unsigned int nFeatures, 
+  unsigned int nClasses, 
+  unsigned int nLayers
+);
+Ann initANN(
+	unsigned int nFeatures, 
+	unsigned int nClasses, 
+	unsigned int nLayers,
+	std::vector<unsigned int> nNodes
+);
 
+///////////////////////////////////////////////////////////////////////////////
+/// Setters
+///////////////////////////////////////////////////////////////////////////////
+/// ANN 
+// Get Activation ID Position
+unsigned int getAIDP(
+  std::vector<unsigned int> nNodes, 
+  unsigned int layerN, 
+  unsigned int nodeN = 0
+);
 
-struct Adam{
-  Adam(): adam(false), alpha(0.01), beta1(0.9), beta2(0.999){}
-  bool adam;
-  double alpha;
-  double beta1;
-  double beta2;
-};
+void setActID(
+  std::vector<unsigned int> &actIDs,
+  std::vector<unsigned int> nNodes,
+  unsigned int ID,
+  unsigned int layerN,
+  unsigned int nodeN
+);
 
-void setAdam(bool &ambit, bool value);
-void setAdam(double &ambit, double value);
+// setActID(..., start<inclusive>, end<exclusive>, ...)
+void setActID(
+  Ann &ann,
+  unsigned int ID,
+  unsigned int layerNStrt = 0,
+  unsigned int layerNEnd = UINT_MAX,
+  unsigned int nodeNStrt = 0,
+  unsigned int nodeNEnd = UINT_MAX
+);

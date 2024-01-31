@@ -107,6 +107,10 @@ std::vector<DTYPE> argmax(std::vector<DTYPE> layer, std::vector<DTYPE> ambit){
 
   return out;
 }
+std::vector<DTYPE> dargmax(std::vector<DTYPE> layer, std::vector<DTYPE> ambit){
+  std::vector<DTYPE> temp(layer.size(), 0.0);
+  return temp;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Loss Functions
@@ -137,3 +141,4 @@ std::vector<DTYPE> dcrossentropy(
   }
   return dcross;
 }
+

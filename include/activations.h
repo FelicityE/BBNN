@@ -1,5 +1,4 @@
 #pragma once
-
 #include "params.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -21,6 +20,7 @@ std::vector<DTYPE> dsoftmax(std::vector<DTYPE> layer, std::vector<DTYPE> meta);
 
 /// Argmax
 std::vector<DTYPE> argmax(std::vector<DTYPE> layer, std::vector<DTYPE> ambit);
+std::vector<DTYPE> dargmax(std::vector<DTYPE> layer, std::vector<DTYPE> ambit);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Loss Functions
@@ -36,12 +36,3 @@ std::vector<DTYPE> dcrossentropy(
   int obs
 );
 
-///////////////////////////////////////////////////////////////////////////////
-// Lists 
-///////////////////////////////////////////////////////////////////////////////
-std::vector<actF> ACTF{sigmoid, relu, softmax, argmax};
-std::vector<actF> DACTF{dsigmoid, drelu, dsoftmax};
-int typeChange = 2;
-
-std::vector<lossF> LOSSF{crossentropy};
-std::vector<lossF> DLOSSF{dcrossentropy};

@@ -1,48 +1,192 @@
 #include "include/ann.h"
 
-void setAdam(bool &ambit, bool value){ambit = value; return;}
-void setAdam(double &ambit, double value){ambit = value; return;}
-
-void setnLayers(Ann &ann, unsigned int value){
-  ann.nLayers = value;
-  for(unsigned int i = ann.nNodes.size(); i < ann.nLayers; i++){
-    ann.nNodes.push_back(ann.nNodes[ann.nNodes.size()-1]);
+///////////////////////////////////////////////////////////////////////////////
+/// Special Utility
+///////////////////////////////////////////////////////////////////////////////
+void print(Ann ann){
+  std::cout << "Number of Features: " << ann.nFeatures << std::endl;
+  std::cout << "Number of Classes: " << ann.nClasses << std::endl;
+  std::cout << "Number of Layers: " << ann.nLayers << std::endl;
+  std::cout << "Total Number of Nodes: " << ann.tNodes << std::endl;
+  std::cout << "Number of Nodes per Layer: ";
+  for(unsigned int i = 0; i < ann.nNodes.size(); i++){
+    std::cout << ann.nNodes[i] << ", ";
   }
-  return;
+  std::cout << std::endl;
+  std::cout << "List of Activation IDs: ";
+  unsigned int p = 0;
+  for(unsigned int i = 0; i < ann.nNodes.size(); i++){
+    std::cout << "L" << i << "("<< ann.nNodes[i] <<"): ";
+    for(unsigned int j = 0; j < ann.nNodes[i]; j++){
+      std::cout << ann.actIDs[p] << ", ";  
+      p++;
+    }
+  }
+  std::cout << std::endl;
+  std::cout << "Weights("<< size(ann.weights) << "): ";
+  for(unsigned int i = 0; i < ann.weights.size(); i++){
+    std::cout << "\n\tL" << i << "("<< ann.weights[i].size() <<") ";
+    for(unsigned int j = 0; j < ann.weights[i].size(); j++){
+      std::cout << ann.weights[i][j] << ", ";
+    }
+  }
+  std::cout << std::endl;
+  std::cout << "Bias("<< ann.bias.size() << "): ";
+  for(unsigned int i = 0; i < ann.bias.size(); i++){
+    std::cout << ann.bias[i] << ", ";
+  }
+  std::cout << std::endl << std::endl;
 }
-void setnNodes(
-  std::vector<unsigned int> &nNodes, 
-  unsigned int value, 
-  unsigned int layer
-){nNodes[layer] = value; return;}
-void setnNodes(
-  std::vector<unsigned int> &nNodes, 
-  unsigned int value, 
-  unsigned int layerStart,
-  unsigned int layerEnd
+
+///////////////////////////////////////////////////////////////////////////////
+/// Initializers
+///////////////////////////////////////////////////////////////////////////////
+void initWeights(
+  std::vector<std::vector<DTYPE>> &weights,
+	std::vector<unsigned int> nNodes
 ){
-  for(unsigned int i = layerStart; i < layerEnd; i++){
-    setnNodes(nNodes, value, i);   
+  for(unsigned int i = 0; i < nNodes.size() - 1; i++){
+    unsigned int j = nNodes[i] * nNodes[i+1];
+    weights.push_back(rng(j));
   }
   return;
 }
-
 void initWeights(Ann &ann){
-  for(unsigned int i = 0; i < ann.nNodes.size()-1; i++){
-    std::vector<DTYPE> temp;
-    for(unsigned int j = 0; j < (ann.nNodes[i]*ann.nNodes[i+1]); j++){
-      temp.push_back((DTYPE)rand()/RAND_MAX);
-    }
-    ann.weights.push_back(temp);
-  }
+  // Unpack
+  std::vector<unsigned int> nNodes = ann.nNodes;
+  // Getting weights
+  std::vector<std::vector<DTYPE>> weights;
+  initWeights(weights, nNodes);
+  // Pack
+  ann.weights = weights;
   return;
 }
 
-void initBias(Ann &ann){
-  for(unsigned int i = 1; i < ann.nNodes.size(); i++){
-    for(unsigned int j = 0; j < ann.nNodes[i].size(); j++){
-      ann.bias.push_back(0);
+Ann initANN(
+	unsigned int nFeatures, 
+	unsigned int nClasses, 
+	unsigned int nLayers
+){
+  // Getting Default Number of Nodes Per Layer
+  std::vector<unsigned int> nNodes(nLayers, nClasses);
+  nNodes[0] = nFeatures;
+  // Getting Number of total Nodes
+  unsigned int tNodes = sum(nNodes);
+  // Getting Default Activation List 
+  std::vector<unsigned int> actIDs(tNodes, 1);
+  for(unsigned int i = tNodes-1; i > tNodes-nNodes[nNodes.size()-1]-1; i--){
+    actIDs[i] = 2; 
+  }
+  // Initializing Weights
+  std::vector<std::vector<DTYPE>> weights;
+  initWeights(weights, nNodes);
+  // Initializing Bias
+  std::vector<DTYPE> bias(tNodes-nFeatures, 0);
+  // Packing
+  struct Ann ann; 
+  ann.nFeatures = nFeatures;
+  ann.nClasses = nClasses;
+  ann.nLayers = nLayers;
+  ann.nNodes = nNodes;
+  ann.tNodes = tNodes;
+  ann.actIDs = actIDs;
+  ann.lossID = 0;
+  ann.weights = weights;
+  ann.bias = bias;
+  
+  return ann;
+}
+Ann initANN(
+	unsigned int nFeatures, 
+	unsigned int nClasses, 
+	unsigned int nLayers,
+	std::vector<unsigned int> nNodes
+){
+  struct Ann ann; 
+  if(nNodes.size() != nLayers){
+    std::cout << "ERROR - initANN: nNodes size does not match nLayers." << std::endl;
+    return ann;
+  }
+  // Getting Default Number of Nodes Per Layer
+  nNodes[0] = nFeatures;
+  nNodes[nNodes.size()-1] = nClasses;
+  // Getting Number of total Nodes
+  unsigned int tNodes = sum(nNodes);
+  // Getting Default Activation List 
+  std::vector<unsigned int> actIDs(tNodes, 1);
+  for(unsigned int i = tNodes-1; i > tNodes-nNodes[nNodes.size()-1]-1; i--){
+    actIDs[i] = 2; 
+  }
+  // Initializing Weights
+  std::vector<std::vector<DTYPE>> weights;
+  initWeights(weights, nNodes);
+  // Initializing Bias
+  std::vector<DTYPE> bias(tNodes-nFeatures, 0);
+  // Packing
+  ann.nFeatures = nFeatures;
+  ann.nClasses = nClasses;
+  ann.nLayers = nLayers;
+  ann.nNodes = nNodes;
+  ann.tNodes = tNodes;
+  ann.actIDs = actIDs;
+  ann.lossID = 0;
+  ann.weights = weights;
+  ann.bias = bias;
+  
+  return ann;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Setters
+///////////////////////////////////////////////////////////////////////////////
+/// ANN
+// Get Activation ID Postion
+unsigned int getAIDP(
+  std::vector<unsigned int> nNodes, 
+  unsigned int layerN, 
+  unsigned int nodeN /*0*/
+){
+  std::vector<unsigned int> pre_nNodes = {nNodes.begin(), nNodes.begin()+layerN};
+  unsigned int position = sum(pre_nNodes)+nodeN;
+  return position;
+}
+
+void setActID(
+  std::vector<unsigned int> &actIDs,
+  std::vector<unsigned int> nNodes,
+  unsigned int ID,
+  unsigned int layerN,
+  unsigned int nodeN
+){
+  // Get position
+  unsigned int position = getAIDP(nNodes, layerN, nodeN);
+  // Set actIDs
+  actIDs[position] = ID;
+  return;
+}
+
+void setActID(
+  Ann &ann,
+  unsigned int ID,
+  unsigned int layerNStrt,
+  unsigned int layerNEnd /*UINT_MAX*/,
+  unsigned int nodeNStrt /*0*/,
+  unsigned int nodeNEnd /*UINT_MAX*/
+){
+  // Unpack
+  std::vector<unsigned int> actIDs = ann.actIDs;
+  std::vector<unsigned int> nNodes = ann.nNodes;
+  // Get Limits
+  if(layerNEnd > nNodes.size()){layerNEnd = nNodes.size();}
+  // Get new ActIDs
+  for(unsigned int i = layerNStrt; i < layerNEnd; i++){
+    if(nodeNEnd > nNodes[i]){nodeNEnd = nNodes[i];}
+    for(unsigned int j = nodeNStrt; j < nodeNEnd; j++){
+      setActID(actIDs, nNodes, ID, i, j);
     }
   }
+  // Pack
+  ann.actIDs = actIDs;
+  
   return;
 }
