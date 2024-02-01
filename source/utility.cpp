@@ -1,25 +1,8 @@
 #include "include/utility.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Read Functions
-//////////////////////////////////////////////////////////////////////////////
-int setup(MetaRead &read, Meta &meta, int numInputs, char * inputs[]){
-  if(numInputs < 2){
-    std::cout << "ERROR - main input: missing data filepath." << std::endl;
-    return 1;
-  }
-  for(unsigned int i = 0; i < numInputs; i++){
-    std::cout << inputs[i] << " ";
-  }
-  std::cout << std::endl;
-
-  return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-/// Vector Functions
-///////////////////////////////////////////////////////////////////////////////
 /// Find Functions
+///////////////////////////////////////////////////////////////////////////////
 bool hasZero(std::vector<unsigned int> v){
   for(unsigned int i = 0; i < v.size(); i++){
     if(v[i] <= 0){return true;}
@@ -27,6 +10,37 @@ bool hasZero(std::vector<unsigned int> v){
   return false;
 }
 
+bool match(std::vector<double> A, std::vector<double> B){
+  if(A.size() != B.size()){
+    std::cout << "ERROR - match: A and B are not the same size." << std::endl;
+  }
+
+  for(unsigned int i = 0; i < A.size(); i++){
+    if(A[i] != B[i]){return false;}
+  }
+
+  return true;
+}
+bool match(char * A, std::string B){
+  for(unsigned int i = 0; i < B.length(); i++){
+    if(A[i] != B[i]){
+      return false;
+    }
+  }
+  return true;
+}
+
+unsigned int max(std::vector<unsigned int> v){
+  unsigned int max_ = 0;
+  for(unsigned int i = 0; i < v.size(); i++){
+    if(v[i] > max_){max_ = v[i];}
+  }
+  return max_;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Vector Functions
+///////////////////////////////////////////////////////////////////////////////
 /// Sum Functions
 DTYPE sum(std::vector<DTYPE> v){
   DTYPE temp = 0;
@@ -235,4 +249,111 @@ void rm(std::vector<std::vector<DTYPE>> &v, unsigned int p /* = 0*/){
     v.erase(v.begin()+p);
   }
   return;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Read Functions
+///////////////////////////////////////////////////////////////////////////////
+int getSetup(
+  Adam &adam, 
+  ANN_Ambit &annbit, 
+  Read_Ambit &read, 
+  int numInputs, 
+  char * inputs[]
+){
+  // Check that the correct number of inputs is given
+  if(numInputs < 2){
+    std::cout << "ERROR - main input: missing data filepath." << std::endl;
+    return 1;
+  }
+  // Print the inputs
+  for(unsigned int i = 0; i < numInputs; i++){
+    std::cout << inputs[i] << " ";
+  }
+  std::cout << std::endl;
+
+
+  if(numInputs > 2){
+    for(unsigned int i = 2; i < numInputs; i++){
+      if(match(inputs[i], "ID_column")){
+        read.idp = std::stoi(inputs[i+1]);
+        i++;
+      }else if(match(inputs[i], "skip_row")){
+        read.skipRow = std::stoi(inputs[i+1]);
+        i++;
+      }else if(match(inputs[i], "skip_column")){
+        read.skipCol = std::stoi(inputs[i+1]);
+        i++;
+      }else if(match(inputs[i], "ratio")){
+        read.ratio = std::stod(inputs[i+1]);
+        i++;
+      }else if(match(inputs[i], "sseed")){
+        read.sseed = std::stoi(inputs[i+1]);
+        i++;
+      }
+
+      else if(match(inputs[i],"Adam")){
+        adam.adam = true;
+      }else if(match(inputs[i], "alpha")){
+        adam.alpha = std::stod(inputs[i+1]);
+        i++;
+      }else if(match(inputs[i], "beta")){
+        adam.beta1 = std::stod(inputs[i+1]);
+        adam.beta2 = std::stod(inputs[i+2]);
+        i += 2;
+      }
+      
+      else if(match(inputs[i],"maxIter")){
+        annbit.maxIter = std::stoi(inputs[i+1]);
+        i++;
+      }else if(match(inputs[i], "wseed")){
+        annbit.wseed = std::stoi(inputs[i+1]);
+        i++;
+      }else if(match(inputs[i], "Layers")){
+        annbit.nLayers = std::stoi(inputs[i+1]);
+        i++;
+        annbit.hNodes[0] = std::stoi(inputs[i+1]);
+        for(unsigned int j = 1; j < annbit.nLayers-2; j++){
+          annbit.hNodes.push_back(std::stoi(inputs[i+1]));
+        }
+        i++;
+      }else if(match(inputs[i], "hNodes")){
+        annbit.nLayers = std::stoi(inputs[i+1])+2;
+        std::cout << "\nNumber of Layers: " << annbit.nLayers << std::endl;
+        i++;
+        annbit.hNodes[0] = std::stoi(inputs[i+1]);
+        i++;
+        for(unsigned int j = 1; j < annbit.nLayers-2; j++){
+          annbit.hNodes.push_back(std::stoi(inputs[i+1]));
+          i++;
+        }
+        // print("Hidden Nodes", nHiddenNodes);
+        std::cout << std::endl;
+      }
+      
+      else if(match(inputs[i], "setActs")){
+        i++;
+        std::vector<unsigned int> temp;
+        unsigned int cnt;
+        while(!match(inputs[i], "-stp")){
+          if(cnt >= 5){
+            std::cout <<
+            "ERROR - SetUp: setActs was not followed by -stp after 5 or less integers."
+            << std::endl;
+            return 1;
+          }
+          temp.push_back(std::stoi(inputs[i]));
+          i++;
+          cnt++;
+        }
+        annbit.setActID_inputs.push_back(temp);
+      }
+      
+      else{
+        std::cout << "ERROR - main input: input["<< i <<"], " << inputs[i] <<  ", not found." << std::endl;
+      }
+    }
+  }
+
+  return 0;
 }

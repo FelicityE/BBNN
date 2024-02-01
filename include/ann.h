@@ -26,6 +26,10 @@ Ann initANN(
 	unsigned int nLayers,
 	std::vector<unsigned int> nNodes
 );
+// Ann initANN(SetUp set);
+
+// Data initDataSets(Data &train, Data &test, SetUp set);
+
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Setters

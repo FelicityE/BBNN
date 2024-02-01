@@ -136,6 +136,20 @@ Ann initANN(
   return ann;
 }
 
+// Ann initANN(
+//   unsigned int nFeatures,
+//   unsigned int nClasses,
+//   std::vector<unsigned int> hNodes,
+//   std::vector<std::vector<unsigned int>> setActs,
+//   unsigned int wseed
+// ){
+
+// }
+
+// Data initDataSets(Data &train, Data &test, SetUp set){
+
+// }
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Setters
 ///////////////////////////////////////////////////////////////////////////////
