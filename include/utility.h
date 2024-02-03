@@ -3,6 +3,18 @@
 #include "structures.h"
 
 ///////////////////////////////////////////////////////////////////////////////
+/// Strings
+///////////////////////////////////////////////////////////////////////////////
+void rmSpace(std::string &str);
+std::string str(char * value);
+
+///////////////////////////////////////////////////////////////////////////////
+/// Print
+///////////////////////////////////////////////////////////////////////////////
+void print(struct Data data);
+int errPrint(std::string error_message);
+
+///////////////////////////////////////////////////////////////////////////////
 /// Find Functions
 ///////////////////////////////////////////////////////////////////////////////
 bool hasZero(std::vector<unsigned int> v);
@@ -62,3 +74,17 @@ int getSetup(
   int numInputs, 
   char * inputs[]
 );
+
+/// Files
+
+int readFile(std::vector<std::vector<std::string>> &content, std::string filename);
+// void getData(
+//   std::string filename, 
+//   std::vector<std::vector<double>> &data,
+//   std::vector<std::vector<double>> &observations,
+//   unsigned int IDpos,
+//   unsigned int skipRow,
+//   unsigned int skipColumn,
+//   unsigned int skipColPattern
+// );
+int getData(struct Data &data, struct Read_Ambit read);

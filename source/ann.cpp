@@ -4,8 +4,8 @@
 /// Special Utility
 ///////////////////////////////////////////////////////////////////////////////
 void print(struct Ann ann){
-  std::cout << "Number of Features: " << ann.nFeatures << std::endl;
-  std::cout << "Number of Classes: " << ann.nClasses << std::endl;
+  std::cout << "Number of Features: " << ann.nNodes[0] << std::endl;
+  std::cout << "Number of Classes: " << ann.nNodes[ann.nLayers-1] << std::endl;
   std::cout << "Number of Layers: " << ann.nLayers << std::endl;
   std::cout << "Total Number of Nodes: " << ann.tNodes << std::endl;
   std::cout << "Number of Nodes per Layer: ";
@@ -63,13 +63,13 @@ void initWeights(struct Ann &ann){
 }
 
 Ann initANN(
-	unsigned int nFeatures, 
+	unsigned int nFeat, 
 	unsigned int nClasses, 
 	unsigned int nLayers
 ){
   // Getting Default Number of Nodes Per Layer
   std::vector<unsigned int> nNodes(nLayers, nClasses);
-  nNodes[0] = nFeatures;
+  nNodes[0] = nFeat;
   // Getting Number of total Nodes
   unsigned int tNodes = sum(nNodes);
   // Getting Default Activation List 
@@ -81,11 +81,9 @@ Ann initANN(
   std::vector<std::vector<DTYPE>> weights;
   initWeights(weights, nNodes);
   // Initializing Bias
-  std::vector<DTYPE> bias(tNodes-nFeatures, 0);
+  std::vector<DTYPE> bias(tNodes-nFeat, 0);
   // Packing
-  struct Ann ann; 
-  ann.nFeatures = nFeatures;
-  ann.nClasses = nClasses;
+  struct Ann ann;
   ann.nLayers = nLayers;
   ann.nNodes = nNodes;
   ann.tNodes = tNodes;
@@ -97,18 +95,20 @@ Ann initANN(
   return ann;
 }
 Ann initANN(
-	unsigned int nFeatures, 
+	unsigned int nFeat, 
 	unsigned int nClasses, 
 	unsigned int nLayers,
 	std::vector<unsigned int> nNodes
 ){
   struct Ann ann; 
   if(nNodes.size() != nLayers){
-    std::cout << "ERROR - initANN: nNodes size does not match nLayers." << std::endl;
+    errPrint("ERROR - initANN: nNodes size does not match nLayers.");
+    std::cout << nNodes.size() << ":" << nLayers << std::endl;
+    exit(1);
     return ann;
   }
   // Getting Default Number of Nodes Per Layer
-  nNodes[0] = nFeatures;
+  nNodes[0] = nFeat;
   nNodes[nNodes.size()-1] = nClasses;
   // Getting Number of total Nodes
   unsigned int tNodes = sum(nNodes);
@@ -121,10 +121,8 @@ Ann initANN(
   std::vector<std::vector<DTYPE>> weights;
   initWeights(weights, nNodes);
   // Initializing Bias
-  std::vector<DTYPE> bias(tNodes-nFeatures, 0);
+  std::vector<DTYPE> bias(tNodes-nFeat, 0);
   // Packing
-  ann.nFeatures = nFeatures;
-  ann.nClasses = nClasses;
   ann.nLayers = nLayers;
   ann.nNodes = nNodes;
   ann.tNodes = tNodes;
@@ -137,28 +135,29 @@ Ann initANN(
 }
 
 Ann initANN(struct ANN_Ambit ann_, struct Data train){
-  unsigned int nFeatures = train.nFeatures;
+  unsigned int nFeat = train.nFeat;
   unsigned int nClasses = train.nClasses;
   unsigned int nLayers = ann_.nLayers;
   
   std::vector<unsigned int> nNodes;
-  nNodes.push_back(nFeatures);
+  nNodes.push_back(nFeat);
   for(unsigned int i = 0; i < ann_.hNodes.size(); i++){
     nNodes.push_back(ann_.hNodes[i]);
   }
   nNodes.push_back(nClasses);
 
   if(nNodes.size() != nLayers){
-    std::cout <<
-      "ERROR - initANN(ANN_Ambit, Data): nNodes("<< nNodes.size()
-      << ").size does not match the number of layers("<< nLayers 
-      << ")." 
-    << std::endl;
+
+    errPrint(
+      "ERROR - initANN(ANN_Ambit, Data): nNodes.size does not match the number of layers"
+    );
+    std::cout << nNodes.size() << ":" << nLayers << std::endl;
+    exit(1);
   }
 
   srand(ann_.wseed);
   struct Ann ann = initANN(
-    nFeatures,
+    nFeat,
     nClasses,
     nLayers,
     nNodes
@@ -177,7 +176,14 @@ Ann initANN(struct ANN_Ambit ann_, struct Data train){
   return ann;
 }
 
-void initDataSets(struct Data train, struct Data test, struct Read_Ambit read_){};
+void getDataSets(
+  struct Data &train, 
+  struct Data &test, 
+  struct Data data, 
+  unsigned int sseed
+){
+  srand(sseed);  
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Setters

@@ -1,5 +1,45 @@
 #include "include/utility.h"
 
+
+///////////////////////////////////////////////////////////////////////////////
+/// Strings
+///////////////////////////////////////////////////////////////////////////////
+void rmSpace(std::string &str){
+  bool start = false;
+  std::string s = "";
+  for(int i = 0; i < str.length(); i++){
+    if(str[i] == ' '){continue;}
+    s += str[i];
+  }
+  str=s;
+  return;
+}
+std::string str(char * value){std::string s = value; return s;}
+///////////////////////////////////////////////////////////////////////////////
+/// Print
+///////////////////////////////////////////////////////////////////////////////
+void print(struct Data data){
+  std::cout 
+    << "Number of Features: " << data.nFeat << "; "
+    << "Number of Classes: " << data.nClasses << "; "
+    << "Number of Samples: " << data.nSamp << "; "
+  << std::endl;
+  std:: cout << "Data: " << std::flush;
+  unsigned int cnt = 0;
+  for(unsigned int i = 0; i < data.feat.size(); i++){
+    if(i%data.nFeat == 0){
+      std::cout << "\nObs: " << data.obs[cnt] << " Feat: ";
+      cnt++;
+    }
+    std::cout << data.feat[i] << " ";
+  }
+  std::cout << std::endl;
+}
+
+int errPrint(std::string error_message){
+  std::cout << RGB::r << error_message << RGB::R << std::endl;
+  return 1;
+}
 ///////////////////////////////////////////////////////////////////////////////
 /// Find Functions
 ///////////////////////////////////////////////////////////////////////////////
@@ -12,7 +52,9 @@ bool hasZero(std::vector<unsigned int> v){
 
 bool match(std::vector<double> A, std::vector<double> B){
   if(A.size() != B.size()){
-    std::cout << "ERROR - match: A and B are not the same size." << std::endl;
+    errPrint("ERROR - match: A and B are not the same size.");
+    std::cout << A.size() << ":" << B.size() << std::endl;
+    exit(1);
   }
 
   for(unsigned int i = 0; i < A.size(); i++){
@@ -81,7 +123,7 @@ unsigned int size(std::vector<std::vector<DTYPE>> v){
   }
   return temp;
 }
-void setSize(std::vector<unsigned int> &v, unsigned int size, unsigned int p /* = 0*/){
+void setSize(std::vector<unsigned int> &v, unsigned int size, unsigned int p /*0*/){
   if(size > v.size()){
     // Insert
     unsigned int temp = size-v.size();
@@ -101,7 +143,7 @@ void setSize(std::vector<unsigned int> &v, unsigned int size, unsigned int p /* 
   else{return;}
   return;
 }
-void setSize(std::vector<DTYPE> &v, unsigned int size, unsigned int p /* = 0*/){
+void setSize(std::vector<DTYPE> &v, unsigned int size, unsigned int p /*0*/){
   if(size > v.size()){
     // Insert
     unsigned int temp = size - v.size();
@@ -121,7 +163,7 @@ void setSize(std::vector<DTYPE> &v, unsigned int size, unsigned int p /* = 0*/){
   else{return;}
   return;
 }
-void setSize(std::vector<std::vector<DTYPE>> &v, unsigned int size, unsigned int p /* = 0*/){
+void setSize(std::vector<std::vector<DTYPE>> &v, unsigned int size, unsigned int p /*0*/){
   if(size > v.size()){
     // Insert 
     unsigned int temp = size - v.size();
@@ -141,7 +183,7 @@ void setSize(std::vector<std::vector<DTYPE>> &v, unsigned int size, unsigned int
   else{return;}
   return;
 }
-void setSizeRand(std::vector<std::vector<DTYPE>> &v, unsigned int size, unsigned int p /* = 0*/){
+void setSizeRand(std::vector<std::vector<DTYPE>> &v, unsigned int size, unsigned int p /*0*/){
   if(size > v.size()){
     // Insert 
     unsigned int temp = size - v.size();
@@ -163,7 +205,7 @@ void setSizeRand(std::vector<std::vector<DTYPE>> &v, unsigned int size, unsigned
 }
 
 /// Insert Functions
-void insert(std::vector<unsigned int> &v, unsigned int p /* = 0*/){
+void insert(std::vector<unsigned int> &v, unsigned int p /*0*/){
   if(p == 0){
     unsigned int temp = v[v.size()-2];
     v.insert(v.end()-1, temp);
@@ -173,7 +215,7 @@ void insert(std::vector<unsigned int> &v, unsigned int p /* = 0*/){
   }
   return;
 }
-void insert(std::vector<DTYPE> &v, unsigned int p /* = 0*/){
+void insert(std::vector<DTYPE> &v, unsigned int p /*0*/){
   if(p == 0){
     DTYPE temp = v[v.size()-2];
     v.insert(v.end()-1, temp);
@@ -183,7 +225,7 @@ void insert(std::vector<DTYPE> &v, unsigned int p /* = 0*/){
   }
   return;
 }
-void insert(std::vector<std::vector<DTYPE>> &v, unsigned int p /* = 0*/){
+void insert(std::vector<std::vector<DTYPE>> &v, unsigned int p /*0*/){
   if(p == 0){
     std::vector<DTYPE> temp = v[v.size()-2];
     v.insert(v.end()-1, temp);
@@ -196,7 +238,7 @@ void insert(std::vector<std::vector<DTYPE>> &v, unsigned int p /* = 0*/){
 
 void insertRand(
   std::vector<DTYPE> &v, 
-  unsigned int p /* = 0*/, 
+  unsigned int p /*0*/, 
   DTYPE ll /*0*/, 
   DTYPE ul /*1*/
 ){
@@ -211,7 +253,7 @@ void insertRand(
 }
 void insertRand(
   std::vector<std::vector<DTYPE>> &v,
-  unsigned int p /* = 0*/,
+  unsigned int p /*0*/,
   DTYPE ll /*0*/, 
   DTYPE ul /*1*/
 ){
@@ -226,7 +268,7 @@ void insertRand(
 }
 
 /// Remove Functions
-void rm(std::vector<unsigned int> &v, unsigned int p /* = 0*/){
+void rm(std::vector<unsigned int> &v, unsigned int p /*0*/){
   if(p == 0){
     v.erase(v.end()-2);
   }else{
@@ -234,7 +276,7 @@ void rm(std::vector<unsigned int> &v, unsigned int p /* = 0*/){
   }
   return;
 }
-void rm(std::vector<DTYPE> &v, unsigned int p /* = 0*/){
+void rm(std::vector<DTYPE> &v, unsigned int p /*0*/){
   if(p == 0){
     v.erase(v.end()-2);
   }else{
@@ -242,7 +284,7 @@ void rm(std::vector<DTYPE> &v, unsigned int p /* = 0*/){
   }
   return;
 }
-void rm(std::vector<std::vector<DTYPE>> &v, unsigned int p /* = 0*/){
+void rm(std::vector<std::vector<DTYPE>> &v, unsigned int p /*0*/){
   if(p == 0){
     v.erase(v.end()-2);
   }else{
@@ -263,7 +305,7 @@ int getSetup(
 ){
   // Check that the correct number of inputs is given
   if(numInputs < 2){
-    std::cout << "ERROR - main input: missing data filepath." << std::endl;
+    errPrint("ERROR - main input: missing data filepath.");
     return 1;
   }
   // Print the inputs
@@ -337,9 +379,7 @@ int getSetup(
         unsigned int cnt;
         while(!match(inputs[i], "-stp")){
           if(cnt >= 5){
-            std::cout <<
-            "ERROR - SetUp: setActs was not followed by -stp after 5 or less integers."
-            << std::endl;
+            errPrint("ERROR - SetUp: setActs was not followed by -stp after 5 or less integers.");
             return 1;
           }
           temp.push_back(std::stoi(inputs[i]));
@@ -351,10 +391,98 @@ int getSetup(
       }
       
       else{
-        std::cout << "ERROR - main input: input["<< i <<"], " << inputs[i] <<  ", not found." << std::endl;
+        std::string msg = "ERROR - main input: input[" + str(inputs[i]) + "], not found.";
+        errPrint(msg);
       }
     }
   }
+
+  return 0;
+}
+
+/// Files
+int readFile(std::vector<std::vector<std::string>> &content, std::string filename){
+  // Creating Vector to hold Content
+  std::vector<std::string> row;
+  std::string line;
+  std::string word;
+  std::fstream file(filename, std::ios::in);
+
+  // Opening File
+  if(file.is_open()){
+    while(getline(file, line) && !line.empty()){
+      row.clear();
+      
+      rmSpace(line); // Removes excess space
+      std::stringstream str(line);
+      
+      while(getline(str, word, ',')){
+        
+        row.push_back(word);
+      }
+      content.push_back(row);
+    }
+  }else{
+    errPrint("ERROR - data.readFile: Could not open file " + filename);
+    return 1;
+  }
+  file.close();
+
+  return 0;
+}
+
+int getData(struct Data &data, struct Read_Ambit read){
+  // Get Data
+  std::vector<std::vector<std::string>> dataS;
+  if(readFile(dataS, read.filepath)){return 1;}
+
+  // Unpack
+  unsigned int sRow = read.skipRow;
+  unsigned int sCol = read.skipCol;
+  unsigned int idp = read.idp;
+
+  unsigned int nFeat = dataS[sRow].size()-sCol-1;
+  unsigned int nSamples = dataS.size()-sRow;
+  unsigned int nClasses;
+  std::vector<DTYPE> feat;
+  std::vector<unsigned int> obs;
+
+  // Get observation and feature vectors
+  for(unsigned int i = sRow; i < dataS.size(); i++){ // for each row 
+    for(unsigned int j =  sCol; j < dataS[i].size(); j++){
+      if(j == idp){
+        obs.push_back(stoi(dataS[i][j]));
+      }else{
+        feat.push_back((DTYPE)stod(dataS[i][j]));
+      }
+    }
+  }
+  // Get number of classes 
+  nClasses = max(obs);
+
+  // Check for errors
+  if(nFeat != feat.size()/nSamples){
+
+    errPrint(
+      "ERROR - getData: Number of features does not equal size of feature set divided by number of samples. "
+    );
+    std::cout << nFeat << ":" << feat.size()/nSamples << std::endl;
+    return 1;
+  }
+  if(nSamples != obs.size()){
+    errPrint(
+      "ERROR - getData: Number of Samples does not match number of Observations."
+    );
+    std::cout << nSamples << ":" << obs.size() << std::endl;
+    return 1;
+  }
+
+  // Pack
+  data.nFeat = nFeat;
+  data.nClasses = nClasses;
+  data.nSamp = nSamples;
+  data.feat = feat;
+  data.obs = obs;
 
   return 0;
 }

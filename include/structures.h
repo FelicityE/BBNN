@@ -4,12 +4,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Lists 
 ///////////////////////////////////////////////////////////////////////////////
-static const std::vector<actF> ACTF{sigmoid, relu, softmax, argmax};
-static const std::vector<actF> DACTF{dsigmoid, drelu, dsoftmax, dargmax};
-static const int typeChange = 2;
+const std::vector<actF> ACTF{sigmoid, relu, softmax, argmax};
+const std::vector<actF> DACTF{dsigmoid, drelu, dsoftmax, dargmax};
+const int typeChange = 2;
 
-static const std::vector<lossF> LOSSF{crossentropy};
-static const std::vector<lossF> DLOSSF{dcrossentropy};
+const std::vector<lossF> LOSSF{crossentropy};
+const std::vector<lossF> DLOSSF{dcrossentropy};
 
 enum ACTID{SIGMOID, RELU, SOFTMAX, ARGMAX};
 
@@ -53,8 +53,6 @@ struct Adam{
 
 struct Ann{
   Ann():argmax(true){}
-  unsigned int nFeatures;
-  unsigned int nClasses;
   unsigned int nLayers;
   std::vector<unsigned int> nNodes;
   unsigned int tNodes;
@@ -78,19 +76,24 @@ struct ANN_Ambit{
 
 struct Data{
   Data(){}
-  std::vector<DTYPE> features;
-  unsigned int nFeatures; // numbder of features/ size of first layer
-  std::vector<unsigned int> observations;
+  Data(unsigned int nFeat, unsigned int nClasses, unsigned int nSamples){
+    this->nFeat = nFeat;
+    this->nClasses= nClasses;
+    this->nSamp = nSamples;
+  }
+  unsigned int nFeat; // numbder of feat/ size of first layer
   unsigned int nClasses; // number of classes / size of last layer
-  unsigned int nSamples;
+  unsigned int nSamp; // number samples
+  std::vector<DTYPE> feat;
+  std::vector<unsigned int> obs;
 };
 
 struct Read_Ambit{
-  Read_Ambit(): idp(0), skipRow(1), skipCol(1), sseed(0), ratio(70){};
-  Read_Ambit(std::string filepath): idp(0), skipRow(1), skipCol(1), sseed(0), ratio(70){
-    this->dataFilePath = filepath;
+  Read_Ambit(): idp(0), skipRow(1), skipCol(0), sseed(0), ratio(70){};
+  Read_Ambit(std::string filepath): idp(0), skipRow(1), skipCol(0), sseed(0), ratio(70){
+    this->filepath = filepath;
   }
-  std::string dataFilePath; // Filepath to data
+  std::string filepath; // Filepath to data
   unsigned int idp; // Class ID column number
   unsigned int skipRow; // Number of rows to skip
   unsigned int skipCol; // Number of columns to skip

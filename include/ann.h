@@ -16,19 +16,24 @@ void initWeights(
 );
 void initWeights(struct Ann &ann);
 Ann initANN(
-  unsigned int nFeatures, 
+  unsigned int nFeat, 
   unsigned int nClasses, 
   unsigned int nLayers
 );
 Ann initANN(
-	unsigned int nFeatures, 
+	unsigned int nFeat, 
 	unsigned int nClasses, 
 	unsigned int nLayers,
 	std::vector<unsigned int> nNodes
 );
 Ann initANN(struct ANN_Ambit ann_, struct Data train);
 
-void initDataSets(struct Data train, struct Data test, struct Read_Ambit read_);
+void getDataSets(
+  struct Data &train, 
+  struct Data &test, 
+  struct Data data,
+  unsigned int sseed
+);
 
 
 ///////////////////////////////////////////////////////////////////////////////
