@@ -90,19 +90,6 @@ int main(int numInputs, char * inputs[]){
         weights_seed = std::stoi(inputs[i+1]);
         i++;
       }
-
-      else if(match(inputs[i], "acts")){
-        i++;
-        if(!find(inputs, i, numInputs-i, "-acts")){
-          std::cout << "ERROR - main input: -acts missing." << std::endl;
-          std::cout << "All activation functions will be set to default, ReLu." << std::endl;
-        }else{
-          while(!match(inputs[i], "-acts") ){
-            actFunList.push_back(inputs[i]);
-            i++;
-          }
-        }
-      }
       
       else{
         std::cout << "ERROR - main input: input["<< i <<"], " << inputs[i] <<  ", not found." << std::endl;
