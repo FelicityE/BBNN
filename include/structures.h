@@ -71,7 +71,7 @@ struct ANN_Ambit{
   ANN_Ambit():nLayers(3), hNodes(std::vector<unsigned int>(1,2)), maxIter(1000), wseed(42){}
   unsigned int nLayers;
   std::vector<unsigned int> hNodes;
-  std::vector<ActID_Set> ActIDSets;
+  std::vector<struct ActID_Set> ActIDSets;
   unsigned int maxIter;
   unsigned int wseed; // weights seed
 };

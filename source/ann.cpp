@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// Special Utility
 ///////////////////////////////////////////////////////////////////////////////
-void print(Ann ann){
+void print(struct Ann ann){
   std::cout << "Number of Features: " << ann.nFeatures << std::endl;
   std::cout << "Number of Classes: " << ann.nClasses << std::endl;
   std::cout << "Number of Layers: " << ann.nLayers << std::endl;
@@ -51,7 +51,7 @@ void initWeights(
   }
   return;
 }
-void initWeights(Ann &ann){
+void initWeights(struct Ann &ann){
   // Unpack
   std::vector<unsigned int> nNodes = ann.nNodes;
   // Getting weights
@@ -136,7 +136,7 @@ Ann initANN(
   return ann;
 }
 
-Ann initANN(ANN_Ambit ann_, Data train){
+Ann initANN(struct ANN_Ambit ann_, struct Data train){
   unsigned int nFeatures = train.nFeatures;
   unsigned int nClasses = train.nClasses;
   unsigned int nLayers = ann_.nLayers;
@@ -177,7 +177,7 @@ Ann initANN(ANN_Ambit ann_, Data train){
   return ann;
 }
 
-void initDataSets(Data train, Data test, Read_Ambit read_){};
+void initDataSets(struct Data train, struct Data test, struct Read_Ambit read_){};
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Setters
@@ -209,7 +209,7 @@ void setActID(
 }
 
 void setActID(
-  Ann &ann,
+  struct Ann &ann,
   unsigned int ID,
   unsigned int layerNStrt,
   unsigned int layerNEnd /*UINT_MAX*/,

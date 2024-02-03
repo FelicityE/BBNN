@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// Special Utility
 ///////////////////////////////////////////////////////////////////////////////
-void print(Ann ann);
+void print(struct Ann ann);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Initializers
@@ -14,7 +14,7 @@ void initWeights(
   std::vector<std::vector<DTYPE>> &weights, 
   std::vector<unsigned int> nNodes
 );
-void initWeights(Ann &ann);
+void initWeights(struct Ann &ann);
 Ann initANN(
   unsigned int nFeatures, 
   unsigned int nClasses, 
@@ -26,9 +26,9 @@ Ann initANN(
 	unsigned int nLayers,
 	std::vector<unsigned int> nNodes
 );
-Ann initANN(ANN_Ambit ann_, Data train);
+Ann initANN(struct ANN_Ambit ann_, struct Data train);
 
-void initDataSets(Data train, Data test, Read_Ambit read_);
+void initDataSets(struct Data train, struct Data test, struct Read_Ambit read_);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ void setActID(
 
 // setActID(..., start<inclusive>, end<exclusive>, ...)
 void setActID(
-  Ann &ann,
+  struct Ann &ann,
   unsigned int ID,
   unsigned int layerNStrt = 0,
   unsigned int layerNEnd = UINT_MAX,

@@ -56,9 +56,9 @@ void rm(std::vector<std::vector<DTYPE>> &v, unsigned int p = 0);
 /// Read Functions
 ///////////////////////////////////////////////////////////////////////////////
 int getSetup(
-  Adam &adam,
-  ANN_Ambit &ann_ambit,
-  Read_Ambit &read,
+  struct Adam &adam,
+  struct ANN_Ambit &ann_ambit,
+  struct Read_Ambit &read,
   int numInputs, 
   char * inputs[]
 );
