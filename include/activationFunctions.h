@@ -7,30 +7,30 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Activation Functions
 ///////////////////////////////////////////////////////////////////////////////
-// DTYPE elu(DTYPE x);
-// DTYPE delu(DTYPE x);
+// double elu(double x);
+// double delu(double x);
 
-// std::vector<DTYPE> elu(std::vector<DTYPE> layer, int stop, int meta = 0);
-// std::vector<DTYPE> delu(std::vector<DTYPE> layer, int stop, int meta = 0);
+// std::vector<double> elu(std::vector<double> layer, int stop, int meta = 0);
+// std::vector<double> delu(std::vector<double> layer, int stop, int meta = 0);
 
-// DTYPE sigmoid(DTYPE x);
-// DTYPE dsigmoid(DTYPE x);
+// double sigmoid(double x);
+// double dsigmoid(double x);
 
-// std::vector<DTYPE> sigmoid(std::vector<DTYPE> layer, int stop, int meta = 0);
-// std::vector<DTYPE> dsigmoid(std::vector<DTYPE> layer, int stop, int meta = 0);
+// std::vector<double> sigmoid(std::vector<double> layer, int stop, int meta = 0);
+// std::vector<double> dsigmoid(std::vector<double> layer, int stop, int meta = 0);
 
-DTYPE relu(DTYPE x);
-DTYPE drelu(DTYPE x);
+double relu(double x);
+double drelu(double x);
 
-std::vector<DTYPE> relu(std::vector<DTYPE> layer, int stop, int meta = 0);
-std::vector<DTYPE> drelu(std::vector<DTYPE> layer, int stop, int meta = 0);
+std::vector<double> relu(std::vector<double> layer, int stop, int meta = 0);
+std::vector<double> drelu(std::vector<double> layer, int stop, int meta = 0);
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Layer Functions
 ///////////////////////////////////////////////////////////////////////////////
-std::vector<DTYPE> softmax(std::vector<DTYPE> layer, int stop, int meta = 0);
+std::vector<double> softmax(std::vector<double> layer, int stop, int meta = 0);
 
-std::vector<DTYPE> dsoftmax(std::vector<DTYPE> layer, int stop, int obs = 0);
+std::vector<double> dsoftmax(std::vector<double> layer, int stop, int obs = 0);
 
-std::vector<DTYPE> argmax(std::vector<DTYPE> layer, int stop, int meta = 0);
+std::vector<double> argmax(std::vector<double> layer, int stop, int meta = 0);

@@ -24,3 +24,5 @@ build/errorFunctions.o: source/errorFunctions.cpp
 
 clean:
 	rm build/main build/*.o 
+
+# main inlcudes ann.h includes utility.h includes structures.h includes pramas.h
