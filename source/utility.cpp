@@ -346,7 +346,8 @@ int getSetup(
           i++;
           cnt++;
         }
-        annbit.setActID_inputs.push_back(temp);
+        struct ActID_Set tempStruct(temp);
+        annbit.ActIDSets.push_back(tempStruct);
       }
       
       else{

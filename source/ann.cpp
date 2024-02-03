@@ -136,19 +136,48 @@ Ann initANN(
   return ann;
 }
 
-// Ann initANN(
-//   unsigned int nFeatures,
-//   unsigned int nClasses,
-//   std::vector<unsigned int> hNodes,
-//   std::vector<std::vector<unsigned int>> setActs,
-//   unsigned int wseed
-// ){
+Ann initANN(ANN_Ambit ann_, Data train){
+  unsigned int nFeatures = train.nFeatures;
+  unsigned int nClasses = train.nClasses;
+  unsigned int nLayers = ann_.nLayers;
+  
+  std::vector<unsigned int> nNodes;
+  nNodes.push_back(nFeatures);
+  for(unsigned int i = 0; i < ann_.hNodes.size(); i++){
+    nNodes.push_back(ann_.hNodes[i]);
+  }
+  nNodes.push_back(nClasses);
 
-// }
+  if(nNodes.size() != nLayers){
+    std::cout <<
+      "ERROR - initANN(ANN_Ambit, Data): nNodes("<< nNodes.size()
+      << ").size does not match the number of layers("<< nLayers 
+      << ")." 
+    << std::endl;
+  }
 
-// Data initDataSets(Data &train, Data &test, SetUp set){
+  srand(ann_.wseed);
+  struct Ann ann = initANN(
+    nFeatures,
+    nClasses,
+    nLayers,
+    nNodes
+  );
 
-// }
+  for(unsigned int i = 0; i < ann_.ActIDSets.size(); i++){
+    setActID(
+      ann,
+      ann_.ActIDSets[i].ID,
+      ann_.ActIDSets[i].layerStrt,
+      ann_.ActIDSets[i].layerEnd,
+      ann_.ActIDSets[i].nodeStrt,
+      ann_.ActIDSets[i].nodeEnd
+    );
+  }
+  return ann;
+}
+
+void initDataSets(Data train, Data test, Read_Ambit read_){};
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Setters

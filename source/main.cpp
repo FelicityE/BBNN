@@ -13,18 +13,10 @@ int main(int numInputs, char * inputs[]){
   // Get trainging and testing data
   struct Data train;
   struct Data test;
-  // initDataSets(train, test, setup);
+  initDataSets(train, test, read_);
 
   // Build ANN
-  // struct Ann ann = initANN(
-  //   train.nFeatures,
-  //   train.nClasses,
-  //   setup.hNodes,
-  //   setup.setActID_inputs,
-  //   setup.wseed
-  // );
-
-  // delete(setup);
+  struct Ann ann = initANN(ann_, train);
 
   
   return 0;

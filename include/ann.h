@@ -26,9 +26,9 @@ Ann initANN(
 	unsigned int nLayers,
 	std::vector<unsigned int> nNodes
 );
-// Ann initANN(SetUp set);
+Ann initANN(ANN_Ambit ann_, Data train);
 
-// Data initDataSets(Data &train, Data &test, SetUp set);
+void initDataSets(Data train, Data test, Read_Ambit read_);
 
 
 ///////////////////////////////////////////////////////////////////////////////
