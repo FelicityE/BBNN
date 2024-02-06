@@ -18,13 +18,17 @@ int main(int numInputs, char * inputs[]){
   struct Data train; // training set
   struct Data test; // test set
   getDataSets(train, test, data);
-  std::cout << "Training Set" << std::endl;
-  print(train);
-  std::cout << "Testing Set" << std::endl;
-  print(test);
+  BUG(
+    std::cout << "Training Set" << std::endl;
+    print(train);
+    std::cout << "Testing Set" << std::endl;
+    print(test);
+  )
+  
 
   // // Build ANN
-  // struct Ann ann = initANN(ann_, train);
+  struct Ann ann = initANN(ann_, train);
+  print(ann);
 
   // // Train
   // trainNN(train, ann);

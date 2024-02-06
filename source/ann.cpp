@@ -191,8 +191,10 @@ void getDataSets(
   srand(sseed);
   unsigned int nSamp_Train = (ratio / 100)*nSamp;
   std::vector<unsigned int> trainSet = rng_unq(nSamp_Train, 0, nSamp);
-  std::cout << "Training Set: " << std::endl;
-  print(trainSet);
+  BUG(
+    std::cout << "Training Set: " << std::endl;
+    print(trainSet);
+  )
 
   // Sort Features and Observations
   std::vector<DTYPE> train_feat;
