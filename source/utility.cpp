@@ -15,14 +15,23 @@ void rmSpace(std::string &str){
   return;
 }
 std::string str(char * value){std::string s = value; return s;}
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Print
 ///////////////////////////////////////////////////////////////////////////////
+void print(std::vector<unsigned int> v){
+  for(unsigned int i = 0; i < v.size(); i ++){
+    std::cout << v[i] << " ";
+  }
+  std::cout << std::endl;
+}
 void print(struct Data data){
   std::cout 
     << "Number of Features: " << data.nFeat << "; "
     << "Number of Classes: " << data.nClasses << "; "
     << "Number of Samples: " << data.nSamp << "; "
+    << "Sample Seed: " << data.sseed << "; "
+    << "Percent of Samples: " << data.ratio << "; "
   << std::endl;
   std:: cout << "Data: " << std::flush;
   unsigned int cnt = 0;
@@ -72,6 +81,22 @@ bool match(char * A, std::string B){
   return true;
 }
 
+bool inVec(unsigned int v, std::vector<unsigned int> V){
+  for(unsigned int i = 0; i < V.size(); i++){
+    if(V[i] == v){return i;}
+  }
+  return 0;
+}
+
+unsigned int dupe(std::vector<unsigned int> v){
+  for(unsigned int i = 0; i < v.size(); i++){
+    for(unsigned int j = i+1; j < v.size(); j++){
+      if(v[i] == v[j]){return j;}
+    }
+  }
+  return 0;
+}
+
 unsigned int max(std::vector<unsigned int> v){
   unsigned int max_ = 0;
   for(unsigned int i = 0; i < v.size(); i++){
@@ -108,13 +133,35 @@ DTYPE rng(DTYPE ll /*0*/, DTYPE ul /*1*/){
 std::vector<DTYPE> rng(unsigned int size, DTYPE ll /*0*/, DTYPE ul /*1*/){
   std::vector<DTYPE> v;
   for(unsigned int i = 0; i < size; i++){
-    DTYPE rn = (DTYPE)rand()/RAND_MAX;
-    if(ll != 0 || ul != 1){rn =  (ul - ll) * rn + ll;}
+    DTYPE rn = rng(ll, ul);
     v.push_back(rn);
   }
   return v;
 }
-
+unsigned int rng(unsigned int ll, unsigned int ul){
+  unsigned int rn = rand() % ul;
+  if(ll != 0){
+    while(rn < ll){rn = rand()% ul;}
+  }
+  return rn;
+}
+std::vector<unsigned int> rng(unsigned int size, unsigned int ll, unsigned int ul){
+  std::vector<unsigned int> v;
+  for(unsigned int i = 0; i < size; i++){
+    unsigned int rn = rng(ll, ul);
+    v.push_back(rn);
+  }
+  return v;
+}
+std::vector<unsigned int> rng_unq(unsigned int size, unsigned int ll, unsigned int ul){
+  std::vector<unsigned int> v;
+  for(unsigned int i = 0; i < size; i++){
+    unsigned int rn = rng(ll, ul);
+    while(std::find(v.begin(), v.end(), rn) != v.end()){rn = rng(ll, ul);}
+    v.push_back(rn);
+  }
+  return v;
+}
 /// Size Functions
 unsigned int size(std::vector<std::vector<DTYPE>> v){
   unsigned int temp = 0;
@@ -327,10 +374,10 @@ int getSetup(
         read.skipCol = std::stoi(inputs[i+1]);
         i++;
       }else if(match(inputs[i], "ratio")){
-        read.ratio = std::stod(inputs[i+1]);
+        read.ratio[0] = std::stod(inputs[i+1]);
         i++;
       }else if(match(inputs[i], "sseed")){
-        read.sseed = std::stoi(inputs[i+1]);
+        read.sseed[0] = std::stoi(inputs[i+1]);
         i++;
       }
 
@@ -483,6 +530,8 @@ int getData(struct Data &data, struct Read_Ambit read){
   data.nSamp = nSamples;
   data.feat = feat;
   data.obs = obs;
+  data.sseed = read.sseed[0];
+  data.ratio = read.ratio[0];
 
   return 0;
 }

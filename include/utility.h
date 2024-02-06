@@ -11,6 +11,7 @@ std::string str(char * value);
 ///////////////////////////////////////////////////////////////////////////////
 /// Print
 ///////////////////////////////////////////////////////////////////////////////
+void print(std::vector<unsigned int> v);
 void print(struct Data data);
 int errPrint(std::string error_message);
 
@@ -21,6 +22,9 @@ bool hasZero(std::vector<unsigned int> v);
 
 bool match(std::vector<double> A, std::vector<double> B);
 bool match(char * A, std::string B);
+
+bool inVec(unsigned int v, std::vector<unsigned int> V);
+unsigned int dupe(std::vector<unsigned int> v);
 
 unsigned int max(std::vector<unsigned int> v);
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,7 +37,9 @@ unsigned int sum(std::vector<unsigned int> v);
 /// Rand Functions
 DTYPE rng(DTYPE ll = 0, DTYPE ul = 1);
 std::vector<DTYPE> rng(unsigned int size, DTYPE ll = 0, DTYPE ul = 1);
-
+unsigned int rng(unsigned int ll, unsigned int ul);
+std::vector<unsigned int> rng(unsigned int size, unsigned int ll, unsigned int ul);
+std::vector<unsigned int> rng_unq(unsigned int size, unsigned int ll, unsigned int ul);
 /// Size Functions
 unsigned int size(std::vector<std::vector<DTYPE>> v);
 void setSize(std::vector<unsigned int> &v, unsigned int size, unsigned int p = 0);
@@ -76,15 +82,5 @@ int getSetup(
 );
 
 /// Files
-
 int readFile(std::vector<std::vector<std::string>> &content, std::string filename);
-// void getData(
-//   std::string filename, 
-//   std::vector<std::vector<double>> &data,
-//   std::vector<std::vector<double>> &observations,
-//   unsigned int IDpos,
-//   unsigned int skipRow,
-//   unsigned int skipColumn,
-//   unsigned int skipColPattern
-// );
 int getData(struct Data &data, struct Read_Ambit read);

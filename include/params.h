@@ -4,10 +4,12 @@
 #include <vector> // For std::vector
 #include <math.h> // For exp(), log(), sqrt(), ect.
 #include <climits> // For UINT_MAX
+#include <algorithm> // For std::find
 
 #include <fstream> // For std::fstream
 #include <string> // For std::strings
 #include <sstream> // For std::stringstream
+
 
 #define ERRPRINT true
 #define TRAINPRINT false

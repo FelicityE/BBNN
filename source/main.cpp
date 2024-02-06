@@ -12,14 +12,25 @@ int main(int numInputs, char * inputs[]){
   // Get trainging and testing data
   struct Data data; // Full dataset
   if(getData(data, read_)){return 1;}
-  print(data);
+  BUG(print(data);)
 
-  // struct Data train; // training set
-  // struct Data test; // test set
-  // getDataSets(train, test, data, read_.sseed);
+  // Future: Separate training from testing and use batches for different ANN's
+  struct Data train; // training set
+  struct Data test; // test set
+  getDataSets(train, test, data);
+  std::cout << "Training Set" << std::endl;
+  print(train);
+  std::cout << "Testing Set" << std::endl;
+  print(test);
 
   // // Build ANN
   // struct Ann ann = initANN(ann_, train);
+
+  // // Train
+  // trainNN(train, ann);
+  // // Test
+  // testNN(test, ann);
+
 
   
   return 0;

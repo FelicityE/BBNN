@@ -179,10 +179,67 @@ Ann initANN(struct ANN_Ambit ann_, struct Data train){
 void getDataSets(
   struct Data &train, 
   struct Data &test, 
-  struct Data data, 
-  unsigned int sseed
+  struct Data data
 ){
-  srand(sseed);  
+  // Unpack
+  unsigned int nFeat = data.nFeat;
+  double ratio = data.ratio;
+  unsigned int nSamp = data.nSamp;
+  unsigned int sseed = data.sseed;
+
+  // Get Training Set
+  srand(sseed);
+  unsigned int nSamp_Train = (ratio / 100)*nSamp;
+  std::vector<unsigned int> trainSet = rng_unq(nSamp_Train, 0, nSamp);
+  std::cout << "Training Set: " << std::endl;
+  print(trainSet);
+
+  // Sort Features and Observations
+  std::vector<DTYPE> train_feat;
+  std::vector<unsigned int> train_obs;
+
+  std::vector<DTYPE> test_feat;
+  std::vector<unsigned int> test_obs;
+  
+  for(unsigned int i = 0; i < nSamp; i++){
+    // if(inVec(i,trainSet)){
+    if(std::find(trainSet.begin(), trainSet.end(), i) != trainSet.end()){
+      for(unsigned int j = nFeat*i; j < nFeat*i+nFeat; j++){
+        train_feat.push_back(data.feat[j]);
+      }
+      train_obs.push_back(data.obs[i]);
+      if(train_feat.size()/nFeat != train_obs.size()){
+        errPrint("ERROR - getDataSet: Features do not match observations.");
+        std::cout << train_feat.size()/nFeat << ":" << train_obs.size() << std::endl;
+      }
+    }else{
+      for(unsigned int j = nFeat*i; j < nFeat*i+nFeat; j++){
+        test_feat.push_back(data.feat[j]);
+      }
+      test_obs.push_back(data.obs[i]);
+      if(test_feat.size()/nFeat != test_obs.size()){
+        errPrint("ERROR - getDataSet: Features do not match observations.");
+        std::cout << test_feat.size()/nFeat << ":" << test_obs.size() << std::endl;
+      }
+    }
+  }
+
+  // Pack
+  train.nFeat = nFeat;
+  train.nClasses = data.nClasses;
+  train.nSamp = nSamp_Train;
+  train.sseed = sseed;
+  train.ratio = ratio;
+  train.feat = train_feat;
+  train.obs = train_obs;
+
+  test.nFeat = nFeat;
+  test.nClasses = data.nClasses;
+  test.nSamp = nSamp - nSamp_Train;
+  test.sseed = sseed;
+  test.ratio = 100 - ratio;
+  test.feat = test_feat;
+  test.obs = test_obs;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

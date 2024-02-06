@@ -31,8 +31,7 @@ Ann initANN(struct ANN_Ambit ann_, struct Data train);
 void getDataSets(
   struct Data &train, 
   struct Data &test, 
-  struct Data data,
-  unsigned int sseed
+  struct Data data
 );
 
 
