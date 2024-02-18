@@ -4,6 +4,7 @@
 #include <vector> // For std::vector
 #include <math.h> // For exp(), log(), sqrt(), ect.
 #include <climits> // For UINT_MAX
+#include <float.h> // For DBL_MAX
 #include <algorithm> // For std::find
 
 #include <fstream> // For std::fstream
@@ -14,16 +15,24 @@
 #define ERRPRINT true
 #define TRAINPRINT false
 #define DEBUG false
+#define COLOR false
 
 #define DTYPE double
 
-typedef std::vector<DTYPE> (*lossF)(std::vector<DTYPE> /*last Layer*/, int /*observed class*/);
-typedef std::vector<DTYPE> (*actF)(std::vector<DTYPE> /*Layer*/, std::vector<DTYPE>);
+typedef std::vector<DTYPE> (*lossF)(std::vector<DTYPE> /*last Layer*/, unsigned int /*observed class*/);
+typedef DTYPE (*actT1)(DTYPE /*value*/);
+typedef std::vector<DTYPE> (*actT2)(std::vector<DTYPE> /*Layer*/, unsigned int /*obs or meta*/);
 
 #if(DEBUG)
   #define BUG(x) x
 #else
   #define BUG(x)
+#endif
+
+#if(COLOR)
+  #define RYB(x) x
+#else
+  #define RYB(x)
 #endif
 
 namespace RGB{

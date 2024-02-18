@@ -4,9 +4,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Lists 
 ///////////////////////////////////////////////////////////////////////////////
-const std::vector<actF> ACTF{sigmoid, relu, softmax, argmax};
-const std::vector<actF> DACTF{dsigmoid, drelu, dsoftmax, dargmax};
-const int typeChange = 2;
+const std::vector<actT1> ACT1{sigmoid, relu};
+const std::vector<actT1> DACT1{dsigmoid, drelu};
+const std::vector<actT2> ACT2{sigmoid, relu, softmax, argmax};
+const std::vector<actT2> DACT2{dsigmoid, drelu, dsoftmax, dargmax};
+const int TYPECHANGE = ACT1.size();
 
 const std::vector<lossF> LOSSF{crossentropy};
 const std::vector<lossF> DLOSSF{dcrossentropy};
@@ -19,7 +21,7 @@ enum ACTID{SIGMOID, RELU, SOFTMAX, ARGMAX};
 ///////////////////////////////////////////////////////////////////////////////
 struct ActID_Set{
   ActID_Set():
-    ID(1),
+    ID(RELU),
     layerStrt(0),
     layerEnd(UINT_MAX),
     nodeStrt(0),
@@ -52,17 +54,22 @@ struct Adam{
 };
 
 struct Ann{
-  Ann():argmax(true){}
-  unsigned int nLayers;
-  std::vector<unsigned int> nNodes;
-  unsigned int tNodes;
-  std::vector<unsigned int> actIDs;
-  unsigned int lossID;
-  std::vector<std::vector<DTYPE>> weights;
-  std::vector<DTYPE> bias;
-  bool argmax; // Set the last layer for testing to argmax
+  Ann():lLAID(ARGMAX){}
+  void setLLFT(unsigned int ID){this->lLAID = ARGMAX; return;}
 
-  void setArgmax(bool set){this->argmax = set; return;}
+  unsigned int nLayers; // Number of layers
+
+  std::vector<unsigned int> nNodes; // Number of Nodes
+  std::vector<unsigned int> sNodes; // Starting Node number
+  unsigned int tNodes; // Total Number of Nodes
+  
+  std::vector<unsigned int> actIDs; // Activation Function IDs
+  unsigned int lossID; // Loss Function ID
+  unsigned int lLAID; // Set the ID of the last layer for testing to argmax(3)
+
+  std::vector<std::vector<DTYPE>> weights; // The Weight parameters
+  std::vector<DTYPE> bias; // This bias parameters
+  
 };
 
 struct ANN_Ambit{
@@ -75,15 +82,13 @@ struct ANN_Ambit{
 };
 
 struct Data{
-  Data(){
-    this->sseed = 0;
-    this->ratio = 70;
-  }
+  Data():sseed(0), ratio(70), acc_err(0.01){}
   unsigned int nFeat; // numbder of feat/ size of first layer
   unsigned int nClasses; // number of classes / size of last layer
   unsigned int nSamp; // number samples
   unsigned int sseed;
   double ratio;
+  double acc_err; // acceptable error for regression (replace with algorithm?)
   std::vector<DTYPE> feat;
   std::vector<unsigned int> obs;
 };
@@ -104,4 +109,14 @@ struct Read_Ambit{
   unsigned int skipCol; // Number of columns to skip
   std::vector<unsigned int> sseed; // sample seed for selection
   std::vector<double> ratio; // percent training to testing (default 70:30)
+};
+
+struct Results{
+  Results():uint_ambit(0), double_ambit(0){}
+  
+  unsigned int uint_ambit; // number of correct predictions
+  DTYPE  double_ambit; // error
+  std::vector<bool> vector_bool; // bool was the sample prediction correct (or within x error for nonclass)
+  std::vector<unsigned int> vector_unit; // sample prediction
+  std::vector<DTYPE> vector_dtype; // sample prediction
 };

@@ -19,12 +19,6 @@ std::string str(char * value){std::string s = value; return s;}
 ///////////////////////////////////////////////////////////////////////////////
 /// Print
 ///////////////////////////////////////////////////////////////////////////////
-void print(std::vector<unsigned int> v){
-  for(unsigned int i = 0; i < v.size(); i ++){
-    std::cout << v[i] << " ";
-  }
-  std::cout << std::endl;
-}
 void print(struct Data data){
   std::cout 
     << "Number of Features: " << data.nFeat << "; "
@@ -44,11 +38,81 @@ void print(struct Data data){
   }
   std::cout << std::endl;
 }
+void print(struct Results re){
+  std::cout << "Number of Correct Predictions (for Classification): " << re.uint_ambit << std::endl;
+  std::cout << "Error (Summed Loss Function): " << re.double_ambit << std::endl;
+  std::cout << "Sample Prediction Correct (bool): ";
+  for(unsigned int i = 0; i < re.vector_bool.size(); i++){
+    std::cout << re.vector_bool[i] << ", ";
+  }
+  std::cout << std::endl;
+  std::cout << "Sample Prediction (uint): ";
+  for(unsigned int i = 0; i < re.vector_unit.size(); i++){
+    std::cout << re.vector_unit[i] << ", ";
+  }
+  std::cout << std::endl;
+  std::cout << "Sample Prediction (dtype): ";
+  for(unsigned int i = 0; i < re.vector_dtype.size(); i++){
+    std::cout << re.vector_dtype[i] << ", ";
+  }
+  std::cout << std::endl;
+}
+
+void print(unsigned int x, std::string name /*na*/, bool endl /*true*/){
+  if(name != "na"){
+    std::cout << name << ": ";
+  }
+  std::cout << x << std::flush;
+  if(endl){
+    std::cout << std::endl;
+  }else{
+    std::cout << ", ";
+  }
+}
+void print(DTYPE x, std::string name /*na*/, bool endl /*true*/){
+  if(name != "na"){
+    std::cout << name << ": ";
+  }
+  std::cout << x << std::flush;
+  if(endl){
+    std::cout << std::endl;
+  }else{
+    std::cout << ", ";
+  }
+}
+
+void print(std::vector<unsigned int> v, std::string name /*na*/){
+  if(name != "na"){
+    std::cout << name << ": " << std::flush;
+  }
+  for(unsigned int i = 0; i < v.size()-1; i++){
+    std::cout << v[i] << ", " << std::flush;
+  }
+  std::cout << v[v.size()-1] << std::endl << std::flush;
+}
+void print(std::vector<DTYPE> v, std::string name /*na*/){
+  if(name != "na"){
+    std::cout << name << ": " << std::flush;
+  }
+  for(unsigned int i = 0; i < v.size()-1; i++){
+    std::cout << v[i] << ", " << std::flush;
+  }
+  std::cout << v[v.size()-1] << std::endl << std::flush;
+}
 
 int errPrint(std::string error_message){
-  std::cout << RGB::r << error_message << RGB::R << std::endl;
+  RYB(std::cout << RGB::r;)
+  std::cout << error_message << std::endl << std::flush;
+  RYB(std::cout << RGB::R << std::flush;)
   return 1;
 }
+int errPrint(std::string error_message, unsigned int a, unsigned int b){
+  RYB(std::cout << RGB::r;)
+  std::cout << error_message << "\t" << a << " : " << b << std::endl << std::flush;
+  RYB(std::cout << RGB::R << std::flush;)
+  return 1;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Find Functions
 ///////////////////////////////////////////////////////////////////////////////
@@ -61,8 +125,7 @@ bool hasZero(std::vector<unsigned int> v){
 
 bool match(std::vector<double> A, std::vector<double> B){
   if(A.size() != B.size()){
-    errPrint("ERROR - match: A and B are not the same size.");
-    std::cout << A.size() << ":" << B.size() << std::endl;
+    errPrint("ERROR - match: A and B are not the same size.", A.size(), B.size());
     exit(1);
   }
 
@@ -105,9 +168,189 @@ unsigned int max(std::vector<unsigned int> v){
   return max_;
 }
 
+DTYPE max(std::vector<DTYPE> v, bool returnIdx /*false*/){
+  DTYPE max_ = 0;
+  unsigned int idx = 0; 
+  for(unsigned int i = 0; i < v.size(); i++){
+    if(v[i] > max_){max_ = v[i]; idx=i;}
+  }
+  if(returnIdx){
+    if(idx > DBL_MAX){
+      errPrint("ERROR max(): return index, index greater than DBL_MAX.");
+      std::cout << idx << std::endl;
+    }
+    return idx;
+  }
+  return max_;
+}
+
+bool same(std::vector<unsigned int> v){
+  for(unsigned int i = 0; i < v.size()-1; i++){
+    if(v[i] != v[i+1]){return false;}
+  }
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Vector Functions
 ///////////////////////////////////////////////////////////////////////////////
+/// Multiply
+// Dot product of Matrix time vector of 1D vectors
+// std::vector<DTYPE> dot1D(
+//   std::vector<DTYPE> A, 
+//   std::vector<DTYPE> B, 
+//   unsigned int Ar, 
+//   unsigned int Ac
+// ){
+//   if(Ar*Ac != A.size()){
+//     errPrint("ERROR dot1D: vector A.size() != A.rows*A.cols.");
+//     std::cout << A.size() << ":" << Ar << "*" << Ac << std::endl;
+//     exit(1);
+//   }else if(B.size()%Ac != 0){
+//     errPrint("ERROR dot1D: vector B.size()/A.cols is not even.", B.size(), Ac);
+//     exit(1);
+//   }
+//   unsigned int Br = Ac, Bc = B.size()/Br;
+//   unsigned int Cr = Ar, Cc = Bc;
+//   std::vector<DTYPE> C(Cr*Cc, 0);
+//   for(unsigned int i = 0; i < Cr; i++){
+//     for(unsigned int j = 0; j < Cc; j++){
+//       for(unsigned int k = 0; k < Br; k++){
+//         C[i*Cc+j] += A[i*Ac+k] * B[k*Bc+j];
+//       }
+//     }
+//   }
+//   return C;
+// }
+std::vector<DTYPE> dot(
+  std::vector<DTYPE> A,
+  std::vector<DTYPE> B,
+  unsigned int stride
+){
+  // Note: B is assumed transposed
+  if(A.size()%stride != 0){
+    errPrint("ERROR dot: vector A.size()\% stride != 0.", A.size(), stride);
+    return A;
+  }else if(B.size()%stride != 0){
+    errPrint("ERROR dot: vector B.size()\% stride != 0.", B.size(), stride);
+    return B;
+  }
+  unsigned int a_row = A.size()/stride;
+  unsigned int a_col = stride;
+  unsigned int b_row = stride;
+  unsigned int b_col = B.size()/stride;
+  unsigned int c_row = a_row;
+  unsigned int c_col = b_col;
+  unsigned int c_size = c_row*c_col;
+  std::vector<DTYPE> C(c_size, 0);
+  for(unsigned int i = 0; i < a_row; i++){
+    for(unsigned int j = 0; j < a_col; j++){
+      for(unsigned int k = 0; k < b_col; k++){
+        BUG(
+          std::cout 
+            << "C[" << i*c_col+k 
+            << "] = A[" << i*a_col+j 
+            << "] * B[" << k*b_row+j << "]" 
+          << std::endl;
+        )
+        C[i*c_col+k] += A[i*a_col+j] * B[k*b_row+j];
+      }
+    }
+  }
+  return C;
+}
+
+std::vector<DTYPE> dotT(
+  std::vector<DTYPE> A,
+  std::vector<DTYPE> B,
+  unsigned int a_col
+){
+  if(A.size() % a_col != 0){
+    errPrint("ERROR dotT: A.size\%a_col != 0.", A.size(), a_col);
+    return A;
+  }
+  std::vector<DTYPE> temp = transposeR(A, a_col);
+  return dot(temp, B, a_col);
+}
+
+std::vector<DTYPE> ewm(
+  std::vector<DTYPE> A,
+  std::vector<DTYPE> B
+){
+  if(A.size() != B.size()){
+    errPrint("ERROR ewm: A.size() != B.size().", A.size(), B.size());
+    return A;
+  }
+  std::vector<DTYPE> C(A.size(), 0);
+  for(unsigned int i = 0; i < A.size(); i++){
+    C[i] = A[i]*B[i];
+  }
+  return C;
+}
+
+std::vector<DTYPE> tensor(
+  std::vector<DTYPE> A,
+  std::vector<DTYPE> B
+){
+  std::vector<DTYPE> C(A.size()*B.size(), 0);
+  for(unsigned int i = 0; i < A.size(); i++){
+    for(unsigned int j = 0; j < B.size(); j++){
+      C[i*B.size()+j] = A[i]*B[j];
+    }
+  }
+  return C;
+}
+
+// Vector manipluation
+void transpose(std::vector<DTYPE> &v, unsigned int v_col){
+  if(v.size()%v_col != 0){
+    errPrint("ERROR transpose: v.size\%stride != 0.", v.size(), v_col);
+    return;
+  }
+  unsigned int v_row = v.size()/v_col;
+  std::vector<DTYPE> temp(v.size(), 0);
+  for(unsigned int i = 0; i < v_row; i++){
+    for(unsigned int j = 0; j < v_col; j++){
+      temp[j*v_row+i] = v[i*v_col+j];
+    }
+  }
+  v = temp;
+  return;
+}
+
+std::vector<DTYPE> transposeR(std::vector<DTYPE> &v, unsigned int v_col){
+  if(v.size()%v_col != 0){
+    errPrint("ERROR transpose: v.size\%stride != 0.", v.size(), v_col);
+    return v;
+  }
+  unsigned int v_row = v.size()/v_col;
+  std::vector<DTYPE> temp(v.size(), 0);
+  for(unsigned int i = 0; i < v_row; i++){
+    for(unsigned int j = 0; j < v_col; j++){
+      temp[j*v_row+i] = v[i*v_col+j];
+    }
+  }
+  return temp;
+}
+
+
+
+/// Subvectors
+std::vector<unsigned int> subVector(std::vector<unsigned int> v, unsigned int strt, unsigned int size){
+  std::vector<unsigned int> temp(size, 0);
+  for(unsigned int i = 0; i < size; i++){
+    temp[i] = v[strt+i];
+  }
+  return temp;
+}
+std::vector<DTYPE> subVector(std::vector<DTYPE> v, unsigned int strt, unsigned int size){
+  std::vector<DTYPE> temp(size, 0);
+  for(unsigned int i = 0; i < size; i++){
+    temp[i] = v[strt+i];
+  }
+  return temp;
+}
+
 /// Sum Functions
 DTYPE sum(std::vector<DTYPE> v){
   DTYPE temp = 0;
@@ -122,6 +365,57 @@ unsigned int sum(std::vector<unsigned int> v){
     temp += v[i];
   }
   return temp;
+}
+
+/// Add
+void add(std::vector<DTYPE> &A, std::vector<DTYPE> B){
+  std::vector<DTYPE> C(A.size(), 0);
+  if(A.size() != B.size()){
+    errPrint("ERROR add: A.size() != B.size().", A.size(), B.size());
+    return;
+  }
+  for(unsigned int i = 0; i < A.size(); i++){
+    A[i] += B[i];
+  }
+  return;
+}
+
+std::vector<DTYPE> addR(std::vector<DTYPE> A, std::vector<DTYPE> B){
+  std::vector<DTYPE> C(A.size(), 0);
+  if(A.size() != B.size()){
+    errPrint("ERROR add: A.size() != B.size().", A.size(), B.size());
+    return A;
+  }
+  for(unsigned int i = 0; i < A.size(); i++){
+    C[i] = A[i] + B[i];
+  }
+  return C;
+}
+
+
+void add(
+  std::vector<DTYPE> &A,
+  std::vector<DTYPE> B,
+  unsigned int idx,
+  unsigned int size
+){
+  if(A.size() < idx+size){
+    errPrint("ERROR add: A.size() < idx+size.", A.size(), idx+size);
+    exit(1); // Exit not return otherwise segfault.
+  } 
+  for(unsigned int i = 0; i < size; i++){
+    A[i+idx] += B[i];
+  }
+  return;
+}
+
+// Zero Functions
+std::vector<std::vector<DTYPE>> zero(std::vector<unsigned int> v){
+  std::vector<std::vector<DTYPE>> z;
+  for(unsigned int i = 0; i < v.size(); i++){
+    z.push_back(std::vector<DTYPE>(v[i], 0));
+  }
+  return z;
 }
 
 /// Rand Functions
@@ -162,14 +456,23 @@ std::vector<unsigned int> rng_unq(unsigned int size, unsigned int ll, unsigned i
   }
   return v;
 }
+
 /// Size Functions
-unsigned int size(std::vector<std::vector<DTYPE>> v){
+unsigned int getSize(std::vector<std::vector<DTYPE>> v){
   unsigned int temp = 0;
   for(unsigned int i = 0; i < v.size(); i++){
     temp += v[i].size();
   }
   return temp;
 }
+std::vector<unsigned int> getSizeVec(std::vector<std::vector<DTYPE>> v){
+  std::vector<unsigned int> s;
+  for(unsigned int i = 0; i < v.size(); i++){
+    s.push_back(v[i].size());
+  }
+  return s;
+}
+
 void setSize(std::vector<unsigned int> &v, unsigned int size, unsigned int p /*0*/){
   if(size > v.size()){
     // Insert
@@ -282,7 +585,6 @@ void insert(std::vector<std::vector<DTYPE>> &v, unsigned int p /*0*/){
   }
   return;
 }
-
 void insertRand(
   std::vector<DTYPE> &v, 
   unsigned int p /*0*/, 
@@ -340,6 +642,56 @@ void rm(std::vector<std::vector<DTYPE>> &v, unsigned int p /*0*/){
   return;
 }
 
+/// Set Functions
+void set(
+  std::vector<DTYPE> &A,
+  std::vector<DTYPE> B,
+  unsigned int idx
+){
+  if(A.size() < idx+B.size()){
+    errPrint("ERROR set: A.size() < idx+B.size().");
+    std::cout << A.size() << ":" << idx * B.size() << std::endl;
+    return;
+  } 
+  for(unsigned int i = 0; i < B.size(); i++){
+    A[i+idx] = B[i];
+  }
+  return;
+}
+
+void set(
+  std::vector<DTYPE> &A,
+  std::vector<DTYPE> B,
+  unsigned int idx,
+  unsigned int size
+){
+  if(A.size() < idx+size){
+    errPrint("ERROR set: A.size() < idx+B.size().");
+    std::cout << A.size() << ":" << idx * size << std::endl;
+    return;
+  } 
+  for(unsigned int i = 0; i < size; i++){
+    A[i+idx] = B[i];
+  }
+  return;
+}
+
+void set(
+  std::vector<unsigned int> &v,
+  unsigned int x,
+  unsigned int idx,
+  unsigned int size
+){
+  if(v.size() < idx+size){
+    errPrint("ERROR set: A.size() < idx+B.size().");
+    std::cout << v.size() << ":" << idx * size << std::endl;
+    return;
+  } 
+  for(unsigned int i = 0; i < size; i++){
+    v[i+idx] = x;
+  }
+  return;
+}
 ///////////////////////////////////////////////////////////////////////////////
 /// Read Functions
 ///////////////////////////////////////////////////////////////////////////////
@@ -505,22 +857,22 @@ int getData(struct Data &data, struct Read_Ambit read){
     }
   }
   // Get number of classes 
-  nClasses = max(obs);
+  nClasses = max(obs)+1;
 
   // Check for errors
   if(nFeat != feat.size()/nSamples){
-
+    
     errPrint(
-      "ERROR - getData: Number of features does not equal size of feature set divided by number of samples. "
+      "ERROR - getData: Number of features does not equal size of feature set divided by number of samples. ",
+      nFeat, feat.size()/nSamples
     );
-    std::cout << nFeat << ":" << feat.size()/nSamples << std::endl;
     return 1;
   }
   if(nSamples != obs.size()){
     errPrint(
-      "ERROR - getData: Number of Samples does not match number of Observations."
+      "ERROR - getData: Number of Samples does not match number of Observations.",
+      nSamples, obs.size()
     );
-    std::cout << nSamples << ":" << obs.size() << std::endl;
     return 1;
   }
 

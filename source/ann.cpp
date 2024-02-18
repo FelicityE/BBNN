@@ -1,7 +1,7 @@
 #include "include/ann.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Special Utility
+/// ANN Utility
 ///////////////////////////////////////////////////////////////////////////////
 void print(struct Ann ann){
   std::cout << "Number of Features: " << ann.nNodes[0] << std::endl;
@@ -13,9 +13,14 @@ void print(struct Ann ann){
     std::cout << ann.nNodes[i] << ", ";
   }
   std::cout << std::endl;
+  std::cout << "Starting Position of Each Layer (Summed Nodes): ";
+  for(unsigned int i = 0; i < ann.sNodes.size(); i++){
+    std::cout << ann.sNodes[i] << ", ";
+  }
+  std::cout << std::endl;
   std::cout << "List of Activation IDs: ";
   unsigned int p = 0;
-  for(unsigned int i = 0; i < ann.nNodes.size(); i++){
+  for(unsigned int i = 1; i < ann.nNodes.size(); i++){
     std::cout << "L" << i << "("<< ann.nNodes[i] <<"): ";
     for(unsigned int j = 0; j < ann.nNodes[i]; j++){
       std::cout << ann.actIDs[p] << ", ";  
@@ -23,7 +28,8 @@ void print(struct Ann ann){
     }
   }
   std::cout << std::endl;
-  std::cout << "Weights("<< size(ann.weights) << "): ";
+  std::cout << "Last Layer Activation ID for Testing: " << ann.lLAID << std::endl;
+  std::cout << "Weights("<< getSize(ann.weights) << "): ";
   for(unsigned int i = 0; i < ann.weights.size(); i++){
     std::cout << "\n\tL" << i << "("<< ann.weights[i].size() <<") ";
     for(unsigned int j = 0; j < ann.weights[i].size(); j++){
@@ -37,6 +43,94 @@ void print(struct Ann ann){
   }
   std::cout << std::endl << std::endl;
 }
+
+void print(std::vector<std::vector<DTYPE>> W, std::vector<DTYPE> B){
+  std::cout << "Weights("<< getSize(W) << "): ";
+  for(unsigned int i = 0; i < W.size(); i++){
+    std::cout << "\n\tL" << i << "("<< W[i].size() <<") ";
+    for(unsigned int j = 0; j < W[i].size(); j++){
+      std::cout << W[i][j] << ", ";
+    }
+  }
+  std::cout << std::endl;
+  std::cout << "Bias("<< B.size() << "): ";
+  for(unsigned int i = 0; i < B.size(); i++){
+    std::cout << B[i] << ", ";
+  }
+  std::cout << std::endl << std::endl;
+}
+
+void applyAct(
+  std::vector<DTYPE> &layer, 
+  std::vector<unsigned int> aIDs,
+  unsigned int obs
+){
+  if(layer.size() != aIDs.size()){
+    errPrint("ERROR applyAct: layer.size() != aIDs.size().", layer.size(), aIDs.size());
+    return;
+  }
+  std::vector<DTYPE> temp = layer;
+  if(same(aIDs)){
+    layer = ACT2[aIDs[0]](temp, obs);
+  }else{
+    for(unsigned int i = 0; i < layer.size(); i++){
+      if(aIDs[i] < TYPECHANGE){
+        layer[i] = ACT1[aIDs[i]](temp[i]);
+      }else{
+        layer[i] = ACT2[aIDs[i]](temp,obs)[i];
+      }
+    }
+  }
+  return;
+} 
+
+void applyDAct(
+  std::vector<DTYPE> &layer, 
+  std::vector<unsigned int> aIDs,
+  unsigned int obs
+){
+  if(layer.size() != aIDs.size()){
+    errPrint("ERROR applyAct: layer.size() != aIDs.size().", layer.size(), aIDs.size());
+    return;
+  }
+  std::vector<DTYPE> temp = layer;
+  if(same(aIDs)){
+    layer = DACT2[aIDs[0]](temp, obs);
+  }else{
+    for(unsigned int i = 0; i < layer.size(); i++){
+      if(aIDs[i] < TYPECHANGE){
+        layer[i] = DACT1[aIDs[i]](temp[i]);
+      }else{
+        layer[i] = DACT2[aIDs[i]](temp,obs)[i];
+      }
+    }
+  }
+  return;
+} 
+
+std::vector<DTYPE> applyDActR(
+  std::vector<DTYPE> &layer, 
+  std::vector<unsigned int> aIDs,
+  unsigned int obs
+){
+  if(layer.size() != aIDs.size()){
+    errPrint("ERROR applyAct: layer.size() != aIDs.size().", layer.size(), aIDs.size());
+    return layer;
+  }
+  std::vector<DTYPE> temp(layer.size(),0);
+  if(same(aIDs)){
+    temp = DACT2[aIDs[0]](layer, obs);
+  }else{
+    for(unsigned int i = 0; i < layer.size(); i++){
+      if(aIDs[i] < TYPECHANGE){
+        temp[i] = DACT1[aIDs[i]](layer[i]);
+      }else{
+        temp[i] = DACT2[aIDs[i]](layer,obs)[i];
+      }
+    }
+  }
+  return temp;
+} 
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Initializers
@@ -70,6 +164,11 @@ Ann initANN(
   // Getting Default Number of Nodes Per Layer
   std::vector<unsigned int> nNodes(nLayers, nClasses);
   nNodes[0] = nFeat;
+  // Getting Layer Starting nodes
+  std::vector<unsigned int> sNodes(nLayers,0);
+  for(unsigned int i = 1; i < nLayers; i++){
+    sNodes[i] = sNodes[i-1]+nNodes[i-1];
+  }
   // Getting Number of total Nodes
   unsigned int tNodes = sum(nNodes);
   // Getting Default Activation List 
@@ -86,6 +185,7 @@ Ann initANN(
   struct Ann ann;
   ann.nLayers = nLayers;
   ann.nNodes = nNodes;
+  ann.sNodes = sNodes;
   ann.tNodes = tNodes;
   ann.actIDs = actIDs;
   ann.lossID = 0;
@@ -107,24 +207,30 @@ Ann initANN(
     exit(1);
     return ann;
   }
-  // Getting Default Number of Nodes Per Layer
-  nNodes[0] = nFeat;
-  nNodes[nNodes.size()-1] = nClasses;
+
+  // Getting Layer Starting nodes
+  std::vector<unsigned int> sNodes(nLayers,0);
+  for(unsigned int i = 1; i < nLayers; i++){
+    sNodes[i] = sNodes[i-1]+nNodes[i-1];
+  }
   // Getting Number of total Nodes
   unsigned int tNodes = sum(nNodes);
+
   // Getting Default Activation List 
-  std::vector<unsigned int> actIDs(tNodes, 1);
-  for(unsigned int i = tNodes-1; i > tNodes-nNodes[nNodes.size()-1]-1; i--){
-    actIDs[i] = 2; 
+  std::vector<unsigned int> actIDs(tNodes-nFeat, RELU);
+  for(unsigned int i = actIDs.size()-nNodes[nLayers-1]; i < actIDs.size(); i++){
+    actIDs[i] = SOFTMAX ; 
   }
   // Initializing Weights
   std::vector<std::vector<DTYPE>> weights;
   initWeights(weights, nNodes);
   // Initializing Bias
   std::vector<DTYPE> bias(tNodes-nFeat, 0);
-  // Packing
+ 
+ // Packing
   ann.nLayers = nLayers;
   ann.nNodes = nNodes;
+  ann.sNodes = sNodes;
   ann.tNodes = tNodes;
   ann.actIDs = actIDs;
   ann.lossID = 0;
@@ -139,15 +245,21 @@ Ann initANN(struct ANN_Ambit ann_, struct Data train){
   unsigned int nClasses = train.nClasses;
   unsigned int nLayers = ann_.nLayers;
   
-  std::vector<unsigned int> nNodes;
-  nNodes.push_back(nFeat);
-  for(unsigned int i = 0; i < ann_.hNodes.size(); i++){
-    nNodes.push_back(ann_.hNodes[i]);
+  if(ann_.hNodes.size() != nLayers-2){
+    errPrint(
+      "ERROR - initANN: hNodes size does not match number of layers minus 2."
+    );
+    std::cout << ann_.hNodes.size() << ":" << nLayers-2 << std::endl;
+    exit(1);
   }
-  nNodes.push_back(nClasses);
+  std::vector<unsigned int> nNodes(nLayers, 0);
+  nNodes[0] = nFeat;
+  for(unsigned int i = 0; i < ann_.hNodes.size(); i++){
+    nNodes[i+1] = ann_.hNodes[i];
+  }
+  nNodes[nLayers-1] = nClasses;
 
   if(nNodes.size() != nLayers){
-
     errPrint(
       "ERROR - initANN(ANN_Ambit, Data): nNodes.size does not match the number of layers"
     );
@@ -156,6 +268,7 @@ Ann initANN(struct ANN_Ambit ann_, struct Data train){
   }
 
   srand(ann_.wseed);
+  
   struct Ann ann = initANN(
     nFeat,
     nClasses,
@@ -254,7 +367,8 @@ unsigned int getAIDP(
   unsigned int layerN, 
   unsigned int nodeN /*0*/
 ){
-  std::vector<unsigned int> pre_nNodes = {nNodes.begin(), nNodes.begin()+layerN};
+  // std::vector<unsigned int> pre_nNodes = {nNodes.begin(), nNodes.begin()+layerN};
+  std::vector<unsigned int> pre_nNodes = subVector(nNodes, 0, layerN);
   unsigned int position = sum(pre_nNodes)+nodeN;
   return position;
 }
@@ -296,5 +410,264 @@ void setActID(
   // Pack
   ann.actIDs = actIDs;
   
+  return;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Training and Testing
+///////////////////////////////////////////////////////////////////////////////
+
+void forward(
+  struct Ann ann,
+  std::vector<DTYPE> &layer,
+  std::vector<DTYPE> &act
+){
+  // unpack
+  unsigned int nLayers = ann.nLayers;
+  BUG(print(nLayers, "nLayers");)
+  // For each layer after the feature layer/vector
+  /*bias layer index*/ unsigned int bli = 0; // add the layer size at end of for loop
+  for(unsigned int i = 1; i < nLayers; i++){
+    BUG(print(i, "\nLayer"));
+    /*activation layer index*/ unsigned int ali = ann.sNodes[i-1];
+    /*activation layer size*/  unsigned int als = ann.nNodes[i-1];
+    /*bias layer size*/ unsigned int bls = ann.nNodes[i];
+    BUG(
+      print(ali, "activation layer index");
+      print(als, "activation layer size");
+      print(bli, "bias layer index");
+      print(bls, "bias layer size");
+    )
+    // get w, a_i-1, and b
+    std::vector<DTYPE> w = ann.weights[i-1];
+    std::vector<DTYPE> a = subVector(act, ali, als);
+    std::vector<DTYPE> b = subVector(ann.bias, bli, bls);
+    BUG(
+      print(w, "weights");
+      print(a, "activation");
+      print(b, "bias");
+    )
+    // matrix multiply w*a
+    std::vector<DTYPE> wab = dot(w, a, als);
+    BUG(print(wab, "w*a"));
+    // add b
+    add(wab, b);
+    BUG(print(wab, "w*a+b"));
+    // set to layer position
+    set(layer, wab, ali+als);
+    BUG(print(layer, "layer-Update"));
+    // Get activation IDs
+    std::vector<unsigned int> aIDs = subVector(ann.actIDs, bli, bls);
+    BUG(print(aIDs, "aID"));
+    // apply activation function
+    applyAct(wab, aIDs, 0);
+    BUG(print(wab, "a1(w*a0+b)"));    
+    // set to act position
+    set(act, wab, ali+als);
+    BUG(print(act, "act-Update"));
+    // Update bli
+    bli += bls;
+  }
+  return;
+}
+
+void backProp(
+  struct Ann ann,
+  unsigned int obs,
+  std::vector<DTYPE> layer,
+  std::vector<DTYPE> act,
+  std::vector<std::vector<DTYPE>> &dW,
+  std::vector<DTYPE> &dB
+){
+  // Get dLoss
+  unsigned int lID = ann.lossID; // Loss ID
+  unsigned int ll = ann.nLayers-1; // Last Layer
+  unsigned int strtA = ann.sNodes[ll]; // Start of Layer
+  unsigned int size = ann.nNodes[ll]; // Size of Layer;
+  std::vector<DTYPE> a = subVector(act, strtA, size); // current activation vector
+  std::vector<DTYPE> dLoss = DLOSSF[lID](a, obs);
+
+  // Get Initial Delta
+  unsigned int nFeat = ann.nNodes[0];
+  unsigned int strtB = ann.sNodes[ll]-nFeat;
+  std::vector<unsigned int> aIDs = subVector(ann.actIDs, strtB, size);
+  std::vector<DTYPE> l = subVector(layer, strtA, size);
+  std::vector<DTYPE> delta = ewm(dLoss, applyDActR(l, aIDs, obs));
+  
+  // Set Last Layer dB and dW
+  add(dB, delta, strtB, size);
+  strtA = ann.sNodes[ll-1]; size = ann.nNodes[ll-1];
+  a = subVector(act, strtA, size);
+  std::vector<DTYPE> tensorDA = tensor(delta, a);
+  add(dW[ll-1], tensorDA, 0, tensorDA.size());
+
+  // For each layer (backwards)
+  for(unsigned int i = ll-1; i > 0; i--){
+    strtA = ann.sNodes[i]; size = ann.nNodes[i];
+    strtB = ann.sNodes[i]-nFeat;
+
+    std::vector<DTYPE> w = ann.weights[i];
+    unsigned int stride = w.size()/size;
+    
+    l = subVector(layer, strtA, size);
+    aIDs = subVector(ann.actIDs, strtB, size);
+    std::vector<DTYPE> tempDelta = delta;
+    delta = ewm(dotT(w, tempDelta, stride),applyDActR(l, aIDs, obs));
+
+    add(dB, delta, strtB, size);
+    strtA = ann.sNodes[i-1]; size = ann.nNodes[i-1];
+    a = subVector(act, strtA, size);
+    tensorDA = tensor(delta, a);
+    add(dW[i-1], tensorDA, 0, tensorDA.size());
+  }
+
+  std::cout << "Updated dW and dB." << std::endl;
+  print(dW, dB);
+
+  return;
+}
+
+
+void trainNN(
+  struct Ann &ann,
+  struct Data data, 
+  struct Adam adam,
+  unsigned int maxIter /*1000*/  
+){
+  // Unpack
+  unsigned int nSamp = data.nSamp;
+  unsigned int nFeat = data.nFeat;
+  unsigned int nClasses = data.nClasses;
+
+  // Training Iteration Epoch
+  unsigned int epoch = 0;
+  bool converged = false;
+  std::vector<unsigned int> wsize = getSizeVec(ann.weights);
+
+  // For Learning Rate
+  std::vector<std::vector<DTYPE>> mtW;
+  std::vector<DTYPE> mtB;
+  std::vector<std::vector<DTYPE>> vtW;
+  std::vector<DTYPE> vtB;
+  if(adam.adam){
+    std::cout << "Adam: " 
+      << adam.alpha << ", " << adam.beta1 << ", " << adam.beta2
+    << std::endl;
+    
+    mtW = zero(wsize); //1st Moment std::vector
+    mtB = std::vector<DTYPE> (ann.bias.size(), 0); // 1st Moment std::vector
+    vtW = zero(wsize); // 2nd Moment std::vector
+    vtB = std::vector<DTYPE> (ann.bias.size(), 0); // 2nd Moment std::vector
+  }else{
+    std::cout << "alpha: " << adam.alpha << std::endl;
+  }
+
+  while(epoch < maxIter && !converged){
+    epoch++;
+    // Init deltas
+    std::vector<std::vector<DTYPE>> dW = zero(wsize);
+    std::vector<DTYPE> dB(ann.bias.size(), 0);
+
+    // For each sample
+    // Parallelize
+    for(unsigned int i = 0; i < nSamp; i++){
+      unsigned int featStride = i*nFeat;
+      unsigned int obsStride = i*nClasses;
+
+      std::vector<DTYPE> layer(ann.tNodes, 0);
+      std::vector<DTYPE> act(ann.tNodes, 0);
+      for(unsigned int j = 0; j < ann.nNodes[0]; j++){
+        layer[j] = data.feat[featStride+j];
+        act[j] = data.feat[featStride+j];
+      }
+      
+      // Run forward propagation
+      forward(
+        ann,
+        layer,
+        act
+      );
+
+      backProp(
+        ann,
+        data.obs[i],
+        layer,
+        act,
+        dW,
+        dB
+      );
+    }
+  }
+  return;
+}
+
+
+void testNN(
+  struct Ann ann,
+  struct Data data,
+  struct Results &result
+){
+  BUG(std::cout << "\nTesting" << std::endl;)
+  // unpack
+  /*Number of Samples*/     unsigned int nSamp = data.nSamp;
+  /*Total Number of Nodes*/ unsigned int tNodes = ann.tNodes;
+  /*Number of Features*/    unsigned int nFeat = data.nFeat;
+  /*Number of Layers*/      unsigned int nLayer = ann.nLayers;
+
+  // Change the last Layer activation ID if necessary
+  /*Last Layer Activation ID*/ unsigned int lLAID = ann.lLAID;
+  /*Last Layer Index*/ unsigned int lli = ann.sNodes[nLayer-1];
+  /*Last Layer Size*/ unsigned int lls = data.nClasses;
+  /*Activation ID Last Layer Index*/ unsigned int alli = ann.sNodes[nLayer-1]-nFeat;
+  /*Activation ID Last Layer*/ std::vector<unsigned int> aIDLL = subVector(ann.actIDs, alli, lls);
+  BUG(print(aIDLL, "Activation ID Last Layer");)
+  /*Original Last Layer Activation ID*/ unsigned int oAIDLL= aIDLL[0];
+  bool changed = false;
+  if(same(aIDLL) & (oAIDLL != lLAID)){
+    BUG(std::cout << "Setting aIDLL to "<< lLAID << std::endl;)
+    set(ann.actIDs, lLAID, alli, lls);
+    changed = true;
+  }
+
+  // Setup Results sizes
+  result.vector_bool = std::vector<bool>(nSamp, false);
+  result.vector_unit = std::vector<unsigned int>(nSamp, lls);
+  result.vector_dtype = std::vector<DTYPE>(nSamp*nFeat, 0);
+
+  // For each sample
+  for(unsigned int i = 0; i < nSamp; i++){
+    /*Feature layer index*/unsigned int fli = i*nFeat;
+    /*Class Layer index*/ unsigned int cli = i*lls;
+    
+    // get features
+    std::vector<DTYPE> feat = subVector(data.feat, fli, nFeat);
+
+    // Create and Setup layer vector and activation vector
+    std::vector<DTYPE> layer(tNodes, 0);
+    set(layer, feat, 0, nFeat);
+    std::vector<DTYPE> act(tNodes, 0);
+    set(act, feat, 0, nFeat);
+
+    // Run forward function
+    forward(ann, layer, act);
+
+    // Get Results
+    std::vector<DTYPE> lastAct = subVector(act,lli,lls);
+    set(result.vector_dtype, lastAct, cli);
+    unsigned int prediction = (unsigned int)max(lastAct, true);
+    result.vector_unit[i] = prediction;
+    if(prediction == data.obs[i]){
+      result.uint_ambit ++;
+      result.vector_bool[i] = true;
+    }
+    std::vector<DTYPE> lastLayer = subVector(act,lli,lls);
+    std::vector<DTYPE> temp = ACT2[oAIDLL](lastLayer, 0);
+    result.double_ambit += sum(LOSSF[ann.lossID](temp,data.obs[i]));
+
+  }
+  if(changed){
+    BUG(std::cout << "Setting aIDLL to back to "<< oAIDLL << std::endl;)
+    set(ann.actIDs, oAIDLL, alli, lls);
+  }
   return;
 }

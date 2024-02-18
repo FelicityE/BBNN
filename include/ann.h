@@ -3,10 +3,25 @@
 #include "utility.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Special Utility
+/// ANN Utility
 ///////////////////////////////////////////////////////////////////////////////
 void print(struct Ann ann);
-
+void print(std::vector<std::vector<DTYPE>> W, std::vector<DTYPE> B);
+void applyAct(
+  std::vector<DTYPE> &layer, 
+  std::vector<unsigned int> aIDs,
+  unsigned int obs
+);
+void applyDAct(
+  std::vector<DTYPE> &layer, 
+  std::vector<unsigned int> aIDs,
+  unsigned int obs
+);
+std::vector<DTYPE> applyDActR(
+  std::vector<DTYPE> &layer, 
+  std::vector<unsigned int> aIDs,
+  unsigned int obs
+);
 ///////////////////////////////////////////////////////////////////////////////
 /// Initializers
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,4 +77,35 @@ void setActID(
   unsigned int layerNEnd = UINT_MAX,
   unsigned int nodeNStrt = 0,
   unsigned int nodeNEnd = UINT_MAX
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// Training and Testing
+///////////////////////////////////////////////////////////////////////////////
+void forward(
+  struct Ann ann,
+  std::vector<DTYPE> &layer,
+  std::vector<DTYPE> &act
+);
+
+void backProp(
+  struct Ann ann,
+  unsigned int obs,
+  std::vector<DTYPE> layer,
+  std::vector<DTYPE> act,
+  std::vector<std::vector<DTYPE>> &dW,
+  std::vector<DTYPE> &dB
+);
+
+void trainNN(
+  struct Ann &ann, 
+  struct Data train,
+  struct Adam adam, 
+  unsigned int maxIter = 1000
+);
+
+void testNN(
+  struct Ann ann,
+  struct Data test,
+  struct Results &result
 );
