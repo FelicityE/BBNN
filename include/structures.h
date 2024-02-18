@@ -113,6 +113,15 @@ struct Read_Ambit{
 
 struct Results{
   Results():uint_ambit(0), double_ambit(0){}
+  Results(
+    unsigned int nSamples,
+    unsigned int nClasses,
+    unsigned int nFeatures
+  ):uint_ambit(0), double_ambit(0){
+    this->vector_bool = std::vector<bool>(nSamples, false);
+    this->vector_unit = std::vector<unsigned int>(nSamples, nClasses);
+    this->vector_dtype = std::vector<DTYPE>(nSamples*nFeatures, 0);
+  }
   
   unsigned int uint_ambit; // number of correct predictions
   DTYPE  double_ambit; // error

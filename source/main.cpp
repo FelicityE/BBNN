@@ -35,9 +35,9 @@ int main(int numInputs, char * inputs[]){
   print(ann);
 
   // Train
-  trainNN(ann, train, adam, ann_.maxIter);
+  // trainNN(ann, train, adam, ann_.maxIter);
   // Test
-  struct Results result;
+  struct Results result(test.nSamp, test.nClasses, test.nFeat);
   testNN(ann, test, result);
   print(result);
 

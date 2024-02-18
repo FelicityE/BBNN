@@ -598,7 +598,31 @@ void trainNN(
       );
     }
   }
+  if(!converged){print(epoch, "Epoch");}
   return;
+}
+
+void getResults(
+  struct Results &result,
+  std::vector<DTYPE> lastAct,
+  std::vector<DTYPE> lastLayer,
+  unsigned int lastActID,
+  unsigned int lossID,
+  unsigned int sampleIndex,
+  unsigned int obs
+){
+  // std::vector<DTYPE> lastAct = subVector(act,lli,lls);
+  unsigned int cli = sampleIndex*lastAct.size();
+  set(result.vector_dtype, lastAct, cli);
+  unsigned int prediction = (unsigned int)max(lastAct, true);
+  result.vector_unit[sampleIndex] = prediction;
+  if(prediction == obs){
+    result.uint_ambit ++;
+    result.vector_bool[sampleIndex] = true;
+  }
+  // std::vector<DTYPE> lastLayer = subVector(layer,lli,lls);
+  std::vector<DTYPE> temp = ACT2[lastActID](lastLayer, 0);
+  result.double_ambit += sum(LOSSF[lossID](temp,obs));
 }
 
 
@@ -629,11 +653,6 @@ void testNN(
     changed = true;
   }
 
-  // Setup Results sizes
-  result.vector_bool = std::vector<bool>(nSamp, false);
-  result.vector_unit = std::vector<unsigned int>(nSamp, lls);
-  result.vector_dtype = std::vector<DTYPE>(nSamp*nFeat, 0);
-
   // For each sample
   for(unsigned int i = 0; i < nSamp; i++){
     /*Feature layer index*/unsigned int fli = i*nFeat;
@@ -653,17 +672,8 @@ void testNN(
 
     // Get Results
     std::vector<DTYPE> lastAct = subVector(act,lli,lls);
-    set(result.vector_dtype, lastAct, cli);
-    unsigned int prediction = (unsigned int)max(lastAct, true);
-    result.vector_unit[i] = prediction;
-    if(prediction == data.obs[i]){
-      result.uint_ambit ++;
-      result.vector_bool[i] = true;
-    }
     std::vector<DTYPE> lastLayer = subVector(act,lli,lls);
-    std::vector<DTYPE> temp = ACT2[oAIDLL](lastLayer, 0);
-    result.double_ambit += sum(LOSSF[ann.lossID](temp,data.obs[i]));
-
+    getResults(result, lastAct, lastLayer, oAIDLL, ann.lossID, i, data.obs[i]);
   }
   if(changed){
     BUG(std::cout << "Setting aIDLL to back to "<< oAIDLL << std::endl;)
