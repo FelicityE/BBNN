@@ -595,7 +595,7 @@ void trainNN(
     result.uint_ambit = 0;
     result.vector_bool = std::vector<bool>(nSamp, false);
     result.vector_unit = std::vector<unsigned int>(nSamp, nClasses);
-    result.vector_dtype = std::vector<DTYPE>(nSamp*nFeat, 0);
+    result.vector_dtype = std::vector<DTYPE>(nSamp*nClasses, 0);
 
     // For each sample
     // Parallelize

@@ -45,4 +45,5 @@ make
 
 echo -e "epoch, maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
 cd build/
-./main ../data/Test.txt Adam
+# ./main ../data/Test.txt Adam
+./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam

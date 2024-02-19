@@ -50,15 +50,15 @@ std::vector<DTYPE> dsigmoid(std::vector<DTYPE> layer, AMBIT_TYPE ambit){
 
 /// Softmax
 std::vector<DTYPE> softmax(std::vector<DTYPE> layer, AMBIT_TYPE ambit){
-  std::vector<DTYPE> predictiveProbability(layer.size(),0);
+  std::vector<DTYPE> temp(layer.size(),0);
   DTYPE denom = 0; 
   for(unsigned int i = 0; i < layer.size(); i++){
     denom += exp(layer[i]);
   }
   for(unsigned int i = 0; i < layer.size(); i++){
-    predictiveProbability[i]= exp(layer[i])/denom;
+    temp[i]= exp(layer[i])/denom;
   }
-  return predictiveProbability;
+  return temp;
 }
 std::vector<DTYPE> dsoftmax(std::vector<DTYPE> layer, AMBIT_TYPE obs){
   // dp_i/da_j e.g. dpda[0] = dp0/da0, dpda[1] = dp0/da1, dpda[2] = dp1/da0 etc.
@@ -122,9 +122,9 @@ std::vector<DTYPE> crossentropy(
   std::vector<DTYPE> layer,
   unsigned int obs
 ){
-  std::vector<DTYPE> cross;
+  std::vector<DTYPE> cross(layer.size(),0);
   for(unsigned int i = 0; i < layer.size(); i++){
-    cross.push_back(crossentropy(layer[i]));
+    cross[i] = crossentropy(layer[i]);
   }
   return cross;
 }
@@ -132,10 +132,10 @@ std::vector<DTYPE> dcrossentropy(
   std::vector<DTYPE> layer,
   unsigned int obs
 ){
-  std::vector<DTYPE> dcross;
+  std::vector<DTYPE> dcross(layer.size());
   for(unsigned int i = 0; i < layer.size(); i++){
-    dcross.push_back(dcrossentropy(layer[i]));
+    dcross[i] = dcrossentropy(layer[i]);
   }
-  return dcross;
+  return std::vector<DTYPE>(dcross.size(), dcross[obs]);
 }
 

@@ -35,7 +35,7 @@ int main(int numInputs, char * inputs[]){
   print(ann);
 
   // Train
-  struct Results train_results(train.nSamp, train.nClasses, train.nFeat);
+  struct Results train_results(train.nSamp, train.nClasses);
   trainNN(ann, train, train_results, alpha, ann_.maxIter);
   
   std::cout << "\nUpdated Weights and Bias" << std::endl;
@@ -44,7 +44,7 @@ int main(int numInputs, char * inputs[]){
   print(train_results);
   
   // Test
-  struct Results test_results(test.nSamp, test.nClasses, test.nFeat);
+  struct Results test_results(test.nSamp, test.nClasses);
   testNN(ann, test, test_results);
   
   std::cout << "\nTesting Results" << std::endl;
