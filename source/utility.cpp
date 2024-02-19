@@ -58,6 +58,23 @@ void print(struct Results re){
   std::cout << std::endl;
 }
 
+void print(bool x, std::string name /*na*/, bool endl /*true*/){
+  if(name != "na"){
+    std::cout << name << ": ";
+  }
+
+  if(x){
+    std::cout << "true" << std::flush;
+  }else{
+    std::cout << "false" << std::flush;
+  }
+
+  if(endl){
+    std::cout << std::endl;
+  }else{
+    std::cout << ", ";
+  }
+}
 void print(unsigned int x, std::string name /*na*/, bool endl /*true*/){
   if(name != "na"){
     std::cout << name << ": ";
@@ -194,112 +211,6 @@ bool same(std::vector<unsigned int> v){
 ///////////////////////////////////////////////////////////////////////////////
 /// Vector Functions
 ///////////////////////////////////////////////////////////////////////////////
-/// Multiply
-// Dot product of Matrix time vector of 1D vectors
-// std::vector<DTYPE> dot1D(
-//   std::vector<DTYPE> A, 
-//   std::vector<DTYPE> B, 
-//   unsigned int Ar, 
-//   unsigned int Ac
-// ){
-//   if(Ar*Ac != A.size()){
-//     errPrint("ERROR dot1D: vector A.size() != A.rows*A.cols.");
-//     std::cout << A.size() << ":" << Ar << "*" << Ac << std::endl;
-//     exit(1);
-//   }else if(B.size()%Ac != 0){
-//     errPrint("ERROR dot1D: vector B.size()/A.cols is not even.", B.size(), Ac);
-//     exit(1);
-//   }
-//   unsigned int Br = Ac, Bc = B.size()/Br;
-//   unsigned int Cr = Ar, Cc = Bc;
-//   std::vector<DTYPE> C(Cr*Cc, 0);
-//   for(unsigned int i = 0; i < Cr; i++){
-//     for(unsigned int j = 0; j < Cc; j++){
-//       for(unsigned int k = 0; k < Br; k++){
-//         C[i*Cc+j] += A[i*Ac+k] * B[k*Bc+j];
-//       }
-//     }
-//   }
-//   return C;
-// }
-std::vector<DTYPE> dot(
-  std::vector<DTYPE> A,
-  std::vector<DTYPE> B,
-  unsigned int stride
-){
-  // Note: B is assumed transposed
-  if(A.size()%stride != 0){
-    errPrint("ERROR dot: vector A.size()\% stride != 0.", A.size(), stride);
-    return A;
-  }else if(B.size()%stride != 0){
-    errPrint("ERROR dot: vector B.size()\% stride != 0.", B.size(), stride);
-    return B;
-  }
-  unsigned int a_row = A.size()/stride;
-  unsigned int a_col = stride;
-  unsigned int b_row = stride;
-  unsigned int b_col = B.size()/stride;
-  unsigned int c_row = a_row;
-  unsigned int c_col = b_col;
-  unsigned int c_size = c_row*c_col;
-  std::vector<DTYPE> C(c_size, 0);
-  for(unsigned int i = 0; i < a_row; i++){
-    for(unsigned int j = 0; j < a_col; j++){
-      for(unsigned int k = 0; k < b_col; k++){
-        BUG(
-          std::cout 
-            << "C[" << i*c_col+k 
-            << "] = A[" << i*a_col+j 
-            << "] * B[" << k*b_row+j << "]" 
-          << std::endl;
-        )
-        C[i*c_col+k] += A[i*a_col+j] * B[k*b_row+j];
-      }
-    }
-  }
-  return C;
-}
-
-std::vector<DTYPE> dotT(
-  std::vector<DTYPE> A,
-  std::vector<DTYPE> B,
-  unsigned int a_col
-){
-  if(A.size() % a_col != 0){
-    errPrint("ERROR dotT: A.size\%a_col != 0.", A.size(), a_col);
-    return A;
-  }
-  std::vector<DTYPE> temp = transposeR(A, a_col);
-  return dot(temp, B, a_col);
-}
-
-std::vector<DTYPE> ewm(
-  std::vector<DTYPE> A,
-  std::vector<DTYPE> B
-){
-  if(A.size() != B.size()){
-    errPrint("ERROR ewm: A.size() != B.size().", A.size(), B.size());
-    return A;
-  }
-  std::vector<DTYPE> C(A.size(), 0);
-  for(unsigned int i = 0; i < A.size(); i++){
-    C[i] = A[i]*B[i];
-  }
-  return C;
-}
-
-std::vector<DTYPE> tensor(
-  std::vector<DTYPE> A,
-  std::vector<DTYPE> B
-){
-  std::vector<DTYPE> C(A.size()*B.size(), 0);
-  for(unsigned int i = 0; i < A.size(); i++){
-    for(unsigned int j = 0; j < B.size(); j++){
-      C[i*B.size()+j] = A[i]*B[j];
-    }
-  }
-  return C;
-}
 
 // Vector manipluation
 void transpose(std::vector<DTYPE> &v, unsigned int v_col){
@@ -333,8 +244,6 @@ std::vector<DTYPE> transposeR(std::vector<DTYPE> &v, unsigned int v_col){
   return temp;
 }
 
-
-
 /// Subvectors
 std::vector<unsigned int> subVector(std::vector<unsigned int> v, unsigned int strt, unsigned int size){
   std::vector<unsigned int> temp(size, 0);
@@ -349,64 +258,6 @@ std::vector<DTYPE> subVector(std::vector<DTYPE> v, unsigned int strt, unsigned i
     temp[i] = v[strt+i];
   }
   return temp;
-}
-
-/// Sum Functions
-DTYPE sum(std::vector<DTYPE> v){
-  DTYPE temp = 0;
-  for (unsigned int i = 0; i < v.size (); i++){
-    temp += v[i];
-  }
-  return temp;
-}
-unsigned int sum(std::vector<unsigned int> v){
-  unsigned int temp = 0;
-  for(unsigned int i = 0; i < v.size(); i++){
-    temp += v[i];
-  }
-  return temp;
-}
-
-/// Add
-void add(std::vector<DTYPE> &A, std::vector<DTYPE> B){
-  std::vector<DTYPE> C(A.size(), 0);
-  if(A.size() != B.size()){
-    errPrint("ERROR add: A.size() != B.size().", A.size(), B.size());
-    return;
-  }
-  for(unsigned int i = 0; i < A.size(); i++){
-    A[i] += B[i];
-  }
-  return;
-}
-
-std::vector<DTYPE> addR(std::vector<DTYPE> A, std::vector<DTYPE> B){
-  std::vector<DTYPE> C(A.size(), 0);
-  if(A.size() != B.size()){
-    errPrint("ERROR add: A.size() != B.size().", A.size(), B.size());
-    return A;
-  }
-  for(unsigned int i = 0; i < A.size(); i++){
-    C[i] = A[i] + B[i];
-  }
-  return C;
-}
-
-
-void add(
-  std::vector<DTYPE> &A,
-  std::vector<DTYPE> B,
-  unsigned int idx,
-  unsigned int size
-){
-  if(A.size() < idx+size){
-    errPrint("ERROR add: A.size() < idx+size.", A.size(), idx+size);
-    exit(1); // Exit not return otherwise segfault.
-  } 
-  for(unsigned int i = 0; i < size; i++){
-    A[i+idx] += B[i];
-  }
-  return;
 }
 
 // Zero Functions
@@ -696,7 +547,7 @@ void set(
 /// Read Functions
 ///////////////////////////////////////////////////////////////////////////////
 int getSetup(
-  struct Adam &adam, 
+  struct Alpha &alpha, 
   struct ANN_Ambit &annbit, 
   struct Read_Ambit &read, 
   int numInputs, 
@@ -734,13 +585,13 @@ int getSetup(
       }
 
       else if(match(inputs[i],"Adam")){
-        adam.adam = true;
+        alpha.adam = true;
       }else if(match(inputs[i], "alpha")){
-        adam.alpha = std::stod(inputs[i+1]);
+        alpha.alpha = std::stod(inputs[i+1]);
         i++;
       }else if(match(inputs[i], "beta")){
-        adam.beta1 = std::stod(inputs[i+1]);
-        adam.beta2 = std::stod(inputs[i+2]);
+        alpha.beta1 = std::stod(inputs[i+1]);
+        alpha.beta2 = std::stod(inputs[i+2]);
         i += 2;
       }
       

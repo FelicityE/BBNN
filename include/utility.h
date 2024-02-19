@@ -13,6 +13,7 @@ std::string str(char * value);
 ///////////////////////////////////////////////////////////////////////////////
 void print(struct Data data);
 void print(struct Results re);
+void print(bool x, std::string name = "na", bool endl = true);
 void print(unsigned int x, std::string name = "na", bool endl = true);
 void print(DTYPE x, std::string name = "na", bool endl = true);
 void print(std::vector<unsigned int> v, std::string name = "na");
@@ -36,37 +37,10 @@ unsigned int max(std::vector<unsigned int> v);
 DTYPE max(std::vector<DTYPE> v, bool returnIdx = false);
 
 bool same(std::vector<unsigned int> v);
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Vector Functions
 ///////////////////////////////////////////////////////////////////////////////
-/// Multiply 
-// std::vector<DTYPE> dot1D(
-//   std::vector<DTYPE> A, 
-//   std::vector<DTYPE> B, 
-//   unsigned int Ar, 
-//   unsigned int Ac
-// );
-std::vector<DTYPE> dot(
-  std::vector<DTYPE> A,
-  std::vector<DTYPE> B,
-  unsigned int stride
-);
-std::vector<DTYPE> dotT(
-  std::vector<DTYPE> A,
-  std::vector<DTYPE> B,
-  unsigned int stride
-);
-
-std::vector<DTYPE> ewm(
-  std::vector<DTYPE> A,
-  std::vector<DTYPE> B
-);
-
-std::vector<DTYPE> tensor(
-  std::vector<DTYPE> A,
-  std::vector<DTYPE> B
-);
-
 /// Vector manipluation
 void transpose(std::vector<DTYPE> &v, unsigned int v_col);
 std::vector<DTYPE> transposeR(std::vector<DTYPE> &v, unsigned int v_col);
@@ -75,20 +49,6 @@ std::vector<DTYPE> transposeR(std::vector<DTYPE> &v, unsigned int v_col);
 std::vector<unsigned int> subVector(std::vector<unsigned int> v, unsigned int strt, unsigned int size);
 std::vector<DTYPE> subVector(std::vector<DTYPE> v, unsigned int strt, unsigned int size);
 
-/// Sum Functions
-DTYPE sum(std::vector<DTYPE> v);
-unsigned int sum(std::vector<unsigned int> v);
-
-/// Add 
-void add(std::vector<DTYPE> &A, std::vector<DTYPE> B);
-std::vector<DTYPE> addR(std::vector<DTYPE> A, std::vector<DTYPE> B);
-
-void add(
-  std::vector<DTYPE> &A,
-  std::vector<DTYPE> B,
-  unsigned int idx,
-  unsigned int size
-);
 /// Zero Functions
 std::vector<std::vector<DTYPE>> zero(std::vector<unsigned int> v);
 
@@ -152,7 +112,7 @@ void set(
 /// Read Functions
 ///////////////////////////////////////////////////////////////////////////////
 int getSetup(
-  struct Adam &adam,
+  struct Alpha &alpha,
   struct ANN_Ambit &ann_ambit,
   struct Read_Ambit &read,
   int numInputs, 

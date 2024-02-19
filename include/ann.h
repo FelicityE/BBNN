@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utility.h"
+#include "vector_math.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 /// ANN Utility
@@ -100,7 +100,8 @@ void backProp(
 void trainNN(
   struct Ann &ann, 
   struct Data train,
-  struct Adam adam, 
+  struct Results &result,
+  struct Alpha alpha, 
   unsigned int maxIter = 1000
 );
 

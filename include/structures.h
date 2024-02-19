@@ -45,12 +45,21 @@ struct ActID_Set{
   unsigned int nodeEnd;
 };
 
-struct Adam{
-  Adam(): adam(false), alpha(0.01), beta1(0.9), beta2(0.999){}
-  bool adam;
+struct Alpha{
+  Alpha(): 
+    alpha(0.01), 
+    gamma(0.0001), 
+    adam(false), 
+    beta1(0.9), 
+    beta2(0.999),
+    epsilon(10e-8)
+  {}
   double alpha;
+  double gamma;
+  bool adam;
   double beta1;
   double beta2;
+  double epsilon;
 };
 
 struct Ann{

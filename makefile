@@ -4,14 +4,17 @@ DFLAGS =
 LIBDIRS = -I.
 
 
-build/main: build/main.o build/ann.o build/utility.o build/activations.o
-	$(GCC) $(FLAGS) $(DFLAGS) $(LIBDIRS) -o build/main build/main.o build/ann.o build/utility.o build/activations.o
+build/main: build/main.o build/ann.o build/vector_math.o build/utility.o build/activations.o
+	$(GCC) $(FLAGS) $(DFLAGS) $(LIBDIRS) -o build/main build/main.o build/ann.o build/vector_math.o build/utility.o build/activations.o
 
 build/main.o: source/main.cpp
 	$(GCC) $(FLAGS) $(DFLAGS) $(LIBDIRS) -c -o build/main.o source/main.cpp -lm
 
 build/ann.o: source/ann.cpp
 	$(GCC) $(FLAGS) $(DFLAGS) $(LIBDIRS) -c -o build/ann.o source/ann.cpp -lm
+
+build/vector_math.o: source/vector_math.cpp
+	$(GCC) $(FLAGS) $(DFLAGS) $(LIBDIRS) -c -o build/vector_math.o source/vector_math.cpp -lm
 
 build/utility.o: source/utility.cpp
 	$(GCC) $(FLAGS) $(DFLAGS) $(LIBDIRS) -c -o build/utility.o source/utility.cpp -lm

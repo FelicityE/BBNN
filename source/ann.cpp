@@ -416,6 +416,28 @@ void setActID(
 ///////////////////////////////////////////////////////////////////////////////
 /// Training and Testing
 ///////////////////////////////////////////////////////////////////////////////
+void getResults(
+  struct Results &result,
+  std::vector<DTYPE> lastAct,
+  std::vector<DTYPE> lastLayer,
+  unsigned int lastActID,
+  unsigned int lossID,
+  unsigned int sampleIndex,
+  unsigned int obs
+){
+  // std::vector<DTYPE> lastAct = subVector(act,lli,lls);
+  unsigned int cli = sampleIndex*lastAct.size();
+  set(result.vector_dtype, lastAct, cli);
+  unsigned int prediction = (unsigned int)max(lastAct, true);
+  result.vector_unit[sampleIndex] = prediction;
+  if(prediction == obs){
+    result.uint_ambit ++;
+    result.vector_bool[sampleIndex] = true;
+  }
+  // std::vector<DTYPE> lastLayer = subVector(layer,lli,lls);
+  std::vector<DTYPE> temp = ACT2[lastActID](lastLayer, 0);
+  result.double_ambit += sum(LOSSF[lossID](temp,obs));
+}
 
 void forward(
   struct Ann ann,
@@ -492,7 +514,7 @@ void backProp(
   unsigned int strtB = ann.sNodes[ll]-nFeat;
   std::vector<unsigned int> aIDs = subVector(ann.actIDs, strtB, size);
   std::vector<DTYPE> l = subVector(layer, strtA, size);
-  std::vector<DTYPE> delta = ewm(dLoss, applyDActR(l, aIDs, obs));
+  std::vector<DTYPE> delta = dot(dLoss, applyDActR(l, aIDs, obs));
   
   // Set Last Layer dB and dW
   add(dB, delta, strtB, size);
@@ -512,7 +534,7 @@ void backProp(
     l = subVector(layer, strtA, size);
     aIDs = subVector(ann.actIDs, strtB, size);
     std::vector<DTYPE> tempDelta = delta;
-    delta = ewm(dotT(w, tempDelta, stride),applyDActR(l, aIDs, obs));
+    delta = dot(dotT(w, tempDelta, stride),applyDActR(l, aIDs, obs));
 
     add(dB, delta, strtB, size);
     strtA = ann.sNodes[i-1]; size = ann.nNodes[i-1];
@@ -520,19 +542,20 @@ void backProp(
     tensorDA = tensor(delta, a);
     add(dW[i-1], tensorDA, 0, tensorDA.size());
   }
-
-  std::cout << "Updated dW and dB." << std::endl;
-  print(dW, dB);
+  BUG(
+    std::cout << "Updated dW and dB." << std::endl;
+    print(dW, dB);
+  )
 
   return;
 }
 
-
 void trainNN(
   struct Ann &ann,
-  struct Data data, 
-  struct Adam adam,
-  unsigned int maxIter /*1000*/  
+  struct Data data,
+  struct Results &result, 
+  struct Alpha alpha,
+  unsigned int maxIter /*1000*/ 
 ){
   // Unpack
   unsigned int nSamp = data.nSamp;
@@ -549,17 +572,18 @@ void trainNN(
   std::vector<DTYPE> mtB;
   std::vector<std::vector<DTYPE>> vtW;
   std::vector<DTYPE> vtB;
-  if(adam.adam){
-    std::cout << "Adam: " 
-      << adam.alpha << ", " << adam.beta1 << ", " << adam.beta2
-    << std::endl;
+  if(alpha.adam){
+    print(alpha.adam, "Adam", false);
+    print(alpha.alpha, "Alpha", false);
+    print(alpha.beta1, "beta1", false);
+    print(alpha.beta2, "beta2");
     
     mtW = zero(wsize); //1st Moment std::vector
     mtB = std::vector<DTYPE> (ann.bias.size(), 0); // 1st Moment std::vector
     vtW = zero(wsize); // 2nd Moment std::vector
     vtB = std::vector<DTYPE> (ann.bias.size(), 0); // 2nd Moment std::vector
   }else{
-    std::cout << "alpha: " << adam.alpha << std::endl;
+    print(alpha.alpha, "alpha");
   }
 
   while(epoch < maxIter && !converged){
@@ -567,6 +591,11 @@ void trainNN(
     // Init deltas
     std::vector<std::vector<DTYPE>> dW = zero(wsize);
     std::vector<DTYPE> dB(ann.bias.size(), 0);
+    result.double_ambit = 0;
+    result.uint_ambit = 0;
+    result.vector_bool = std::vector<bool>(nSamp, false);
+    result.vector_unit = std::vector<unsigned int>(nSamp, nClasses);
+    result.vector_dtype = std::vector<DTYPE>(nSamp*nFeat, 0);
 
     // For each sample
     // Parallelize
@@ -588,6 +617,14 @@ void trainNN(
         act
       );
 
+      unsigned int lli = ann.sNodes[ann.nLayers-1];
+      unsigned int lls = ann.nNodes[ann.nLayers-1];
+      unsigned int lastActID = ann.actIDs[ann.actIDs.size()-1];
+      std::vector<DTYPE> lastAct = subVector(act,lli,lls);
+      std::vector<DTYPE> lastLayer = subVector(act,lli,lls);
+      getResults(result, lastAct, lastLayer, lastActID, ann.lossID, i, data.obs[i]);
+
+      // Run Back Propagation
       backProp(
         ann,
         data.obs[i],
@@ -597,32 +634,49 @@ void trainNN(
         dB
       );
     }
+
+    // update weights and bias
+    if(alpha.adam){
+      double alpha_ = alpha.alpha*sqrt(1-pow(alpha.beta2,epoch))/(1-pow(alpha.beta1,epoch));
+
+      // Weights
+      dot(mtW, alpha.beta1);
+      add(mtW, dotR(dW, (1-alpha.beta1)));
+      dot(vtW, alpha.beta2);
+      add(vtW, dotR(squareR(dW), (1-alpha.beta2)));
+      subtract(
+        ann.weights, 
+        divideR(
+          dotR(mtW, alpha_),
+          addR(rootR(vtW), alpha.epsilon)
+        )
+      );
+
+      // Bias
+      dot(mtB, alpha.beta1);
+      add(mtB, dotR(dB, (1-alpha.beta1)));
+      dot(vtB, alpha.beta2);
+      add(vtB, dotR(squareR(dB), (1-alpha.beta2)));
+      subtract(
+        ann.bias,
+        divideR(
+          dotR(mtB, alpha_),
+          addR(rootR(vtB), alpha.epsilon)
+        )
+      );
+
+    }else{
+      subtract(ann.weights, dotR(dW, alpha.alpha));
+      subtract(ann.bias, dotR(dB, alpha.alpha));
+    }
+
+    if((result.double_ambit < alpha.gamma) || (result.uint_ambit == nSamp)){
+      converged = true;
+      print(epoch, "Epoch"); print("Converged");
+    }
   }
   if(!converged){print(epoch, "Epoch");}
   return;
-}
-
-void getResults(
-  struct Results &result,
-  std::vector<DTYPE> lastAct,
-  std::vector<DTYPE> lastLayer,
-  unsigned int lastActID,
-  unsigned int lossID,
-  unsigned int sampleIndex,
-  unsigned int obs
-){
-  // std::vector<DTYPE> lastAct = subVector(act,lli,lls);
-  unsigned int cli = sampleIndex*lastAct.size();
-  set(result.vector_dtype, lastAct, cli);
-  unsigned int prediction = (unsigned int)max(lastAct, true);
-  result.vector_unit[sampleIndex] = prediction;
-  if(prediction == obs){
-    result.uint_ambit ++;
-    result.vector_bool[sampleIndex] = true;
-  }
-  // std::vector<DTYPE> lastLayer = subVector(layer,lli,lls);
-  std::vector<DTYPE> temp = ACT2[lastActID](lastLayer, 0);
-  result.double_ambit += sum(LOSSF[lossID](temp,obs));
 }
 
 
