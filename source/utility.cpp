@@ -41,17 +41,17 @@ void print(struct Data data){
 void print(struct Results re){
   std::cout << "Number of Correct Predictions (for Classification): " << re.uint_ambit << std::endl;
   std::cout << "Error (Summed Loss Function): " << re.double_ambit << std::endl;
-  std::cout << "Sample Prediction Correct (bool): ";
+  std::cout << "Sample Prediction Correct: ";
   for(unsigned int i = 0; i < re.vector_bool.size(); i++){
     std::cout << re.vector_bool[i] << ", ";
   }
   std::cout << std::endl;
-  std::cout << "Sample Prediction (uint): ";
+  std::cout << "Sample Prediction uint(" << re.vector_unit.size() << "):";
   for(unsigned int i = 0; i < re.vector_unit.size(); i++){
     std::cout << re.vector_unit[i] << ", ";
   }
   std::cout << std::endl;
-  std::cout << "Sample Prediction (dtype): ";
+  std::cout << "Sample Prediction dtype(" << re.vector_dtype.size() << "):";
   for(unsigned int i = 0; i < re.vector_dtype.size(); i++){
     std::cout << re.vector_dtype[i] << ", ";
   }
@@ -115,6 +115,19 @@ void print(std::vector<DTYPE> v, std::string name /*na*/){
     std::cout << v[i] << ", " << std::flush;
   }
   std::cout << v[v.size()-1] << std::endl << std::flush;
+}
+void print(std::vector<std::vector<DTYPE>> v, std::string name /*na*/){
+  if(name != "na"){
+    std::cout << name << ": " << std::flush;
+  }
+  for(unsigned int i = 0; i < v.size(); i++){
+    std::cout << "\n\tL" << i << "("<< v[i].size() <<") ";
+    for(unsigned int j = 0; j < v[i].size(); j++){
+      std::cout << v[i][j] << ", ";
+    }
+    std::cout << v[i][v[i].size()-1] << std::flush;
+  }
+  std::cout << std::endl;
 }
 
 int errPrint(std::string error_message){

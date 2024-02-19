@@ -675,7 +675,10 @@ void trainNN(
       print(epoch, "Epoch"); print("Converged");
     }
   }
-  if(!converged){print(epoch, "Epoch");}
+  if(!converged){
+    print(epoch, "Epoch");
+    fprintf(stderr, "%u, ",epoch);
+  }
   return;
 }
 

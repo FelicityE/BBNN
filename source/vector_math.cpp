@@ -179,7 +179,7 @@ std::vector<std::vector<DTYPE>> divideR(
     return A;
   }
 
-  std::vector<std::vector<DTYPE>> C;
+  std::vector<std::vector<DTYPE>> C(A.size());
   for(unsigned int i = 0; i < A.size(); i++){
     if(A[i].size() != B[i].size()){
       errPrint("ERROR - divide: A[i].size != B[i].size.", A[i].size(), B[i].size());
@@ -386,17 +386,17 @@ std::vector<std::vector<DTYPE>> subtractR(
   std::vector<std::vector<DTYPE>> B
 ){
   if(A.size() != B.size()){
-    errPrint("ERROR - subtract: A.size does not match B.size.", A.size(), B.size());
+    errPrint("ERROR - subtractR: A.size does not match B.size.", A.size(), B.size());
     return A;
   }
 
-  std::vector<std::vector<DTYPE>> C;
+  std::vector<std::vector<DTYPE>> C(A.size());
   for(unsigned int i = 0; i < A.size(); i++){
     if(A[i].size() != B[i].size()){
-      errPrint("ERROR - subtract: A[i].size does not match B[i].size.", A[i].size(), B[i].size());
+      errPrint("ERROR - subtractR: A[i].size does not match B[i].size.", A[i].size(), B[i].size());
       return A;
     }
-    C[i] = std::vector<DTYPE>(A.size(), 0);
+    C[i] = std::vector<DTYPE>(A[i].size(), 0);
     for(unsigned int j = 0; j < A[i].size(); j++){
       C[i][j] = A[i][j] - B[i][j];
     }

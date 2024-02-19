@@ -43,6 +43,6 @@ make
 # example 5: set layer 2 and layer 4 to sigmoid
 # setActs 0 2 3 -stp setActs 0 4 5 -stp
 
-echo -e "maxIter,alpha,ratio,sseed,wseed,epoch,test,train,total" >&2 
+echo -e "epoch, maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
 cd build/
 ./main ../data/Test.txt Adam

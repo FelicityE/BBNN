@@ -13,11 +13,15 @@ std::string str(char * value);
 ///////////////////////////////////////////////////////////////////////////////
 void print(struct Data data);
 void print(struct Results re);
+
 void print(bool x, std::string name = "na", bool endl = true);
 void print(unsigned int x, std::string name = "na", bool endl = true);
 void print(DTYPE x, std::string name = "na", bool endl = true);
+
 void print(std::vector<unsigned int> v, std::string name = "na");
 void print(std::vector<DTYPE> v, std::string name = "na");
+void print(std::vector<std::vector<DTYPE>> v, std::string name /*na*/);
+
 int errPrint(std::string error_message);
 int errPrint(std::string error_message, unsigned int a, unsigned int b);
 // int errPrint(std::string error_message, double a, double b);
