@@ -218,7 +218,7 @@ Ann initANN(
 
   // Getting Default Activation List 
   std::vector<unsigned int> actIDs(tNodes-nFeat, RELU);
-  for(unsigned int i = actIDs.size()-nNodes[nLayers-1]; i < actIDs.size(); i++){
+  for(unsigned int i = sNodes[nLayers-1]; i < actIDs.size(); i++){
     actIDs[i] = SOFTMAX ; 
   }
   // Initializing Weights
@@ -360,7 +360,61 @@ void getDataSets(
 ///////////////////////////////////////////////////////////////////////////////
 /// Setters
 ///////////////////////////////////////////////////////////////////////////////
-/// ANN
+// Setting Activation function
+void setNodes(
+  std::vector<unsigned int> &actIDs,
+  unsigned int actID,
+  unsigned int node,
+  unsigned int toNode /*0*/
+){
+  if(node >= actIDs.size()){
+    errPrint("ERROR setNode: node >= actIDs.size()", node, actIDs.size());
+    return;
+  }else if(toNode > actIDs.size()){
+    errPrint("ERROR setNode: toNode > actIDs.size()", toNode, actIDs.size());
+    return;
+  }
+  if(toNode == 0){
+    actIDs[node] = actID;
+    return;
+  }
+  for(unsigned int i = node; i < toNode; i++){
+    actIDs[i] = actID;
+  }
+  return;
+}
+
+void getNodes(
+  std::vector<unsigned int> sNodes,
+  std::vector<unsigned int> nNodes,
+  unsigned int &nodeR,
+  unsigned int &toNodeR,
+  unsigned int Layer,
+  unsigned int node,
+  unsigned int toLayer /*0*/,
+  unsigned int toNode /*0*/
+){
+  unsigned int nLayers = sNodes.size();
+  if(Layer == 0){
+    errPrint("ERROR getNodes: Layer = 0. Layer 0 has no activation functions");
+    return;
+  }else if(Layer >= nLayers){
+    errPrint("ERROR getNodes: Layer index is > number of Layers.",Layer, nLayers-1);
+    return;
+  }else if(node >= nNodes[Layer]){
+    errPrint("ERROR getNodes: node > nNodes[Layer].", node, nNodes[Layer]-1);
+    return;
+  }else if(toLayer >= nLayers){
+    errPrint("ERROR getNodes: toLayer index is > number of Layers.",toLayer, nLayers-1);
+    return;
+  }else if(toNode >= nNodes[Layer]){
+    errPrint("ERROR getNodes: toNode > nNodes[Layer].", toNode, nNodes[Layer]-1);
+    return;
+  }
+  nodeR = sNodes[Layer]+node-nNodes[0];
+  toNodeR = sNodes[toLayer]+toNode-nNodes[0];
+  return;
+}
 // Get Activation ID Postion
 unsigned int getAIDP(
   std::vector<unsigned int> nNodes, 

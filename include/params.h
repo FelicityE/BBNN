@@ -15,7 +15,7 @@
 #define ERRPRINT true
 #define TRAINPRINT false
 #define DEBUG false
-#define COLOR false
+#define COLOR true
 
 #define DTYPE double
 
