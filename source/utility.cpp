@@ -19,6 +19,11 @@ std::string str(char * value){std::string s = value; return s;}
 ///////////////////////////////////////////////////////////////////////////////
 /// Print
 ///////////////////////////////////////////////////////////////////////////////
+// File Handling
+bool is_empty(std::ifstream& pFile){
+  return pFile.peek() == std::ifstream::traits_type::eof();
+}
+
 void print(struct Data data){
   std::cout 
     << "Number of Features: " << data.nFeat << "; "
@@ -46,9 +51,9 @@ void print(struct Results re){
     std::cout << re.vector_bool[i] << ", ";
   }
   std::cout << std::endl;
-  std::cout << "Sample Prediction uint(" << re.vector_unit.size() << "):";
-  for(unsigned int i = 0; i < re.vector_unit.size(); i++){
-    std::cout << re.vector_unit[i] << ", ";
+  std::cout << "Sample Prediction uint(" << re.vector_uint.size() << "):";
+  for(unsigned int i = 0; i < re.vector_uint.size(); i++){
+    std::cout << re.vector_uint[i] << ", ";
   }
   std::cout << std::endl;
   std::cout << "Sample Prediction dtype(" << re.vector_dtype.size() << "):";
@@ -635,27 +640,12 @@ int getSetup(
         // print("Hidden Nodes", nHiddenNodes);
         std::cout << std::endl;
       }
-      
-      // else if(match(inputs[i], "setActs")){
-      //   i++;
-      //   std::vector<unsigned int> temp;
-      //   unsigned int cnt;
-      //   while(!match(inputs[i], "-stp")){
-      //     if(cnt >= 5){
-      //       errPrint("ERROR - SetUp: setActs was not followed by -stp after 5 or less integers.");
-      //       return 1;
-      //     }
-      //     temp.push_back(std::stoi(inputs[i]));
-      //     i++;
-      //     cnt++;
-      //   }
-      //   struct ActID_Set tempStruct(temp);
-      //   annbit.ActIDSets.push_back(tempStruct);
-      // }
 
       else if(match(inputs[i], "setNodes")){
-        std::cout << "Setting Nodes" << std::endl;
-        print(inputs[i+1], "0");
+        BUG(
+          std::cout << "Setting Nodes" << std::endl;
+          print(inputs[i+1], "0");
+        )
         i++;
         unsigned int actID = std::stoi(inputs[i]);
         i++;

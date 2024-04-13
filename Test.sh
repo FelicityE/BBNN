@@ -1,13 +1,14 @@
 #!/bin/bash
 
-#SBATCH --job-name=BBNN-Analysis
-#SBATCH --output=/home/fhe2/Code/BBNN/results/log.out
-#SBATCH --error=/home/fhe2/Code/BBNN/results/log.err
+#SBATCH --job-name=BBNN-Test
+#SBATCH --output=/home/fhe2/Code/BBNN/results/test-log.out
+#SBATCH --error=/home/fhe2/Code/BBNN/results/test-log.err
 
-#SBATCH --time=1000:00
+#SBATCH --time=1:00
 #SBATCH --mem=300
 #SBATCH --nodes=1
 
+make clean
 make
 
 # Options
@@ -28,28 +29,12 @@ make
 # Layers x y -> set number of layers = x and number of nodes for each hidden layer = y, default 3 2
 # hNodes x y1 y2 ... yn -> set number hidden of layers = x and nodes for each hidden layer = yl, y2, ... yn (all hidden layers must be defined); default 2
 
+# ScorePath path -> set the scores to go to filepath 
+
 # setNodes x y z -> Set to actID x starting from node position y for z nodes; (setNodes <actID> <starting node> <for n nodes>)
 # setNodes x list: y1 y2 -list -> Set node poitions y1 and y2 to actID x 
 
 
 echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
 cd build/
-for h in {1..10}
-do
-    for l in {1..10}
-    do
-        for i in $(seq 0 $h)
-        do
-            for j in $(seq 0 $l)
-            do
-                for p in {1..10}
-                do
-                    >&2 echo -n "$p, $h, $l, $i, $j, "
-                    ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam wseed $p maxIter 1000 hNodes 2 $h $l setNodes 0 0 $i setNodes 0 $h $j > ../results/log.log
-                done
-            done
-        done
-    done
-done
-# ./main ../data/Test.txt Adam setActs 0 2 3 -stp maxIter 1
-# ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam 
+./main ../data/Test.txt Adam maxIter 1000 hNodes 2 9 6 > ../results/test-log.log

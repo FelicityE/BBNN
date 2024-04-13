@@ -4,47 +4,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Lists 
 ///////////////////////////////////////////////////////////////////////////////
-const std::vector<actT1> ACT1{sigmoid, relu};
-const std::vector<actT1> DACT1{dsigmoid, drelu};
-const std::vector<actT2> ACT2{sigmoid, relu, softmax, argmax};
-const std::vector<actT2> DACT2{dsigmoid, drelu, dsoftmax, dargmax};
+const std::vector<actT1> ACT1{relu, sigmoid};
+const std::vector<actT1> DACT1{drelu, dsigmoid};
+const std::vector<actT2> ACT2{relu, sigmoid, softmax, argmax};
+const std::vector<actT2> DACT2{drelu, dsigmoid, dsoftmax, dargmax};
 const int TYPECHANGE = ACT1.size();
 
 const std::vector<lossF> LOSSF{crossentropy};
 const std::vector<lossF> DLOSSF{dcrossentropy};
 
-enum ACTID{SIGMOID, RELU, SOFTMAX, ARGMAX};
+enum ACTID{RELU, SIGMOID, SOFTMAX, ARGMAX};
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Structs
 ///////////////////////////////////////////////////////////////////////////////
-// struct ActID_Set{
-//   ActID_Set():
-//     ID(RELU),
-//     layerStrt(0),
-//     layerEnd(UINT_MAX),
-//     nodeStrt(0),
-//     nodeEnd(UINT_MAX)
-//   {}
-//   ActID_Set(std::vector<unsigned int> set):
-//     layerEnd(UINT_MAX),
-//     nodeStrt(0),
-//     nodeEnd(UINT_MAX)
-//   {
-//     this->ID = set[0];
-//     this->layerStrt = set[1];
-//     if(set.size() > 2){this->layerEnd = set[2];}
-//     if(set.size() > 3){this->nodeStrt = set[3];}
-//     if(set.size() > 4){this->nodeEnd = set[4];}
-//   }
-//   unsigned int ID;
-//   unsigned int layerStrt;
-//   unsigned int layerEnd;
-//   unsigned int nodeStrt;
-//   unsigned int nodeEnd;
-// };
-
 struct ActID_Set{
   ActID_Set(unsigned int id, std::vector<unsigned int> nodePos){
     this->ID = id;
@@ -135,14 +109,40 @@ struct Results{
     unsigned int nSamples,
     unsigned int nClasses
   ):uint_ambit(0), double_ambit(0){
+    this->observedValue = std::vector<unsigned int> (nSamples, nClasses);
     this->vector_bool = std::vector<bool>(nSamples, false);
-    this->vector_unit = std::vector<unsigned int>(nSamples, nClasses);
+    this->vector_uint = std::vector<unsigned int>(nSamples, nClasses);
+    this->vector_dtype = std::vector<DTYPE>(nSamples*nClasses, 0);
+  }
+  Results(
+    unsigned int nSamples,
+    unsigned int nClasses,
+    std::vector<unsigned int> obs 
+  ):uint_ambit(0), double_ambit(0){
+    this->observedValue = obs;
+    this->vector_bool = std::vector<bool>(nSamples, false);
+    this->vector_uint = std::vector<unsigned int>(nSamples, nClasses);
     this->vector_dtype = std::vector<DTYPE>(nSamples*nClasses, 0);
   }
   
   unsigned int uint_ambit; // number of correct predictions
   DTYPE  double_ambit; // error
+  std::vector<unsigned int> observedValue;
   std::vector<bool> vector_bool; // bool was the sample prediction correct (or within x error for nonclass)
-  std::vector<unsigned int> vector_unit; // sample prediction
+  std::vector<unsigned int> vector_uint; // sample prediction
   std::vector<DTYPE> vector_dtype; // sample prediction
+};
+
+struct Scores{
+  Scores(){}
+  Scores(unsigned int nClass){
+    this->accuracy = 0;
+    this->precision = std::vector<double>(nClass,0);
+    this->recall = std::vector<double>(nClass,0);
+    this->F1 = std::vector<double>(nClass,0);
+  }
+  double accuracy;
+  std::vector<double> precision;
+  std::vector<double> recall;
+  std::vector<double> F1;
 };

@@ -4,20 +4,22 @@
 /// ANN Utility
 ///////////////////////////////////////////////////////////////////////////////
 void print(struct Ann ann){
-  std::cout << "Number of Features: " << ann.nNodes[0] << std::endl;
-  std::cout << "Number of Classes: " << ann.nNodes[ann.nLayers-1] << std::endl;
-  std::cout << "Number of Layers: " << ann.nLayers << std::endl;
-  std::cout << "Total Number of Nodes: " << ann.tNodes << std::endl;
+  std::cout << "Number of Features: " << ann.nNodes[0] << ", ";
+  std::cout << "Number of Classes: " << ann.nNodes[ann.nLayers-1] << ", ";
+  std::cout << "Number of Layers: " << ann.nLayers << ", ";
+  std::cout << "Total Number of Nodes: " << ann.tNodes << ", ";
   std::cout << "Number of Nodes per Layer: ";
   for(unsigned int i = 0; i < ann.nNodes.size(); i++){
     std::cout << ann.nNodes[i] << ", ";
   }
   std::cout << std::endl;
-  std::cout << "Starting Position of Each Layer (Summed Nodes): ";
-  for(unsigned int i = 0; i < ann.sNodes.size(); i++){
-    std::cout << ann.sNodes[i] << ", ";
-  }
-  std::cout << std::endl;
+  BUG(
+    std::cout << "Starting Position of Each Layer (Summed Nodes): ";
+    for(unsigned int i = 0; i < ann.sNodes.size(); i++){
+      std::cout << ann.sNodes[i] << ", ";
+    }
+    std::cout << std::endl;
+  )
   std::cout << "List of Activation IDs: ";
   unsigned int p = 0;
   for(unsigned int i = 1; i < ann.nNodes.size(); i++){
@@ -28,7 +30,7 @@ void print(struct Ann ann){
     }
   }
   std::cout << std::endl;
-  std::cout << "Last Layer Activation ID for Testing: " << ann.lLAID << std::endl;
+  std::cout << "Loss ID: " << ann.lLAID << std::endl;
   std::cout << "Weights("<< getSize(ann.weights) << "): ";
   for(unsigned int i = 0; i < ann.weights.size(); i++){
     std::cout << "\n\tL" << i << "("<< ann.weights[i].size() <<") ";
@@ -60,6 +62,40 @@ void print(std::vector<std::vector<DTYPE>> W, std::vector<DTYPE> B){
   std::cout << std::endl << std::endl;
 }
 
+void printTo(struct Scores scores, std::string filename /*= "score.log"*/){
+  bool addHeader = false;
+  std::ifstream check(filename);
+  if(!check || is_empty(check)){
+    check.close();
+    addHeader = true;
+  }
+  std::ofstream file;
+  file.open(filename, std::ofstream::app);
+  
+  std::vector<std::string> headers{"p", "r", "f"};
+  if(addHeader){
+    file << "a";
+    for(unsigned int i = 0; i < scores.F1.size(); i++){
+      for(unsigned int j = 0; j < headers.size(); j++){
+        file << ", " << headers[j] << i; 
+      }
+    }
+  }
+
+  file << "\n" << scores.accuracy;
+  for(unsigned int i = 0; i < scores.F1.size(); i++){
+    file 
+      << ", " << scores.precision[i]
+      << ", " << scores.recall[i]
+      << ", " << scores.F1[i];
+  }
+  
+  file.close();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Applying Activation Functions
+///////////////////////////////////////////////////////////////////////////////
 void applyAct(
   std::vector<DTYPE> &layer, 
   std::vector<unsigned int> aIDs,
@@ -156,45 +192,45 @@ void initWeights(struct Ann &ann){
   return;
 }
 
-Ann initANN(
-	unsigned int nFeat, 
-	unsigned int nClasses, 
-	unsigned int nLayers
-){
-  // Getting Default Number of Nodes Per Layer
-  std::vector<unsigned int> nNodes(nLayers, nClasses);
-  nNodes[0] = nFeat;
-  // Getting Layer Starting nodes
-  std::vector<unsigned int> sNodes(nLayers,0);
-  for(unsigned int i = 1; i < nLayers; i++){
-    sNodes[i] = sNodes[i-1]+nNodes[i-1];
-  }
-  // Getting Number of total Nodes
-  unsigned int tNodes = sum(nNodes);
-  // Getting Default Activation List 
-  std::vector<unsigned int> actIDs(tNodes, RELU);
-  for(unsigned int i = tNodes-1; i > tNodes-nNodes[nNodes.size()-1]-1; i--){
-    // print(i, "[i], 3 input");
-    actIDs[i] = SOFTMAX; 
-  }
-  // Initializing Weights
-  std::vector<std::vector<DTYPE>> weights;
-  initWeights(weights, nNodes);
-  // Initializing Bias
-  std::vector<DTYPE> bias(tNodes-nFeat, 0);
-  // Packing
-  struct Ann ann;
-  ann.nLayers = nLayers;
-  ann.nNodes = nNodes;
-  ann.sNodes = sNodes;
-  ann.tNodes = tNodes;
-  ann.actIDs = actIDs;
-  ann.lossID = 0;
-  ann.weights = weights;
-  ann.bias = bias;
+// Ann initANN(
+// 	unsigned int nFeat, 
+// 	unsigned int nClasses, 
+// 	unsigned int nLayers
+// ){
+//   // Getting Default Number of Nodes Per Layer
+//   std::vector<unsigned int> nNodes(nLayers, nClasses);
+//   nNodes[0] = nFeat;
+//   // Getting Layer Starting nodes
+//   std::vector<unsigned int> sNodes(nLayers,0);
+//   for(unsigned int i = 1; i < nLayers; i++){
+//     sNodes[i] = sNodes[i-1]+nNodes[i-1];
+//   }
+//   // Getting Number of total Nodes
+//   unsigned int tNodes = sum(nNodes);
+//   // Getting Default Activation List 
+//   std::vector<unsigned int> actIDs(tNodes, RELU);
+//   for(unsigned int i = tNodes-1; i > tNodes-nNodes[nNodes.size()-1]-1; i--){
+//     // print(i, "[i], 3 input");
+//     actIDs[i] = SOFTMAX; 
+//   }
+//   // Initializing Weights
+//   std::vector<std::vector<DTYPE>> weights;
+//   initWeights(weights, nNodes);
+//   // Initializing Bias
+//   std::vector<DTYPE> bias(tNodes-nFeat, 0);
+//   // Packing
+//   struct Ann ann;
+//   ann.nLayers = nLayers;
+//   ann.nNodes = nNodes;
+//   ann.sNodes = sNodes;
+//   ann.tNodes = tNodes;
+//   ann.actIDs = actIDs;
+//   ann.lossID = 0;
+//   ann.weights = weights;
+//   ann.bias = bias;
   
-  return ann;
-}
+//   return ann;
+// }
 
 Ann initANN(
 	unsigned int nFeat, 
@@ -442,18 +478,106 @@ void getResults(
   unsigned int sampleIndex,
   unsigned int obs
 ){
-  // std::vector<DTYPE> lastAct = subVector(act,lli,lls);
+  // Copy result set to results struct
+  result.observedValue[sampleIndex] = obs;
+  // Get Sample Starting Index (when listed as a layer output)
   unsigned int cli = sampleIndex*lastAct.size();
+  // Set Sample Prediction to the last layer output
   set(result.vector_dtype, lastAct, cli);
+  // Get the class prediction
   unsigned int prediction = (unsigned int)max(lastAct, true);
-  result.vector_unit[sampleIndex] = prediction;
+  // Set class prediction to in sample index
+  result.vector_uint[sampleIndex] = prediction;
   if(prediction == obs){
+    // Count the number of correct predictions
     result.uint_ambit ++;
+    // Set sample index to true
     result.vector_bool[sampleIndex] = true;
   }
-  // std::vector<DTYPE> lastLayer = subVector(layer,lli,lls);
+  result.observedValue[sampleIndex] = obs;
   std::vector<DTYPE> temp = ACT2[lastActID](lastLayer, 0);
   result.double_ambit += sum(LOSSF[lossID](temp,obs));
+}
+
+void getScores(
+  struct Scores &score,
+  std::vector<unsigned int> obs,
+  std::vector<unsigned int> pre,
+  std::vector<bool> cor
+){
+  std::vector<unsigned int> obsCnt(3,0);
+  std::vector<unsigned int> preCnt(3,0);
+  std::vector<unsigned int> corCnt(3,0);
+  
+  for(unsigned int i = 0; i < obs.size(); i++){
+    obsCnt[obs[i]]++;
+    preCnt[pre[i]]++;
+    if(cor[i]){
+      corCnt[obs[i]]++;
+    }
+    BUG(
+      std::cout << "Sample: " << i
+        << "  Observed: " << obs[i]
+        << "  Predicted: " << pre[i]
+        << "  Correct: " << cor[i]
+        << "  New Observed " << obs[i] << " Count: " << obsCnt[obs[i]]
+        << "  New Predicted " << pre[i] << " Count: " << preCnt[pre[i]]
+        << "  New Correct " << obs[i] << " Count: " << corCnt[obs[i]]
+      << std::endl;
+    )
+  }
+
+  score.accuracy = (double)sum(corCnt)/(double)cor.size();
+  
+  for(unsigned int i = 0; i < 3; i++){
+    if(obsCnt[i] == 0){
+      score.recall[i] = -1;
+    }else{
+      score.recall[i] = (double)corCnt[i]/(double)obsCnt[i];
+    }
+    if(preCnt[i] == 0){
+      score.precision[i] = -1;
+    }else{
+      score.precision[i] = (double)corCnt[i]/(double)preCnt[i];    
+    }
+    if(obsCnt[i] == 0 || preCnt[i] == 0){
+      score.F1[i] = -1;
+    }else{
+      score.F1[i] = (2*score.recall[i]*score.precision[i])/(score.recall[i]+score.precision[i]);
+    }
+    BUG(
+      std::cout << "Class: " << i
+        << "  Observed: " << obsCnt[i]
+        << "  Predicted: " << preCnt[i]
+        << "  Correct: " << corCnt[i]
+        << "  = Recall: " << score.recall[i]
+        << "  Precision: " << score.precision[i]
+        << "  F1: " << score.F1[i]
+      << std::endl;
+    )
+  }
+  BUG(
+    std::cout << "Accuracy: " << score.accuracy << std::endl;
+  )
+  return;
+}
+struct Scores getScores(
+  struct Results result,
+  unsigned int nClasses
+){
+  std::vector<unsigned int> obs = result.observedValue;
+  std::vector<unsigned int> pre = result.vector_uint;
+  std::vector<bool> cor = result.vector_bool;
+  
+  struct Scores score(nClasses);
+  getScores(
+    score,
+    obs,
+    pre,
+    cor
+  );
+
+  return score;
 }
 
 void forward(
@@ -611,7 +735,7 @@ void trainNN(
     result.double_ambit = 0;
     result.uint_ambit = 0;
     result.vector_bool = std::vector<bool>(nSamp, false);
-    result.vector_unit = std::vector<unsigned int>(nSamp, nClasses);
+    result.vector_uint = std::vector<unsigned int>(nSamp, nClasses);
     result.vector_dtype = std::vector<DTYPE>(nSamp*nClasses, 0);
 
     // For each sample
@@ -755,4 +879,39 @@ void testNN(
     set(ann.actIDs, oAIDLL, alli, lls);
   }
   return;
+}
+
+void runANN(
+  struct Alpha alpha,
+  struct ANN_Ambit ann_,
+  struct Data data,
+  struct Data train,
+  struct Data test,
+  struct Scores &trainScores,
+  struct Scores &testScores
+){
+  // Build
+  struct Ann ann = initANN(ann_, train);
+  BUG(std::cout << "\nGetting ANN" << std::endl;);
+  print(ann);
+
+  // Train
+  struct Results train_results(train.nSamp, train.nClasses);
+  trainNN(ann, train, train_results, alpha, ann_.maxIter);
+  
+  std::cout << "\nUpdated Weights and Bias" << std::endl;
+  print(ann.weights, ann.bias);
+  std::cout << "\nTraining Results" << std::endl;
+  print(train_results);
+
+  trainScores = getScores(train_results, train.nClasses);
+  
+  // Test
+  struct Results test_results(test.nSamp, test.nClasses);
+  testNN(ann, test, test_results);
+  
+  std::cout << "\nTesting Results" << std::endl;
+  print(test_results);
+
+  testScores = getScores(test_results, test.nClasses);
 }

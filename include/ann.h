@@ -7,6 +7,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 void print(struct Ann ann);
 void print(std::vector<std::vector<DTYPE>> W, std::vector<DTYPE> B);
+
+void printTo(
+  struct Scores scores,
+  std::string filename = "scores.log"
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// Applying Activation Functions
+///////////////////////////////////////////////////////////////////////////////
 void applyAct(
   std::vector<DTYPE> &layer, 
   std::vector<unsigned int> aIDs,
@@ -82,6 +91,28 @@ void setActID(
 ///////////////////////////////////////////////////////////////////////////////
 /// Training and Testing
 ///////////////////////////////////////////////////////////////////////////////
+void getResults(
+  struct Results &result,
+  std::vector<DTYPE> lastAct,
+  std::vector<DTYPE> lastLayer,
+  unsigned int lastActID,
+  unsigned int lossID,
+  unsigned int sampleIndex,
+  unsigned int obs
+);
+
+void getScores(
+  struct Scores &score,
+  std::vector<unsigned int> obs,
+  std::vector<unsigned int> pre,
+  std::vector<bool> cor
+);
+struct Scores getScores(
+  struct Results result,
+  unsigned int nClasses
+);
+
+
 void forward(
   struct Ann ann,
   std::vector<DTYPE> &layer,
@@ -109,4 +140,14 @@ void testNN(
   struct Ann ann,
   struct Data test,
   struct Results &result
+);
+
+void runANN(
+  struct Alpha alpha,
+  struct ANN_Ambit ann_,
+  struct Data data,
+  struct Data train,
+  struct Data test,
+  struct Scores &trainScores,
+  struct Scores &testScores
 );
