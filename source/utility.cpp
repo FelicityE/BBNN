@@ -581,8 +581,8 @@ int getSetup(
   if(numInputs > 2){
     for(unsigned int i = 2; i < numInputs; i++){
       if(match(inputs[i], "ID_column")){
-        read.idp = std::stoi(inputs[i+1]);
         i++;
+        read.idp = std::stoi(inputs[i]);
       }else if(match(inputs[i], "skip_row")){
         read.skipRow = std::stoi(inputs[i+1]);
         i++;
@@ -654,19 +654,22 @@ int getSetup(
       // }
 
       else if(match(inputs[i], "setNodes")){
+        std::cout << "Setting Nodes" << std::endl;
+        print(inputs[i+1], "0");
         i++;
         unsigned int actID = std::stoi(inputs[i]);
         i++;
         std::vector<unsigned int> nodePos;
         if(match(inputs[i],"list:")){
-          while(!match(inputs[i], "-list")){
+          i++;
+          while(!match(inputs[i], ":list")){
             nodePos.push_back(std::stoi(inputs[i]));
             i++;
             if(i >= numInputs){
               if(COLOR){
-                errPrint("ERROR - Setup:" + rgb::b + "list:" + rgb::R + "was not followed by" + rgb::b + "-list." + rgb::R);
+                errPrint("ERROR - Setup:" + rgb::b + "list:" + rgb::R + "was not followed by" + rgb::b + ":list." + rgb::R);
               }else{
-                errPrint("ERROR - Setup: list: was not followed by -list.");
+                errPrint("ERROR - Setup: list: was not followed by :list.");
               }
               
             }
@@ -675,7 +678,6 @@ int getSetup(
           unsigned int nodeStrt = std::stoi(inputs[i]);
           i++;
           unsigned int for_nNodes = std::stoi(inputs[i]);
-          i++;
           for(unsigned int j = 0; j < for_nNodes; j++){
             nodePos.push_back(nodeStrt+j);
           }

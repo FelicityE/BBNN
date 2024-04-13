@@ -4,7 +4,7 @@
 #SBATCH --output=/home/fhe2/Code/BBNN/results/log.out
 #SBATCH --error=/home/fhe2/Code/BBNN/results/log.err
 
-#SBATCH --time=1:00
+#SBATCH --time=1000:00
 #SBATCH --mem=300
 #SBATCH --nodes=1
 
@@ -34,12 +34,22 @@ make
 
 echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
 cd build/
-for i in {0..9}
+for h in {1..10}
 do
-    # ./main ../data/Test.txt Adam maxIter 1000 hNodes 2 9 6 > ../results/log.log
-    ./main ../data/Test.txt Adam maxIter 1000 hNodes 2 9 6 setNodes 0 0 $i > ../results/log.log
-    # ./main ../data/Test.txt Adam maxIter 1000 hNodes 2 9 6 setNodes 0 0 5 > ../results/log.log
-    # ./main ../data/Test.txt Adam maxIter 1000 hNodes 2 9 6 setNodes 0 0 9 > ../results/log.log
+    for l in {1..10}
+    do
+        for i in $(seq 0 $h)
+        do
+            for j in $(seq 0 $l)
+            do
+                for p in {1..10}
+                do
+                    >&2 echo -n "$p, $h, $l, $i, $j, "
+                    ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam wseed $p maxIter 1000 hNodes 2 $h $l setNodes 0 0 $i setNodes 0 $h $j > ../results/log.log
+                done
+            done
+        done
+    done
 done
 # ./main ../data/Test.txt Adam setActs 0 2 3 -stp maxIter 1
 # ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam 
