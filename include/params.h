@@ -15,7 +15,7 @@
 #define ERRPRINT true
 #define TRAINPRINT false
 #define DEBUG false
-#define COLOR true
+#define COLOR false
 
 #define DTYPE double
 
@@ -30,12 +30,12 @@ typedef std::vector<DTYPE> (*actT2)(std::vector<DTYPE> /*Layer*/, unsigned int /
 #endif
 
 #if(COLOR)
-  #define RYB(x) x
+  #define RGB(x) x
 #else
-  #define RYB(x)
+  #define RGB(x)
 #endif
 
-namespace RGB{
+namespace rgb{
   const std::string R = "\033[0m"; // reset
   const std::string k = "\033[30m"; // black
   const std::string r = "\033[31m"; // red

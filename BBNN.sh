@@ -28,22 +28,18 @@ make
 # Layers x y -> set number of layers = x and number of nodes for each hidden layer = y, default 3 2
 # hNodes x y1 y2 ... yn -> set number hidden of layers = x and nodes for each hidden layer = yl, y2, ... yn (all hidden layers must be defined); default 2
 
-# Activation Functions: default ReLu(1)
-# Activations ID: sigmoid 0, relu 1, softmax 2, argmax 3; 
-# To change an activation function use the following
-# setActs <ID> <starting layer number> <ending layer number (exclusive)> <starting node> <ending node> -stp
-# example 1: set layers 2 to the end to sigmoid
-# setActs 0 2 -stp
-# example 2: set layer 2 to sigmoid
-# setActs 0 2 3 -stp
-# example 3: set nodes 2 to the end in layer 2 to sigmoid
-# setActs 0 2 3 2 -stp
-# example 4: set nodes 2 and 3 in layer 2 to sigmoid
-# setActs 0 2 3 2 4
-# example 5: set layer 2 and layer 4 to sigmoid
-# setActs 0 2 3 -stp setActs 0 4 5 -stp
+# setNodes x y z -> Set to actID x starting from node position y for z nodes; (setNodes <actID> <starting node> <for n nodes>)
+# setNodes x list: y1 y2 -list -> Set node poitions y1 and y2 to actID x 
 
-echo -e "epoch, maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
+
+echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
 cd build/
-./main ../data/Test.txt Adam setActs 0 2 3 -stp maxIter 1
+for i in {0..9}
+do
+    # ./main ../data/Test.txt Adam maxIter 1000 hNodes 2 9 6 > ../results/log.log
+    ./main ../data/Test.txt Adam maxIter 1000 hNodes 2 9 6 setNodes 0 0 $i > ../results/log.log
+    # ./main ../data/Test.txt Adam maxIter 1000 hNodes 2 9 6 setNodes 0 0 5 > ../results/log.log
+    # ./main ../data/Test.txt Adam maxIter 1000 hNodes 2 9 6 setNodes 0 0 9 > ../results/log.log
+done
+# ./main ../data/Test.txt Adam setActs 0 2 3 -stp maxIter 1
 # ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam 

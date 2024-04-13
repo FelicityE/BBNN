@@ -172,9 +172,10 @@ Ann initANN(
   // Getting Number of total Nodes
   unsigned int tNodes = sum(nNodes);
   // Getting Default Activation List 
-  std::vector<unsigned int> actIDs(tNodes, 1);
+  std::vector<unsigned int> actIDs(tNodes, RELU);
   for(unsigned int i = tNodes-1; i > tNodes-nNodes[nNodes.size()-1]-1; i--){
-    actIDs[i] = 2; 
+    // print(i, "[i], 3 input");
+    actIDs[i] = SOFTMAX; 
   }
   // Initializing Weights
   std::vector<std::vector<DTYPE>> weights;
@@ -194,6 +195,7 @@ Ann initANN(
   
   return ann;
 }
+
 Ann initANN(
 	unsigned int nFeat, 
 	unsigned int nClasses, 
@@ -213,13 +215,20 @@ Ann initANN(
   for(unsigned int i = 1; i < nLayers; i++){
     sNodes[i] = sNodes[i-1]+nNodes[i-1];
   }
+  // print(sNodes, "sNodes");
   // Getting Number of total Nodes
   unsigned int tNodes = sum(nNodes);
+  // print(tNodes-nFeat, "Total number of activations");
 
   // Getting Default Activation List 
   std::vector<unsigned int> actIDs(tNodes-nFeat, RELU);
-  for(unsigned int i = sNodes[nLayers-1]; i < actIDs.size(); i++){
-    actIDs[i] = SOFTMAX ; 
+  // Setting last layer (must be SoftMax)
+  // print(sNodes[nLayers-1], "Start"); 
+  int tempsize = actIDs.size();
+  // print(tempsize, "Number of activations");
+  for(unsigned int i = sNodes[nLayers-1]-nFeat; i < actIDs.size(); i++){
+    // print(i, "[i], 4 input");
+    actIDs[i] = SOFTMAX; 
   }
   // Initializing Weights
   std::vector<std::vector<DTYPE>> weights;
@@ -247,7 +256,7 @@ Ann initANN(struct ANN_Ambit ann_, struct Data train){
   
   if(ann_.hNodes.size() != nLayers-2){
     errPrint(
-      "ERROR - initANN: hNodes size does not match number of layers minus 2."
+      "ERROR - initANN: hNodes size does not match number of hidden layers."
     );
     std::cout << ann_.hNodes.size() << ":" << nLayers-2 << std::endl;
     exit(1);
@@ -276,16 +285,25 @@ Ann initANN(struct ANN_Ambit ann_, struct Data train){
     nNodes
   );
 
+  // Need list of node positions and what activation ID to change to
   for(unsigned int i = 0; i < ann_.ActIDSets.size(); i++){
-    setActID(
-      ann,
-      ann_.ActIDSets[i].ID,
-      ann_.ActIDSets[i].layerStrt,
-      ann_.ActIDSets[i].layerEnd,
-      ann_.ActIDSets[i].nodeStrt,
-      ann_.ActIDSets[i].nodeEnd
-    );
+    unsigned int ID = ann_.ActIDSets[i].ID;
+    for(unsigned int j = 0; j < ann_.ActIDSets[i].nodePositions.size(); j++){
+      unsigned int pos = ann_.ActIDSets[i].nodePositions[j];
+      ann.actIDs[pos] = ID;
+    }
   }
+
+  // for(unsigned int i = 0; i < ann_.ActIDSets.size(); i++){
+    // setActID(
+    //   ann,
+    //   ann_.ActIDSets[i].ID,
+    //   ann_.ActIDSets[i].layerStrt,
+    //   ann_.ActIDSets[i].layerEnd,
+    //   ann_.ActIDSets[i].nodeStrt,
+    //   ann_.ActIDSets[i].nodeEnd
+    // );
+  // }
   return ann;
 }
 
@@ -360,61 +378,6 @@ void getDataSets(
 ///////////////////////////////////////////////////////////////////////////////
 /// Setters
 ///////////////////////////////////////////////////////////////////////////////
-// Setting Activation function
-void setNodes(
-  std::vector<unsigned int> &actIDs,
-  unsigned int actID,
-  unsigned int node,
-  unsigned int toNode /*0*/
-){
-  if(node >= actIDs.size()){
-    errPrint("ERROR setNode: node >= actIDs.size()", node, actIDs.size());
-    return;
-  }else if(toNode > actIDs.size()){
-    errPrint("ERROR setNode: toNode > actIDs.size()", toNode, actIDs.size());
-    return;
-  }
-  if(toNode == 0){
-    actIDs[node] = actID;
-    return;
-  }
-  for(unsigned int i = node; i < toNode; i++){
-    actIDs[i] = actID;
-  }
-  return;
-}
-
-void getNodes(
-  std::vector<unsigned int> sNodes,
-  std::vector<unsigned int> nNodes,
-  unsigned int &nodeR,
-  unsigned int &toNodeR,
-  unsigned int Layer,
-  unsigned int node,
-  unsigned int toLayer /*0*/,
-  unsigned int toNode /*0*/
-){
-  unsigned int nLayers = sNodes.size();
-  if(Layer == 0){
-    errPrint("ERROR getNodes: Layer = 0. Layer 0 has no activation functions");
-    return;
-  }else if(Layer >= nLayers){
-    errPrint("ERROR getNodes: Layer index is > number of Layers.",Layer, nLayers-1);
-    return;
-  }else if(node >= nNodes[Layer]){
-    errPrint("ERROR getNodes: node > nNodes[Layer].", node, nNodes[Layer]-1);
-    return;
-  }else if(toLayer >= nLayers){
-    errPrint("ERROR getNodes: toLayer index is > number of Layers.",toLayer, nLayers-1);
-    return;
-  }else if(toNode >= nNodes[Layer]){
-    errPrint("ERROR getNodes: toNode > nNodes[Layer].", toNode, nNodes[Layer]-1);
-    return;
-  }
-  nodeR = sNodes[Layer]+node-nNodes[0];
-  toNodeR = sNodes[toLayer]+toNode-nNodes[0];
-  return;
-}
 // Get Activation ID Postion
 unsigned int getAIDP(
   std::vector<unsigned int> nNodes, 
@@ -726,9 +689,10 @@ void trainNN(
 
     if((result.double_ambit < alpha.gamma) || (result.uint_ambit == nSamp)){
       converged = true;
-      print(epoch, "Epoch"); print("Converged");
+      print(epoch, "Epoch"); print(converged, "Converged, In IF");
     }
   }
+
   if(!converged){
     print(epoch, "Epoch");
     fprintf(stderr, "%u, ",epoch);

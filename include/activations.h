@@ -17,7 +17,7 @@ std::vector<DTYPE> sigmoid(std::vector<DTYPE> layer, AMBIT_TYPE ambit);
 std::vector<DTYPE> dsigmoid(std::vector<DTYPE> layer, AMBIT_TYPE ambit);
 /// Softmax
 std::vector<DTYPE> softmax(std::vector<DTYPE> layer, AMBIT_TYPE obs);
-std::vector<DTYPE> dsoftmax(std::vector<DTYPE> layer, unsigned int obs);
+std::vector<DTYPE> dsoftmax(std::vector<DTYPE> layer, AMBIT_TYPE obs);
 
 /// Argmax
 std::vector<DTYPE> argmax(std::vector<DTYPE> layer, AMBIT_TYPE ambit);
@@ -30,10 +30,10 @@ DTYPE crossentropy(DTYPE x);
 DTYPE dcrossentropy(DTYPE x);
 std::vector<DTYPE> crossentropy(
   std::vector<DTYPE> layer,
-  unsigned int obs
+  AMBIT_TYPE obs
 );
 std::vector<DTYPE> dcrossentropy(
   std::vector<DTYPE> layer,
-  unsigned int obs
+  AMBIT_TYPE obs
 );
 

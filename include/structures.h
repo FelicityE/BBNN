@@ -19,30 +19,39 @@ enum ACTID{SIGMOID, RELU, SOFTMAX, ARGMAX};
 ///////////////////////////////////////////////////////////////////////////////
 // Structs
 ///////////////////////////////////////////////////////////////////////////////
+// struct ActID_Set{
+//   ActID_Set():
+//     ID(RELU),
+//     layerStrt(0),
+//     layerEnd(UINT_MAX),
+//     nodeStrt(0),
+//     nodeEnd(UINT_MAX)
+//   {}
+//   ActID_Set(std::vector<unsigned int> set):
+//     layerEnd(UINT_MAX),
+//     nodeStrt(0),
+//     nodeEnd(UINT_MAX)
+//   {
+//     this->ID = set[0];
+//     this->layerStrt = set[1];
+//     if(set.size() > 2){this->layerEnd = set[2];}
+//     if(set.size() > 3){this->nodeStrt = set[3];}
+//     if(set.size() > 4){this->nodeEnd = set[4];}
+//   }
+//   unsigned int ID;
+//   unsigned int layerStrt;
+//   unsigned int layerEnd;
+//   unsigned int nodeStrt;
+//   unsigned int nodeEnd;
+// };
+
 struct ActID_Set{
-  ActID_Set():
-    ID(RELU),
-    layerStrt(0),
-    layerEnd(UINT_MAX),
-    nodeStrt(0),
-    nodeEnd(UINT_MAX)
-  {}
-  ActID_Set(std::vector<unsigned int> set):
-    layerEnd(UINT_MAX),
-    nodeStrt(0),
-    nodeEnd(UINT_MAX)
-  {
-    this->ID = set[0];
-    this->layerStrt = set[1];
-    if(set.size() > 2){this->layerEnd = set[2];}
-    if(set.size() > 3){this->nodeStrt = set[3];}
-    if(set.size() > 4){this->nodeEnd = set[4];}
+  ActID_Set(unsigned int id, std::vector<unsigned int> nodePos){
+    this->ID = id;
+    this->nodePositions = nodePos;
   }
   unsigned int ID;
-  unsigned int layerStrt;
-  unsigned int layerEnd;
-  unsigned int nodeStrt;
-  unsigned int nodeEnd;
+  std::vector<unsigned int> nodePositions;
 };
 
 struct Alpha{

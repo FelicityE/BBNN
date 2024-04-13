@@ -131,15 +131,15 @@ void print(std::vector<std::vector<DTYPE>> v, std::string name /*na*/){
 }
 
 int errPrint(std::string error_message){
-  RYB(std::cout << RGB::r;)
+  RGB(std::cout << rgb::r;)
   std::cout << error_message << std::endl << std::flush;
-  RYB(std::cout << RGB::R << std::flush;)
+  RGB(std::cout << rgb::R << std::flush;)
   return 1;
 }
 int errPrint(std::string error_message, unsigned int a, unsigned int b){
-  RYB(std::cout << RGB::r;)
+  RGB(std::cout << rgb::r;)
   std::cout << error_message << "\t" << a << " : " << b << std::endl << std::flush;
-  RYB(std::cout << RGB::R << std::flush;)
+  RGB(std::cout << rgb::R << std::flush;)
   return 1;
 }
 
@@ -636,20 +636,51 @@ int getSetup(
         std::cout << std::endl;
       }
       
-      else if(match(inputs[i], "setActs")){
+      // else if(match(inputs[i], "setActs")){
+      //   i++;
+      //   std::vector<unsigned int> temp;
+      //   unsigned int cnt;
+      //   while(!match(inputs[i], "-stp")){
+      //     if(cnt >= 5){
+      //       errPrint("ERROR - SetUp: setActs was not followed by -stp after 5 or less integers.");
+      //       return 1;
+      //     }
+      //     temp.push_back(std::stoi(inputs[i]));
+      //     i++;
+      //     cnt++;
+      //   }
+      //   struct ActID_Set tempStruct(temp);
+      //   annbit.ActIDSets.push_back(tempStruct);
+      // }
+
+      else if(match(inputs[i], "setNodes")){
         i++;
-        std::vector<unsigned int> temp;
-        unsigned int cnt;
-        while(!match(inputs[i], "-stp")){
-          if(cnt >= 5){
-            errPrint("ERROR - SetUp: setActs was not followed by -stp after 5 or less integers.");
-            return 1;
+        unsigned int actID = std::stoi(inputs[i]);
+        i++;
+        std::vector<unsigned int> nodePos;
+        if(match(inputs[i],"list:")){
+          while(!match(inputs[i], "-list")){
+            nodePos.push_back(std::stoi(inputs[i]));
+            i++;
+            if(i >= numInputs){
+              if(COLOR){
+                errPrint("ERROR - Setup:" + rgb::b + "list:" + rgb::R + "was not followed by" + rgb::b + "-list." + rgb::R);
+              }else{
+                errPrint("ERROR - Setup: list: was not followed by -list.");
+              }
+              
+            }
           }
-          temp.push_back(std::stoi(inputs[i]));
+        }else{
+          unsigned int nodeStrt = std::stoi(inputs[i]);
           i++;
-          cnt++;
+          unsigned int for_nNodes = std::stoi(inputs[i]);
+          i++;
+          for(unsigned int j = 0; j < for_nNodes; j++){
+            nodePos.push_back(nodeStrt+j);
+          }
         }
-        struct ActID_Set tempStruct(temp);
+        struct ActID_Set tempStruct(actID, nodePos);
         annbit.ActIDSets.push_back(tempStruct);
       }
       
