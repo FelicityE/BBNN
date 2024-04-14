@@ -29,7 +29,7 @@ make
 # Layers x y -> set number of layers = x and number of nodes for each hidden layer = y, default 3 2
 # hNodes x y1 y2 ... yn -> set number hidden of layers = x and nodes for each hidden layer = yl, y2, ... yn (all hidden layers must be defined); default 2
 
-# ScorePath path -> set the scores to go to filepath 
+# LogPath <filepath> -> set the output log to go to <filepath>
 
 # setNodes x y z -> Set to actID x starting from node position y for z nodes; (setNodes <actID> <starting node> <for n nodes>)
 # setNodes x list: y1 y2 -list -> Set node poitions y1 and y2 to actID x 

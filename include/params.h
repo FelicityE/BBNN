@@ -11,6 +11,8 @@
 #include <string> // For std::strings
 #include <sstream> // For std::stringstream
 
+#include <ctime>
+
 
 #define ERRPRINT true
 #define TRAINPRINT false

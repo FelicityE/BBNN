@@ -24,6 +24,110 @@ bool is_empty(std::ifstream& pFile){
   return pFile.peek() == std::ifstream::traits_type::eof();
 }
 
+std::string buildHeader(unsigned int nClasses){
+  std::string header = "stamp, maxIter, ratio, sseed, wseed, adam, alpha, nFeat, nClass, nSamp, nLayers, tNodes, total-a, test-a, ";
+
+  std::vector<std::string> headers{"test-p", "test-r", "test-f"};
+  for(unsigned int i = 0; i < nClasses; i++){
+    for(unsigned int j = 0; j < headers.size(); j++){
+     header += headers[j] + std::to_string(i) +", "; 
+    }
+  }
+
+  header += "train-a";
+  headers = {"train-p", "train-r", "train-f"};
+  for(unsigned int i = 0; i < nClasses; i++){
+    for(unsigned int j = 0; j < headers.size(); j++){
+      header += ", " + headers[j] + std::to_string(i); 
+    }
+  }
+  
+  return header;
+}
+void addHeader(std::string filename, std::string header){
+  bool addHeader = false;
+  std::ifstream check(filename);
+  if(!check || is_empty(check)){
+    check.close();
+    addHeader = true;
+  }
+  
+  std::ofstream file;
+  file.open(filename, std::ofstream::app);
+  if(addHeader){file << header;}
+  file.close();
+  
+  return;
+}
+
+void printTo(
+  struct ANN_Ambit annbit,
+  struct Read_Ambit read,
+  struct Alpha alpha,
+  struct Data data,
+  std::time_t stamp
+){
+  std::ofstream file;
+  file.open(annbit.logpath, std::ofstream::app);
+  
+  unsigned int temp = 0;
+  for(unsigned int i = 0; i < annbit.hNodes.size(); i++){
+    temp += annbit.hNodes[i];
+  }
+  unsigned int tNodes = temp+data.nFeat+data.nClasses;
+  
+  file << "\n" << stamp
+    << ", " << annbit.maxIter << ", " << read.ratio[0]
+    << ", " << read.sseed[0] << ", " << annbit.wseed
+    << ", " << alpha.adam << ", " << alpha.alpha
+    << ", " << data.nFeat << ", " << data.nClasses << ", " << data.nSamp
+    << ", " << annbit.nLayers << ", " << tNodes;
+
+  file.close();
+}
+void printTo(
+  std::string filename,
+  struct Scores testscores, 
+  struct Scores trainscores, 
+  double totalAccuracy
+){
+  std::ofstream file;
+  file.open(filename, std::ofstream::app);
+
+  file <<  ", " << totalAccuracy << ", " << testscores.accuracy;
+  for(unsigned int i = 0; i < testscores.F1.size(); i++){
+    file 
+      << ", " << testscores.precision[i]
+      << ", " << testscores.recall[i]
+      << ", " << testscores.F1[i];
+  }
+  file << ", " << trainscores.accuracy;
+  for(unsigned int i = 0; i < trainscores.F1.size(); i++){
+    file 
+      << ", " << trainscores.precision[i]
+      << ", " << trainscores.recall[i]
+      << ", " << trainscores.F1[i];
+  }
+  
+  file.close();
+}
+void printTo(struct Ann ann, std::string filename, std::time_t stamp){
+  std::ofstream file;
+  file.open(filename, std::ofstream::app);
+
+  unsigned int p = 0;
+  file << "\nStamp: " << stamp;
+  for(unsigned int i = 1; i < ann.nNodes.size(); i++){
+    file << ", L" << i << "("<< ann.nNodes[i] <<"):";
+    for(unsigned int j = 0; j < ann.nNodes[i]; j++){
+      file << ", " << ann.actIDs[p];
+      p++;
+    }
+  }
+
+}
+
+
 void print(struct Data data){
   std::cout 
     << "Number of Features: " << data.nFeat << "; "
@@ -585,7 +689,9 @@ int getSetup(
 
   if(numInputs > 2){
     for(unsigned int i = 2; i < numInputs; i++){
-      if(match(inputs[i], "ID_column")){
+      if(match(inputs[i], "LogPath")){
+        annbit.logpath = inputs[++i];
+      }else if(match(inputs[i], "ID_column")){
         i++;
         read.idp = std::stoi(inputs[i]);
       }else if(match(inputs[i], "skip_row")){

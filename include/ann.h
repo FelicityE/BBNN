@@ -50,7 +50,7 @@ Ann initANN(
 	unsigned int nLayers,
 	std::vector<unsigned int> nNodes
 );
-Ann initANN(struct ANN_Ambit ann_, struct Data train);
+Ann initANN(struct ANN_Ambit annbit, struct Data train);
 
 void getDataSets(
   struct Data &train, 
@@ -144,10 +144,11 @@ void testNN(
 
 void runANN(
   struct Alpha alpha,
-  struct ANN_Ambit ann_,
+  struct ANN_Ambit annbit,
   struct Data data,
   struct Data train,
   struct Data test,
   struct Scores &trainScores,
-  struct Scores &testScores
+  struct Scores &testScores,
+  std::time_t stamp
 );

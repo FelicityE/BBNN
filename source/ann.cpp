@@ -285,22 +285,22 @@ Ann initANN(
   return ann;
 }
 
-Ann initANN(struct ANN_Ambit ann_, struct Data train){
+Ann initANN(struct ANN_Ambit annbit, struct Data train){
   unsigned int nFeat = train.nFeat;
   unsigned int nClasses = train.nClasses;
-  unsigned int nLayers = ann_.nLayers;
+  unsigned int nLayers = annbit.nLayers;
   
-  if(ann_.hNodes.size() != nLayers-2){
+  if(annbit.hNodes.size() != nLayers-2){
     errPrint(
       "ERROR - initANN: hNodes size does not match number of hidden layers."
     );
-    std::cout << ann_.hNodes.size() << ":" << nLayers-2 << std::endl;
+    std::cout << annbit.hNodes.size() << ":" << nLayers-2 << std::endl;
     exit(1);
   }
   std::vector<unsigned int> nNodes(nLayers, 0);
   nNodes[0] = nFeat;
-  for(unsigned int i = 0; i < ann_.hNodes.size(); i++){
-    nNodes[i+1] = ann_.hNodes[i];
+  for(unsigned int i = 0; i < annbit.hNodes.size(); i++){
+    nNodes[i+1] = annbit.hNodes[i];
   }
   nNodes[nLayers-1] = nClasses;
 
@@ -312,7 +312,7 @@ Ann initANN(struct ANN_Ambit ann_, struct Data train){
     exit(1);
   }
 
-  srand(ann_.wseed);
+  srand(annbit.wseed);
   
   struct Ann ann = initANN(
     nFeat,
@@ -322,22 +322,22 @@ Ann initANN(struct ANN_Ambit ann_, struct Data train){
   );
 
   // Need list of node positions and what activation ID to change to
-  for(unsigned int i = 0; i < ann_.ActIDSets.size(); i++){
-    unsigned int ID = ann_.ActIDSets[i].ID;
-    for(unsigned int j = 0; j < ann_.ActIDSets[i].nodePositions.size(); j++){
-      unsigned int pos = ann_.ActIDSets[i].nodePositions[j];
+  for(unsigned int i = 0; i < annbit.ActIDSets.size(); i++){
+    unsigned int ID = annbit.ActIDSets[i].ID;
+    for(unsigned int j = 0; j < annbit.ActIDSets[i].nodePositions.size(); j++){
+      unsigned int pos = annbit.ActIDSets[i].nodePositions[j];
       ann.actIDs[pos] = ID;
     }
   }
 
-  // for(unsigned int i = 0; i < ann_.ActIDSets.size(); i++){
+  // for(unsigned int i = 0; i < annbit.ActIDSets.size(); i++){
     // setActID(
     //   ann,
-    //   ann_.ActIDSets[i].ID,
-    //   ann_.ActIDSets[i].layerStrt,
-    //   ann_.ActIDSets[i].layerEnd,
-    //   ann_.ActIDSets[i].nodeStrt,
-    //   ann_.ActIDSets[i].nodeEnd
+    //   annbit.ActIDSets[i].ID,
+    //   annbit.ActIDSets[i].layerStrt,
+    //   annbit.ActIDSets[i].layerEnd,
+    //   annbit.ActIDSets[i].nodeStrt,
+    //   annbit.ActIDSets[i].nodeEnd
     // );
   // }
   return ann;
@@ -883,21 +883,29 @@ void testNN(
 
 void runANN(
   struct Alpha alpha,
-  struct ANN_Ambit ann_,
+  struct ANN_Ambit annbit,
   struct Data data,
   struct Data train,
   struct Data test,
   struct Scores &trainScores,
-  struct Scores &testScores
+  struct Scores &testScores,
+  std::time_t stamp
 ){
   // Build
-  struct Ann ann = initANN(ann_, train);
+  struct Ann ann = initANN(annbit, train);
   BUG(std::cout << "\nGetting ANN" << std::endl;);
   print(ann);
+  
+  std::string annPath = "../results/ann.csv";
+  printTo(
+    ann,
+    annPath,
+    stamp
+  );
 
   // Train
   struct Results train_results(train.nSamp, train.nClasses);
-  trainNN(ann, train, train_results, alpha, ann_.maxIter);
+  trainNN(ann, train, train_results, alpha, annbit.maxIter);
   
   std::cout << "\nUpdated Weights and Bias" << std::endl;
   print(ann.weights, ann.bias);
@@ -914,4 +922,13 @@ void runANN(
   print(test_results);
 
   testScores = getScores(test_results, test.nClasses);
+
+  double total = ((double)train_results.uint_ambit+(double)test_results.uint_ambit)/data.nSamp;
+
+  printTo(
+    annbit.logpath,
+    testScores,
+    trainScores,
+    total
+  );
 }

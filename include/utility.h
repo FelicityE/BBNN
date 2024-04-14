@@ -14,6 +14,25 @@ std::string str(char * value);
 // File handling 
 bool is_empty(std::ifstream& pFile);
 
+std::string buildHeader(unsigned int nClasses);
+void addHeader(std::string filename, std::string header);
+
+void printTo(
+  struct ANN_Ambit annbit,
+  struct Read_Ambit read,
+  struct Alpha alpha,
+  struct Data data,
+  std::time_t stamp
+);
+void printTo(
+  std::string filename,
+  struct Scores testscores, 
+  struct Scores trainscores, 
+  double totalAccuracy
+);
+void printTo(struct Ann ann, std::string filename, std::time_t stamp);
+
+
 void print(struct Data data);
 void print(struct Results re);
 

@@ -3,15 +3,15 @@
 int main(int numInputs, char * inputs[]){
   // Create Defaults;
   struct Alpha alpha;
-  struct ANN_Ambit ann_;
-  struct Read_Ambit read_(inputs[1]);
+  struct ANN_Ambit annbit;
+  struct Read_Ambit readbit(inputs[1]);
 
   // Set changes
-  if(getSetup(alpha, ann_, read_, numInputs, inputs)){return 1;}
+  if(getSetup(alpha, annbit, readbit, numInputs, inputs)){return 1;}
 
   // Get trainging and testing data
   struct Data data; // Full dataset
-  if(getData(data, read_)){return 1;}
+  if(getData(data, readbit)){return 1;}
   BUG(
     std::cout << "Getting Data" << std::endl;
     print(data);
@@ -27,19 +27,34 @@ int main(int numInputs, char * inputs[]){
     std::cout << "\nTesting Set" << std::endl;
     print(test);
   )
+
+  // Get Initial Trial Stamp (stamp should change for each trial)
+  std::time_t stamp = std::time(0);
+  // Add header if needed
+  std::string header = buildHeader(data.nClasses);
+  addHeader(annbit.logpath, header);
   
+  // Print Meta Data (within loop)
+  printTo(annbit, readbit, alpha, data, stamp);
+
   struct Scores trainScores;
   struct Scores testScores;
   runANN(
     alpha,
-    ann_,
+    annbit,
     data,
     train,
     test,
     trainScores,
-    testScores
+    testScores,
+    stamp
   );
 
+  // unsigned int tNodes = sum(annbit.hNodes)+data.nFeat+data.nClasses;
+  std::string metapath = "../results/meta.csv";
   
+
+  
+
   return 0;
 }
