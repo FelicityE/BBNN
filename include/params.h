@@ -11,8 +11,9 @@
 #include <string> // For std::strings
 #include <sstream> // For std::stringstream
 
-#include <ctime>
-
+// #include <ctime>
+#include "omp.h"
+#include <iomanip>
 
 #define ERRPRINT true
 #define TRAINPRINT false

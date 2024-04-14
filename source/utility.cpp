@@ -65,7 +65,7 @@ void printTo(
   struct Read_Ambit read,
   struct Alpha alpha,
   struct Data data,
-  std::time_t stamp
+  double stamp
 ){
   std::ofstream file;
   file.open(annbit.logpath, std::ofstream::app);
@@ -76,8 +76,8 @@ void printTo(
   }
   unsigned int tNodes = temp+data.nFeat+data.nClasses;
   
-  file << "\n" << stamp
-    << ", " << annbit.maxIter << ", " << read.ratio[0]
+  file << "\n" << std::setprecision(13) << stamp;
+  file << ", " << annbit.maxIter << ", " << read.ratio[0]
     << ", " << read.sseed[0] << ", " << annbit.wseed
     << ", " << alpha.adam << ", " << alpha.alpha
     << ", " << data.nFeat << ", " << data.nClasses << ", " << data.nSamp
@@ -112,12 +112,13 @@ void printTo(
   
   file.close();
 }
-void printTo(struct Ann ann, std::string filename, std::time_t stamp){
+void printTo(struct Ann ann, std::string filename, double stamp){
   std::ofstream file;
   file.open(filename, std::ofstream::app);
 
   unsigned int p = 0;
-  file << "Stamp: " << stamp;
+  // file << "Stamp: " << stamp;
+  file << std::setprecision(13) << stamp;
   for(unsigned int i = 1; i < ann.nNodes.size(); i++){
     file << ", L" << i << "("<< ann.nNodes[i] <<"):";
     for(unsigned int j = 0; j < ann.nNodes[i]; j++){
@@ -693,7 +694,11 @@ int getSetup(
     for(unsigned int i = 2; i < numInputs; i++){
       if(match(inputs[i], "LogPath")){
         annbit.logpath = inputs[++i];
-      }else if(match(inputs[i], "ID_column")){
+      }else if(match(inputs[i], "Analyze")){
+        read.analyze = true;
+      }
+      
+      else if(match(inputs[i], "ID_column")){
         i++;
         read.idp = std::stoi(inputs[i]);
       }else if(match(inputs[i], "skip_row")){
@@ -745,8 +750,10 @@ int getSetup(
           annbit.hNodes.push_back(std::stoi(inputs[i+1]));
           i++;
         }
-        // print("Hidden Nodes", nHiddenNodes);
-        std::cout << std::endl;
+        BUG(
+          print("Hidden Nodes", nHiddenNodes);
+          std::cout << std::endl;
+        )
       }
 
       else if(match(inputs[i], "setNodes")){

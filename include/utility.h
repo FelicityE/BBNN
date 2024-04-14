@@ -22,7 +22,7 @@ void printTo(
   struct Read_Ambit read,
   struct Alpha alpha,
   struct Data data,
-  std::time_t stamp
+  double stamp
 );
 void printTo(
   std::string filename,
@@ -31,7 +31,7 @@ void printTo(
   struct Scores trainscores, 
   double totalAccuracy
 );
-void printTo(struct Ann ann, std::string filename, std::time_t stamp);
+void printTo(struct Ann ann, std::string filename, double stamp);
 
 
 void print(struct Data data);

@@ -146,9 +146,12 @@ void runANN(
   struct Alpha alpha,
   struct ANN_Ambit annbit,
   struct Data data,
-  struct Data train,
-  struct Data test,
-  struct Scores &trainScores,
-  struct Scores &testScores,
-  std::time_t stamp
+  double stamp
+);
+
+void runAnalysis(
+  struct Read_Ambit readbit,
+  struct ANN_Ambit annbit,
+  struct Alpha alpha,
+  struct Data data
 );

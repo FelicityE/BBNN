@@ -34,6 +34,8 @@ make
 # setNodes x y z -> Set to actID x starting from node position y for z nodes; (setNodes <actID> <starting node> <for n nodes>)
 # setNodes x list: y1 y2 -list -> Set node poitions y1 and y2 to actID x 
 
+# Analyize -> (Default off) Runs analyizer following inputs will be:
+#   alpha {0.01, 0.001, 0.0001}
 
 echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
 cd build/

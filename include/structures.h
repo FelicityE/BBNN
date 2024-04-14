@@ -92,16 +92,16 @@ struct Read_Ambit{
   Read_Ambit(): idp(0), skipRow(1), skipCol(0){
     this->sseed = std::vector<unsigned int> (1,0);
     this->ratio = std::vector<double> (1,70);
-    // this->logpath = "../results/log.csv";
+    this->analyze = false;
   };
   Read_Ambit(std::string filepath): idp(0), skipRow(1), skipCol(0){
     this->filepath = filepath;
     this->sseed = std::vector<unsigned int> (1,0);
     this->ratio = std::vector<double> (1,70);
-    // this->logpath = "../results/log.csv";
+    this->analyze = false;
   }
   std::string filepath; // Filepath to data
-  // std::string logpath; // Filepath to output
+  bool analyze;
   unsigned int idp; // Class ID column number
   unsigned int skipRow; // Number of rows to skip
   unsigned int skipCol; // Number of columns to skip

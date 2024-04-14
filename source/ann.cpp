@@ -883,13 +883,21 @@ void runANN(
   struct Alpha alpha,
   struct ANN_Ambit annbit,
   struct Data data,
-  struct Data train,
-  struct Data test,
-  struct Scores &trainScores,
-  struct Scores &testScores,
-  std::time_t stamp
+  double stamp
 ){
-  // Build
+  // Get data separation
+  // Future: Separate training from testing and use batches for different ANN's
+  struct Data train; // training set
+  struct Data test; // test set
+  getDataSets(train, test, data);
+  BUG(
+    std::cout << "\nTraining Set" << std::endl;
+    print(train);
+    std::cout << "\nTesting Set" << std::endl;
+    print(test);
+  )
+
+  // Build ANN
   struct Ann ann = initANN(annbit, train);
   BUG(std::cout << "\nGetting ANN" << std::endl;);
   print(ann);
@@ -909,8 +917,7 @@ void runANN(
   print(ann.weights, ann.bias);
   std::cout << "\nTraining Results" << std::endl;
   print(train_results);
-
-  trainScores = getScores(train_results, train.nClasses);
+  struct Scores trainScores = getScores(train_results, train.nClasses);
   
   // Test
   struct Results test_results(test.nSamp, test.nClasses);
@@ -919,7 +926,7 @@ void runANN(
   std::cout << "\nTesting Results" << std::endl;
   print(test_results);
 
-  testScores = getScores(test_results, test.nClasses);
+  struct Scores testScores = getScores(test_results, test.nClasses);
 
   double total = ((double)train_results.uint_ambit+(double)test_results.uint_ambit)/data.nSamp;
 
@@ -930,4 +937,40 @@ void runANN(
     trainScores,
     total
   );
+
+  return;
+}
+
+void runAnalysis(
+  struct Read_Ambit readbit,
+  struct ANN_Ambit annbit,
+  struct Alpha alpha,
+  struct Data data
+){
+  // Out of loop
+  std::vector<double> alphas{0.01, 0.001, 0.0001};
+  // std::vector<unsigned int> nHiddenLayers{2, 4, 8, 16}; 
+  // unsigned int nNodes = 12;
+
+  // Alpha Loop
+  for(unsigned int i = 0; i < alphas.size(); i++){
+    alpha.alpha = alphas[i];
+    
+
+    // Inner Most loop //
+    double stamp = omp_get_wtime();
+    // Print Meta Data (within loop)
+    printTo(annbit, readbit, alpha, data, stamp);
+    // Run ANN
+    runANN(
+      alpha,
+      annbit,
+      data,
+      stamp
+    );
+    // Inner Most Loop // 
+
+
+  }
+  return;
 }
