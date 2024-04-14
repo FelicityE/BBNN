@@ -691,7 +691,7 @@ void backProp(
   return;
 }
 
-void trainNN(
+unsigned int trainNN(
   struct Ann &ann,
   struct Data data,
   struct Results &result, 
@@ -814,14 +814,12 @@ void trainNN(
     if((result.double_ambit < alpha.gamma) || (result.uint_ambit == nSamp)){
       converged = true;
       print(epoch, "Epoch"); print(converged, "Converged, In IF");
+      return epoch;
     }
   }
 
-  if(!converged){
-    print(epoch, "Epoch");
-    fprintf(stderr, "%u, ",epoch);
-  }
-  return;
+
+  return epoch;
 }
 
 
@@ -905,7 +903,7 @@ void runANN(
 
   // Train
   struct Results train_results(train.nSamp, train.nClasses);
-  trainNN(ann, train, train_results, alpha, annbit.maxIter);
+  unsigned int epoch = trainNN(ann, train, train_results, alpha, annbit.maxIter);
   
   std::cout << "\nUpdated Weights and Bias" << std::endl;
   print(ann.weights, ann.bias);
@@ -927,6 +925,7 @@ void runANN(
 
   printTo(
     annbit.logpath,
+    epoch,
     testScores,
     trainScores,
     total

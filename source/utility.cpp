@@ -25,7 +25,7 @@ bool is_empty(std::ifstream& pFile){
 }
 
 std::string buildHeader(unsigned int nClasses){
-  std::string header = "stamp, maxIter, ratio, sseed, wseed, adam, alpha, nFeat, nClass, nSamp, nLayers, tNodes, total-a, test-a, ";
+  std::string header = "stamp, maxIter, ratio, sseed, wseed, adam, alpha, nFeat, nClass, nSamp, nLayers, tNodes, epoch, total-a, test-a, ";
 
   std::vector<std::string> headers{"test-p", "test-r", "test-f"};
   for(unsigned int i = 0; i < nClasses; i++){
@@ -87,6 +87,7 @@ void printTo(
 }
 void printTo(
   std::string filename,
+  unsigned int epoch,
   struct Scores testscores, 
   struct Scores trainscores, 
   double totalAccuracy
@@ -94,7 +95,7 @@ void printTo(
   std::ofstream file;
   file.open(filename, std::ofstream::app);
 
-  file <<  ", " << totalAccuracy << ", " << testscores.accuracy;
+  file << ", " << epoch <<  ", " << totalAccuracy << ", " << testscores.accuracy;
   for(unsigned int i = 0; i < testscores.F1.size(); i++){
     file 
       << ", " << testscores.precision[i]
@@ -116,7 +117,7 @@ void printTo(struct Ann ann, std::string filename, std::time_t stamp){
   file.open(filename, std::ofstream::app);
 
   unsigned int p = 0;
-  file << "\nStamp: " << stamp;
+  file << "Stamp: " << stamp;
   for(unsigned int i = 1; i < ann.nNodes.size(); i++){
     file << ", L" << i << "("<< ann.nNodes[i] <<"):";
     for(unsigned int j = 0; j < ann.nNodes[i]; j++){
@@ -124,7 +125,8 @@ void printTo(struct Ann ann, std::string filename, std::time_t stamp){
       p++;
     }
   }
-
+  file << "\n";
+  file.close();
 }
 
 

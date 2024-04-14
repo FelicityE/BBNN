@@ -128,7 +128,7 @@ void backProp(
   std::vector<DTYPE> &dB
 );
 
-void trainNN(
+unsigned int trainNN(
   struct Ann &ann, 
   struct Data train,
   struct Results &result,

@@ -26,6 +26,7 @@ void printTo(
 );
 void printTo(
   std::string filename,
+  unsigned int epoch,
   struct Scores testscores, 
   struct Scores trainscores, 
   double totalAccuracy
