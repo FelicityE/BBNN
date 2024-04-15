@@ -44,6 +44,7 @@ void print(DTYPE x, std::string name = "na", bool endl = true);
 void print(std::vector<unsigned int> v, std::string name = "na");
 void print(std::vector<DTYPE> v, std::string name = "na");
 void print(std::vector<std::vector<DTYPE>> v, std::string name /*na*/);
+void print(std::vector<std::vector<unsigned int>> v, std::string name /*na*/);
 
 int errPrint(std::string error_message);
 int errPrint(std::string error_message, unsigned int a, unsigned int b);
@@ -75,15 +76,28 @@ std::vector<DTYPE> transposeR(std::vector<DTYPE> &v, unsigned int v_col);
 /// Sub vectors
 std::vector<unsigned int> subVector(std::vector<unsigned int> v, unsigned int strt, unsigned int size);
 std::vector<DTYPE> subVector(std::vector<DTYPE> v, unsigned int strt, unsigned int size);
+std::vector<unsigned int> subVecR(
+  std::vector<unsigned int> v, 
+  unsigned int size, 
+  unsigned int strt =0 
+);
 
 /// Zero Functions
 std::vector<std::vector<DTYPE>> zero(std::vector<unsigned int> v);
+
+/// Count Functions
+std::vector<unsigned int> count(unsigned int size, unsigned int strt = 0);
 
 /// Rand Functions
 DTYPE rng(DTYPE ll = 0, DTYPE ul = 1);
 std::vector<DTYPE> rng(unsigned int size, DTYPE ll = 0, DTYPE ul = 1);
 unsigned int rng(unsigned int ll, unsigned int ul);
 std::vector<unsigned int> rng(unsigned int size, unsigned int ll, unsigned int ul);
+std::vector<unsigned int> rng(
+  unsigned int size, 
+  std::vector<unsigned int> ll, 
+  std::vector<unsigned int> ul
+);
 std::vector<unsigned int> rng_unq(unsigned int size, unsigned int ll, unsigned int ul);
 
 /// Size Functions

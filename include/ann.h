@@ -149,9 +149,32 @@ void runANN(
   double stamp
 );
 
+///////////////////////////////////////////////////////////////////////////////
+/// Analyzing and Running
+///////////////////////////////////////////////////////////////////////////////
+void setHLayers(
+  struct ANN_Ambit &annbit,
+  unsigned int hLayers,
+  std::vector<unsigned int> nNodes
+);
+unsigned int getNodePosition(
+  std::vector<unsigned int> nNodes,
+  unsigned int Layer,
+  unsigned int node
+);
+void setActIDs(
+  struct ANN_Ambit &annbit,
+  std::vector<unsigned int> acts,
+  std::vector<std::vector<unsigned int>> actCnts
+);
+void getActIDs(
+  struct ANN_Ambit &annbit,
+  unsigned int nClasses
+);
+
 void runAnalysis(
-  struct Read_Ambit readbit,
-  struct ANN_Ambit annbit,
-  struct Alpha alpha,
+  struct Read_Ambit &readbit,
+  struct ANN_Ambit &annbit,
+  struct Alpha &alpha,
   struct Data data
 );

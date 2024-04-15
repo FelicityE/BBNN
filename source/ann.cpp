@@ -941,26 +941,150 @@ void runANN(
   return;
 }
 
+void setHLayers(
+  struct ANN_Ambit &annbit,
+  unsigned int hLayers,
+  std::vector<unsigned int> nNodes
+){
+  annbit.nLayers = hLayers+2;
+  BUG(print(hLayers, "Number of Hidden Layers");)
+  annbit.hNodes = std::vector<unsigned int>(hLayers, 3);
+  for(unsigned int i = 0; i < nNodes.size(); i++){
+    BUG(print(i, "hLayer[i]");)
+    if(i > hLayers-1){return;}
+    annbit.hNodes[i] = nNodes[i];
+    BUG(print(nNodes[i], "Number of Nodes");)
+  }
+  for(unsigned int i = nNodes.size(); i < hLayers; i++){
+    BUG(print(i, "hLayer[i]");)
+    annbit.hNodes[i] = nNodes[nNodes.size()-1];
+    BUG(print(nNodes[nNodes.size()-1], "Number of Nodes");)
+  }
+
+  return;
+}
+
+
+unsigned int getNodePosition(
+  std::vector<unsigned int> nNodes,
+  unsigned int Layer,
+  unsigned int node
+){
+  unsigned int position = sum(subVecR(nNodes, Layer))+node;
+  BUG(print(position, "Position");)
+  return position;
+}
+
+void setActIDs(
+  struct ANN_Ambit &annbit,
+  std::vector<unsigned int> acts,
+  std::vector<std::vector<unsigned int>> actCnts
+){
+  std::vector<unsigned int> hNodes = annbit.hNodes;
+  unsigned int nHLayers = hNodes.size();
+  
+  std::vector<struct ActID_Set> sets(acts.size()-1);
+  std::vector<std::vector<unsigned int>> positions(acts.size());
+
+  unsigned int actsSize = acts.size();
+  BUG(
+    print(actsSize, "Number of Activation Functions");
+    print(actCnts, "Activation Counts");
+  )
+  for(unsigned int i = 1; i < acts.size(); i++){
+    sets[i-1].ID = acts[i];
+    std::vector<unsigned int> temp = actCnts[i];
+    BUG(print(sum(temp), "Sum of Activiation Count");)
+    positions[i] = std::vector<unsigned int>(sum(temp), 0);
+  }
+
+  std::vector<unsigned int> offsets(nHLayers, 0);
+  for(unsigned int i = 1; i < acts.size(); i++){
+    unsigned int count = 0; 
+    unsigned int temp = 0; 
+    for(unsigned int j = 0; j < nHLayers; j++){
+      for(unsigned int k = 0; k < actCnts[i][j]; k++){
+        positions[i][k+count] = temp + k + offsets[j];
+      }
+      count += actCnts[i][j];
+      temp += hNodes[j];
+      offsets[j] += count;
+    }
+  }
+
+  BUG(print(positions, "Positions");)
+
+  for(unsigned int i = 1; i < acts.size(); i++){
+    sets[i-1].nodePositions = positions[i];
+  }
+
+  annbit.ActIDSets = sets;
+  
+
+  return;
+}
+
+void getActIDs(
+  struct ANN_Ambit &annbit,
+  unsigned int nClasses
+){
+  srand(annbit.wseed);
+  // Getting Activation functions
+  unsigned int nActs = ACT1.size();
+  BUG(print(nActs, "nActs");)
+  std::vector<unsigned int> list = count(nActs);
+  std::vector<unsigned int> order = list;
+  std::random_shuffle(order.begin(), order.end());
+
+  // Get Random numbers
+  unsigned int nHLayers = annbit.nLayers-2;
+  std::vector<unsigned int> nNodes = annbit.hNodes;
+
+  std::vector<unsigned int> v0(nHLayers, 0);
+  std::vector<std::vector<unsigned int>> actCnts(nActs);
+
+  
+  for(unsigned int i = 0; i < nActs; i++){
+    actCnts[order[i]] = rng(nHLayers, v0, nNodes);
+    unsigned int temp = actCnts[order[i]].size();
+    subtract(nNodes, actCnts[order[i]]);
+  }
+
+  BUG(print(actCnts, "Activation Counts");)
+  setActIDs(annbit, list, actCnts);
+  return;
+}
+
 void runAnalysis(
-  struct Read_Ambit readbit,
-  struct ANN_Ambit annbit,
-  struct Alpha alpha,
+  struct Read_Ambit &readbit,
+  struct ANN_Ambit &annbit,
+  struct Alpha &alpha,
   struct Data data
 ){
-  // Out of loop
-  std::vector<double> alphas{0.01, 0.001, 0.0001};
-  // std::vector<unsigned int> nHiddenLayers{2, 4, 8, 16}; 
-  // unsigned int nNodes = 12;
+  // Testing 
+  std::vector<unsigned int> nHLayers{2, 4, 8, 16}; 
+  // std::vector<std::vector<unsigned int>> nNodes{
+  //   {10, 8},
+  //   {10, 9, 8, 7},
+  //   {10, 10, 9, 9, 8, 8, 7, 7},
+  //   {11, 11, 11, 10, 10, 10, 9, 9, 8, 8, 7, 7, 7, 6, 6, 6},
+  // };
+  std::vector<std::vector<unsigned int>> nNodes{{12}};
+  
 
   // Alpha Loop
-  for(unsigned int i = 0; i < alphas.size(); i++){
-    alpha.alpha = alphas[i];
+  for(unsigned int j = 0; j < nHLayers.size(); j++){
+    // setHLayers(annbit, nHLayers[j], nNodes[j]); /*Use this when selecting variable number of nodes*/
+    setHLayers(annbit, nHLayers[j], nNodes[0]);
+    getActIDs(annbit, data.nClasses);
+    print(annbit.ActIDSets[0].ID, "*********Set To");
     
 
     // Inner Most loop //
     double stamp = omp_get_wtime();
     // Print Meta Data (within loop)
     printTo(annbit, readbit, alpha, data, stamp);
+    
     // Run ANN
     runANN(
       alpha,
@@ -969,7 +1093,6 @@ void runAnalysis(
       stamp
     );
     // Inner Most Loop // 
-
 
   }
   return;

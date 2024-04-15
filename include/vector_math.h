@@ -99,6 +99,7 @@ void add(
 ///////////////////////////////////////////////////////////////////////////////
 /// Subtract
 ///////////////////////////////////////////////////////////////////////////////
+void subtract(std::vector<unsigned int> &A, std::vector<unsigned int> B);
 void subtract(std::vector<DTYPE> &A, std::vector<DTYPE> B);
 std::vector<DTYPE> subtractR(
   std::vector<DTYPE> A, 

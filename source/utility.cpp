@@ -241,6 +241,23 @@ void print(std::vector<std::vector<DTYPE>> v, std::string name /*na*/){
   }
   std::cout << std::endl;
 }
+void print(std::vector<std::vector<unsigned int>> v, std::string name /*na*/){
+  if(name != "na"){
+    std::cout << name << ": " << std::flush;
+  }
+  for(unsigned int i = 0; i < v.size(); i++){
+    std::cout << "[" << i << "]";
+    for(unsigned int j = 0; j < v[i].size(); j++){
+      if(j != 0){std::cout << ", ";}
+      std::cout << v[i][j];
+    }
+    std::cout << "; ";
+  }
+
+  std::cout << std::endl;
+  return;
+}
+
 
 int errPrint(std::string error_message){
   RGB(std::cout << rgb::r;)
@@ -377,6 +394,17 @@ std::vector<unsigned int> subVector(std::vector<unsigned int> v, unsigned int st
   }
   return temp;
 }
+std::vector<unsigned int> subVecR(
+  std::vector<unsigned int> v, 
+  unsigned int size, 
+  unsigned int strt /*=0*/
+){
+  std::vector<unsigned int> temp(size, 0);
+  for(unsigned int i = 0; i < size; i++){
+    temp[i] = v[strt+i];
+  }
+  return temp;
+}
 std::vector<DTYPE> subVector(std::vector<DTYPE> v, unsigned int strt, unsigned int size){
   std::vector<DTYPE> temp(size, 0);
   for(unsigned int i = 0; i < size; i++){
@@ -393,6 +421,20 @@ std::vector<std::vector<DTYPE>> zero(std::vector<unsigned int> v){
   }
   return z;
 }
+// std::vector<unsigned int> zeros(unsigned int size){
+//   std::vector<unsigned int> v(size,0);
+//   return v;
+// }
+
+/// Count Functions
+std::vector<unsigned int> count(unsigned int size, unsigned int strt){
+  std::vector<unsigned int> v(size,0);
+  for(unsigned int i = 0; i < size; i++){
+    v[i] = strt+i;
+  }
+  return v;
+}
+
 
 /// Rand Functions
 DTYPE rng(DTYPE ll /*0*/, DTYPE ul /*1*/){
@@ -401,10 +443,9 @@ DTYPE rng(DTYPE ll /*0*/, DTYPE ul /*1*/){
   return rn;
 }
 std::vector<DTYPE> rng(unsigned int size, DTYPE ll /*0*/, DTYPE ul /*1*/){
-  std::vector<DTYPE> v;
+  std::vector<DTYPE> v(size,0);
   for(unsigned int i = 0; i < size; i++){
-    DTYPE rn = rng(ll, ul);
-    v.push_back(rn);
+    v[i] = rng(ll, ul);
   }
   return v;
 }
@@ -416,19 +457,33 @@ unsigned int rng(unsigned int ll, unsigned int ul){
   return rn;
 }
 std::vector<unsigned int> rng(unsigned int size, unsigned int ll, unsigned int ul){
-  std::vector<unsigned int> v;
+  std::vector<unsigned int> v(size,0);
   for(unsigned int i = 0; i < size; i++){
-    unsigned int rn = rng(ll, ul);
-    v.push_back(rn);
+    v[i] = rng(ll, ul);
   }
   return v;
 }
+std::vector<unsigned int> rng(
+  unsigned int size, 
+  std::vector<unsigned int> ll, 
+  std::vector<unsigned int> ul
+){
+  if((size != ll.size()) || (size != ul.size())){
+    errPrint("ERROR - rng: size != ll.size() != ul.size().");
+  }
+  std::vector<unsigned int> v(size, 0);
+  for(unsigned int i = 0; i < size; i++){
+    v[i] = rng(ll[i], ul[i]);
+  }
+  BUG(print(v, "rng()=V");)
+  return v;
+}
 std::vector<unsigned int> rng_unq(unsigned int size, unsigned int ll, unsigned int ul){
-  std::vector<unsigned int> v;
+  std::vector<unsigned int> v(size, 0);
   for(unsigned int i = 0; i < size; i++){
     unsigned int rn = rng(ll, ul);
     while(std::find(v.begin(), v.end(), rn) != v.end()){rn = rng(ll, ul);}
-    v.push_back(rn);
+    v[i] = rn;
   }
   return v;
 }

@@ -12,8 +12,10 @@
 #include <sstream> // For std::stringstream
 
 // #include <ctime>
-#include "omp.h"
-#include <iomanip>
+#include "omp.h" // To add time stamp
+#include <iomanip> // To increase precision to output
+
+#include <bits/stdc++.h> // To use random_shuffle
 
 #define ERRPRINT true
 #define TRAINPRINT false

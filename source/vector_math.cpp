@@ -335,6 +335,16 @@ void add(
 ///////////////////////////////////////////////////////////////////////////////
 /// Subtract
 ///////////////////////////////////////////////////////////////////////////////
+void subtract(std::vector<unsigned int> &A, std::vector<unsigned int> B){
+  if(A.size() != B.size()){
+    errPrint("ERROR - subMat: A.size does not match B.size.", A.size(), B.size());
+    return;
+  }
+  for(unsigned int i = 0; i < A.size(); i++){
+    A[i] -= B[i];
+  }
+  return;
+}
 void subtract(std::vector<DTYPE> &A, std::vector<DTYPE> B){
   if(A.size() != B.size()){
     errPrint("ERROR - subMat: A.size does not match B.size.", A.size(), B.size());

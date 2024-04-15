@@ -20,6 +20,7 @@ enum ACTID{RELU, SIGMOID, SOFTMAX, ARGMAX};
 // Structs
 ///////////////////////////////////////////////////////////////////////////////
 struct ActID_Set{
+  ActID_Set(){};
   ActID_Set(unsigned int id, std::vector<unsigned int> nodePos){
     this->ID = id;
     this->nodePositions = nodePos;
