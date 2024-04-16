@@ -1024,43 +1024,80 @@ void setActIDs(
   return;
 }
 
-void getActIDs(
+void printTo(std::string filepath, std::vector<unsigned int> actCnts){
+  std::ofstream file;
+  file.open(filepath, std::ofstream::app);
+  for(unsigned int i = 0; i < actCnts.size(); i++){
+    file << ", " << actCnts[i];
+  }
+  file.close();
+}
+
+std::vector<unsigned int> getActIDs(
   struct ANN_Ambit &annbit,
   unsigned int nClasses
 ){
-  srand(annbit.wseed);
+  srand(annbit.aseed);
   // Getting Activation functions
   unsigned int nActs = ACT1.size();
-  BUG(print(nActs, "nActs");)
+  print(nActs, "nActs");
   std::vector<unsigned int> list = count(nActs);
   std::vector<unsigned int> order = list;
   std::random_shuffle(order.begin(), order.end());
 
   // Get Random numbers
   unsigned int nHLayers = annbit.nLayers-2;
+  print(nHLayers, "Number of Hidden Layers");
   std::vector<unsigned int> nNodes = annbit.hNodes;
+  
 
   std::vector<unsigned int> v0(nHLayers, 0);
   std::vector<std::vector<unsigned int>> actCnts(nActs);
 
-  
+  std::vector<unsigned int> tempNodes = nNodes;
   for(unsigned int i = 0; i < nActs; i++){
     actCnts[order[i]] = rng(nHLayers, v0, nNodes);
     unsigned int temp = actCnts[order[i]].size();
-    subtract(nNodes, actCnts[order[i]]);
+    subtract(tempNodes, actCnts[order[i]]);
   }
 
   BUG(print(actCnts, "Activation Counts");)
   setActIDs(annbit, list, actCnts);
-  return;
+
+  // Getting number of nodes that are set to default (0)
+  std::vector<unsigned int> temp(nHLayers, 0);
+  for(unsigned int i = 1; i < actCnts.size(); i++){
+    for(unsigned int j = 0; j < actCnts[i].size(); j++){
+      temp[j] += actCnts[i][j];
+    }
+  }
+  print(nNodes, "Number of Nodes per layer");
+  print(temp, "Number of Nodes not Default");
+  temp = subtractR(nNodes, temp);
+  for(unsigned int i = 0; i < actCnts[0].size(); i++){
+    actCnts[0][i] = temp[i];
+  }
+
+  // Getting printout of nodes
+  std::vector<unsigned int> printOut(nHLayers*nActs, 0);
+  for(unsigned int i = 0; i < actCnts.size(); i++){
+    for(unsigned int j = 0; j < actCnts[i].size(); j++){
+      printOut[j*actCnts.size()+i] = actCnts[i][j];
+    }
+  }
+  print(printOut, "Act Counts"); 
+  return printOut;
 }
 
 void runAnalysis(
   struct Read_Ambit &readbit,
   struct ANN_Ambit &annbit,
   struct Alpha &alpha,
-  struct Data data
+  struct Data data,
+  bool addheader
 ){
+
+  
   // Testing 
   std::vector<unsigned int> nHLayers{2, 4, 8, 16}; 
   // std::vector<std::vector<unsigned int>> nNodes{
@@ -1070,14 +1107,17 @@ void runAnalysis(
   //   {11, 11, 11, 10, 10, 10, 9, 9, 8, 8, 7, 7, 7, 6, 6, 6},
   // };
   std::vector<std::vector<unsigned int>> nNodes{{12}};
-  
+  if(addheader){
+    std::string header = buildHeader(nHLayers[nHLayers.size()-1], ACT1.size());
+    addHeader(annbit.logpath, header, true);
+    addheader = false;
+  }
 
   // Alpha Loop
   for(unsigned int j = 0; j < nHLayers.size(); j++){
     // setHLayers(annbit, nHLayers[j], nNodes[j]); /*Use this when selecting variable number of nodes*/
     setHLayers(annbit, nHLayers[j], nNodes[0]);
-    getActIDs(annbit, data.nClasses);
-    print(annbit.ActIDSets[0].ID, "*********Set To");
+    std::vector<unsigned int> actout = getActIDs(annbit, data.nClasses);
     
 
     // Inner Most loop //
@@ -1085,6 +1125,7 @@ void runAnalysis(
     // Print Meta Data (within loop)
     printTo(annbit, readbit, alpha, data, stamp);
     
+
     // Run ANN
     runANN(
       alpha,
@@ -1093,6 +1134,10 @@ void runAnalysis(
       stamp
     );
     // Inner Most Loop // 
+    printTo(annbit.logpath, actout);
+    
+    // Updating aseed for next run
+    annbit.aseed += 1;
 
   }
   return;

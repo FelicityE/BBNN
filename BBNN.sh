@@ -4,8 +4,8 @@
 #SBATCH --output=/home/fhe2/Code/BBNN/results/log.out
 #SBATCH --error=/home/fhe2/Code/BBNN/results/log.err
 
-#SBATCH --time=1000:00
-#SBATCH --mem=300
+#SBATCH --time=300:00
+#SBATCH --mem=500
 #SBATCH --nodes=1
 
 make
@@ -36,20 +36,7 @@ echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trai
 cd build/
 for h in {1..10}
 do
-    for l in {1..10}
-    do
-        for i in $(seq 0 $h)
-        do
-            for j in $(seq 0 $l)
-            do
-                for p in {1..10}
-                do
-                    >&2 echo -n "$p, $h, $l, $i, $j, "
-                    ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam wseed $p maxIter 1000 hNodes 2 $h $l setNodes 0 0 $i setNodes 0 $h $j > ../results/log.log
-                done
-            done
-        done
-    done
+    ./main ../data/winequality-red.csv ID_column 11 Analyze Adam maxIter 100000 wseed $h > ../results/log.log
 done
 # ./main ../data/Test.txt Adam setActs 0 2 3 -stp maxIter 1
 # ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam 

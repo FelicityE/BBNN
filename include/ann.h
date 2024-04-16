@@ -167,7 +167,8 @@ void setActIDs(
   std::vector<unsigned int> acts,
   std::vector<std::vector<unsigned int>> actCnts
 );
-void getActIDs(
+void printTo(std::string filepath, std::vector<unsigned int> actCnts);
+std::vector<unsigned int> getActIDs(
   struct ANN_Ambit &annbit,
   unsigned int nClasses
 );
@@ -176,5 +177,6 @@ void runAnalysis(
   struct Read_Ambit &readbit,
   struct ANN_Ambit &annbit,
   struct Alpha &alpha,
-  struct Data data
+  struct Data data,
+  bool addheader
 );

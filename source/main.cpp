@@ -19,11 +19,22 @@ int main(int numInputs, char * inputs[]){
 
   // Add header to output log if needed
   std::string header = buildHeader(data.nClasses);
-  addHeader(annbit.logpath, header);
+  bool addheader = addHeader(annbit.logpath, header);
   
   if(readbit.analyze){
-    runAnalysis(readbit, annbit, alpha, data);
+    runAnalysis(readbit, annbit, alpha, data, addheader);
   }else{
+    if(addheader){
+      std::string header = buildHeader(annbit.hNodes.size(), ACT1.size());
+      addHeader(annbit.logpath, header, true);
+      addheader = false;
+    }
+
+    std::vector<unsigned int> actout(annbit.hNodes.size()*ACT1.size(), 0);
+    if(readbit.diversify){
+      actout = getActIDs(annbit, data.nClasses);
+    }
+
     // Get Identifier
     double stamp = omp_get_wtime();
     // Print Meta Data
@@ -35,6 +46,8 @@ int main(int numInputs, char * inputs[]){
       data,
       stamp
     );
+
+    printTo(annbit.logpath, actout);
   }
   
   

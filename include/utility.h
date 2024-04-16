@@ -15,7 +15,8 @@ std::string str(char * value);
 bool is_empty(std::ifstream& pFile);
 
 std::string buildHeader(unsigned int nClasses);
-void addHeader(std::string filename, std::string header);
+std::string buildHeader(unsigned int nLayers, unsigned int nActIDs);
+bool addHeader(std::string filename, std::string header, bool addHeader = false);
 
 void printTo(
   struct ANN_Ambit annbit,
@@ -46,6 +47,7 @@ void print(std::vector<DTYPE> v, std::string name = "na");
 void print(std::vector<std::vector<DTYPE>> v, std::string name /*na*/);
 void print(std::vector<std::vector<unsigned int>> v, std::string name /*na*/);
 
+void print(std::string str);
 int errPrint(std::string error_message);
 int errPrint(std::string error_message, unsigned int a, unsigned int b);
 // int errPrint(std::string error_message, double a, double b);

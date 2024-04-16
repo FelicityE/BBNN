@@ -25,7 +25,7 @@ bool is_empty(std::ifstream& pFile){
 }
 
 std::string buildHeader(unsigned int nClasses){
-  std::string header = "stamp, maxIter, ratio, sseed, wseed, adam, alpha, nFeat, nClass, nSamp, nLayers, tNodes, epoch, total-a, test-a, ";
+  std::string header = "stamp, maxIter, ratio, aseed, wseed, sseed, adam, alpha, nFeat, nClass, nSamp, nLayers, tNodes, epoch, total-a, test-a, ";
 
   std::vector<std::string> headers{"test-p", "test-r", "test-f"};
   for(unsigned int i = 0; i < nClasses; i++){
@@ -44,20 +44,28 @@ std::string buildHeader(unsigned int nClasses){
   
   return header;
 }
-void addHeader(std::string filename, std::string header){
-  bool addHeader = false;
+std::string buildHeader(unsigned int nLayers, unsigned int nActIDs){
+  std::string header = "";
+  for(unsigned int i = 1; i < nLayers+1; i++){
+    for(unsigned int j = 0; j < nActIDs; j++){
+      header += ", L" + std::to_string(i) + "A" + std::to_string(j);
+    }
+  }
+  return header;
+}
+bool addHeader(std::string filename, std::string header, bool addheader /*= false*/){
   std::ifstream check(filename);
   if(!check || is_empty(check)){
     check.close();
-    addHeader = true;
+    addheader = true;
   }
   
   std::ofstream file;
   file.open(filename, std::ofstream::app);
-  if(addHeader){file << header;}
+  if(addheader){file << header;}
   file.close();
   
-  return;
+  return addheader;
 }
 
 void printTo(
@@ -78,7 +86,7 @@ void printTo(
   
   file << "\n" << std::setprecision(13) << stamp;
   file << ", " << annbit.maxIter << ", " << read.ratio[0]
-    << ", " << read.sseed[0] << ", " << annbit.wseed
+    << ", " << annbit.aseed << ", " << annbit.wseed << ", " << read.sseed[0]
     << ", " << alpha.adam << ", " << alpha.alpha
     << ", " << data.nFeat << ", " << data.nClasses << ", " << data.nSamp
     << ", " << annbit.nLayers << ", " << tNodes;
@@ -258,6 +266,14 @@ void print(std::vector<std::vector<unsigned int>> v, std::string name /*na*/){
   return;
 }
 
+void print(std::string str){
+  std::cout << str << std::endl << std::flush;
+  return;
+}
+void print(char* str){
+  std::cout << str << std::endl << std::flush;
+  return;
+}
 
 int errPrint(std::string error_message){
   RGB(std::cout << rgb::r;)
@@ -751,6 +767,9 @@ int getSetup(
         annbit.logpath = inputs[++i];
       }else if(match(inputs[i], "Analyze")){
         read.analyze = true;
+      }else if(match(inputs[i], "aseed")){
+        annbit.aseed = std::stoi(inputs[++i]);
+        read.diversify = true;
       }
       
       else if(match(inputs[i], "ID_column")){

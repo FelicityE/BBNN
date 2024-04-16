@@ -38,8 +38,6 @@ make
 #   alpha {0.01, 0.001, 0.0001}
 
 # echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
+
 cd build/
-for h in {1..10}
-do
-    ./main ../data/Test.txt Adam Analyze wseed $h > ../results/test-log.log
-done
+./main ../data/winequality-red.csv ID_colum 11 Adam maxIter > ../results/test-log.log
