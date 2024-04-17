@@ -8,6 +8,7 @@
 #SBATCH --mem=500
 #SBATCH --nodes=1
 
+make clean
 make
 
 # Options
@@ -32,11 +33,27 @@ make
 # setNodes x list: y1 y2 -list -> Set node poitions y1 and y2 to actID x 
 
 
-echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
+# echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
+echo -e "stamp, time" >&2
 cd build/
-for h in {1..10}
+for a in {1..10}
 do
-    ./main ../data/winequality-red.csv ID_column 11 Analyze Adam maxIter 100000 wseed $h > ../results/log.log
+    ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam alpha 0.001 maxIter 10000 hNodes 2 9 6 wseed $a > ../results/log.log
+    for b in {1..10}
+    do
+        ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam alpha 0.001 maxIter 10000 hNodes 2 9 6 wseed $a aseed $b > ../results/log.log
+    done
 done
-# ./main ../data/Test.txt Adam setActs 0 2 3 -stp maxIter 1
-# ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam 
+
+
+# ./main ../data/winequality-red.csv ID_column 11 Adam maxIter 100000 Layers 6 8 > ../results/log.log
+# for a in {1..10}
+# do
+#     for b in 18 10 6 4
+#     do
+#         for c in 6 8 10
+#         do
+#             ./main ../data/winequality-red.csv ID_column 11 Adam maxIter 100000 Layers $b $c aseed $a > ../results/log.log
+#         done
+#     done
+# done

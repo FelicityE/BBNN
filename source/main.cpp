@@ -48,10 +48,9 @@ int main(int numInputs, char * inputs[]){
     );
 
     printTo(annbit.logpath, actout);
+
+    double e_time = omp_get_wtime();
+    fprintf(stderr, "%f, %f\n", stamp, e_time-stamp); 
   }
-  
-  
-  
-  
   return 0;
 }

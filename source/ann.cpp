@@ -1112,7 +1112,7 @@ void runAnalysis(
     addHeader(annbit.logpath, header, true);
     addheader = false;
   }
-
+  double s_time = omp_get_wtime();
   // Alpha Loop
   for(unsigned int j = 0; j < nHLayers.size(); j++){
     // setHLayers(annbit, nHLayers[j], nNodes[j]); /*Use this when selecting variable number of nodes*/
@@ -1138,7 +1138,9 @@ void runAnalysis(
     
     // Updating aseed for next run
     annbit.aseed += 1;
-
+    fprintf(stderr, "%f, ", stamp); 
   }
+  double e_time = omp_get_wtime();
+  fprintf(stderr, "%f\n", e_time - s_time);
   return;
 }
