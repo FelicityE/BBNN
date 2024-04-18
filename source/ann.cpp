@@ -1024,15 +1024,6 @@ void setActIDs(
   return;
 }
 
-void printTo(std::string filepath, std::vector<unsigned int> actCnts){
-  std::ofstream file;
-  file.open(filepath, std::ofstream::app);
-  for(unsigned int i = 0; i < actCnts.size(); i++){
-    file << ", " << actCnts[i];
-  }
-  file.close();
-}
-
 std::vector<unsigned int> getActIDs(
   struct ANN_Ambit &annbit,
   unsigned int nClasses
@@ -1134,7 +1125,7 @@ void runAnalysis(
       stamp
     );
     // Inner Most Loop // 
-    printTo(annbit.logpath, actout);
+    printTo(annbit.logpath, actout, annbit.hNodes);
     
     // Updating aseed for next run
     annbit.aseed += 1;

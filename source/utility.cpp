@@ -47,6 +47,7 @@ std::string buildHeader(unsigned int nClasses){
 std::string buildHeader(unsigned int nLayers, unsigned int nActIDs){
   std::string header = "";
   for(unsigned int i = 1; i < nLayers+1; i++){
+    header += ", L" + std::to_string(i);
     for(unsigned int j = 0; j < nActIDs; j++){
       header += ", L" + std::to_string(i) + "A" + std::to_string(j);
     }
@@ -137,7 +138,26 @@ void printTo(struct Ann ann, std::string filename, double stamp){
   file << "\n";
   file.close();
 }
+void printTo(
+  std::string filepath, 
+  std::vector<unsigned int> actCnts,
+  std::vector<unsigned int> hNodes
+){
+  std::ofstream file;
+  file.open(filepath, std::ofstream::app);
 
+  file << ", " << hNodes[0];
+
+  unsigned int step = actCnts.size()/hNodes.size();
+  unsigned int lcnt = 0;
+  for(unsigned int i = 0; i < actCnts.size(); i++){
+    if(i%step == 0 && i != 0){
+      file << ", " << hNodes[++lcnt];
+    }
+    file << ", " << actCnts[i];
+  }
+  file.close();
+}
 
 void print(struct Data data){
   std::cout 

@@ -30,9 +30,15 @@ int main(int numInputs, char * inputs[]){
       addheader = false;
     }
 
-    std::vector<unsigned int> actout(annbit.hNodes.size()*ACT1.size(), 0);
+    unsigned int nHL = annbit.hNodes.size();
+    unsigned int nActs = ACT1.size();
+    std::vector<unsigned int> actout(nHL*nActs, 0);
     if(readbit.diversify){
       actout = getActIDs(annbit, data.nClasses);
+    }else{
+      for(unsigned int i = 0; i < nHL; i++){
+        actout[i*nActs] = annbit.hNodes[i];
+      }
     }
 
     // Get Identifier
@@ -47,7 +53,7 @@ int main(int numInputs, char * inputs[]){
       stamp
     );
 
-    printTo(annbit.logpath, actout);
+    printTo(annbit.logpath, actout, annbit.hNodes);
 
     double e_time = omp_get_wtime();
     fprintf(stderr, "%f, %f\n", stamp, e_time-stamp); 

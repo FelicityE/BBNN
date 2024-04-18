@@ -167,7 +167,7 @@ void setActIDs(
   std::vector<unsigned int> acts,
   std::vector<std::vector<unsigned int>> actCnts
 );
-void printTo(std::string filepath, std::vector<unsigned int> actCnts);
+
 std::vector<unsigned int> getActIDs(
   struct ANN_Ambit &annbit,
   unsigned int nClasses

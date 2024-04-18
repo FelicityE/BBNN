@@ -33,7 +33,11 @@ void printTo(
   double totalAccuracy
 );
 void printTo(struct Ann ann, std::string filename, double stamp);
-
+void printTo(
+  std::string filepath, 
+  std::vector<unsigned int> actCnts, 
+  std::vector<unsigned int> hNodes
+);
 
 void print(struct Data data);
 void print(struct Results re);
