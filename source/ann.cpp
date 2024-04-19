@@ -192,83 +192,60 @@ void initWeights(struct Ann &ann){
   return;
 }
 
-// Ann initANN(
-// 	unsigned int nFeat, 
-// 	unsigned int nClasses, 
-// 	unsigned int nLayers
-// ){
-//   // Getting Default Number of Nodes Per Layer
-//   std::vector<unsigned int> nNodes(nLayers, nClasses);
-//   nNodes[0] = nFeat;
-//   // Getting Layer Starting nodes
-//   std::vector<unsigned int> sNodes(nLayers,0);
-//   for(unsigned int i = 1; i < nLayers; i++){
-//     sNodes[i] = sNodes[i-1]+nNodes[i-1];
-//   }
-//   // Getting Number of total Nodes
-//   unsigned int tNodes = sum(nNodes);
-//   // Getting Default Activation List 
-//   std::vector<unsigned int> actIDs(tNodes, RELU);
-//   for(unsigned int i = tNodes-1; i > tNodes-nNodes[nNodes.size()-1]-1; i--){
-//     // print(i, "[i], 3 input");
-//     actIDs[i] = SOFTMAX; 
-//   }
-//   // Initializing Weights
-//   std::vector<std::vector<DTYPE>> weights;
-//   initWeights(weights, nNodes);
-//   // Initializing Bias
-//   std::vector<DTYPE> bias(tNodes-nFeat, 0);
-//   // Packing
-//   struct Ann ann;
-//   ann.nLayers = nLayers;
-//   ann.nNodes = nNodes;
-//   ann.sNodes = sNodes;
-//   ann.tNodes = tNodes;
-//   ann.actIDs = actIDs;
-//   ann.lossID = 0;
-//   ann.weights = weights;
-//   ann.bias = bias;
+Ann initANN(struct ANN_Ambit annbit, struct Data train){
+  unsigned int nFeat = train.nFeat;
+  unsigned int nClasses = train.nClasses;
+  unsigned int nLayers = annbit.nLayers;
   
-//   return ann;
-// }
+  // Checking that inputs match
+  if(annbit.hNodes.size() != nLayers-2){
+    errPrint(
+      "ERROR - initANN: hNodes size does not match number of hidden layers."
+    );
+    std::cout << annbit.hNodes.size() << ":" << nLayers-2 << std::endl;
+    exit(1);
+  }
 
-Ann initANN(
-	unsigned int nFeat, 
-	unsigned int nClasses, 
-	unsigned int nLayers,
-	std::vector<unsigned int> nNodes
-){
-  struct Ann ann; 
+  // Getting the Number of Nodes Per Layer
+  std::vector<unsigned int> nNodes(nLayers, 0);
+  nNodes[0] = nFeat;
+  for(unsigned int i = 0; i < annbit.hNodes.size(); i++){
+    nNodes[i+1] = annbit.hNodes[i];
+  }
+  nNodes[nLayers-1] = nClasses;
+  // Checking Nodes and Layers match
   if(nNodes.size() != nLayers){
-    errPrint("ERROR - initANN: nNodes size does not match nLayers.");
+    errPrint(
+      "ERROR - initANN(ANN_Ambit, Data): nNodes.size does not match the number of layers"
+    );
     std::cout << nNodes.size() << ":" << nLayers << std::endl;
     exit(1);
-    return ann;
   }
+
+  // Creating ANN struct
+  struct Ann ann;
 
   // Getting Layer Starting nodes
   std::vector<unsigned int> sNodes(nLayers,0);
   for(unsigned int i = 1; i < nLayers; i++){
     sNodes[i] = sNodes[i-1]+nNodes[i-1];
   }
-  // print(sNodes, "sNodes");
+
   // Getting Number of total Nodes
   unsigned int tNodes = sum(nNodes);
-  // print(tNodes-nFeat, "Total number of activations");
 
   // Getting Default Activation List 
-  std::vector<unsigned int> actIDs(tNodes-nFeat, RELU);
-  // Setting last layer (must be SoftMax)
-  // print(sNodes[nLayers-1], "Start"); 
+  std::vector<unsigned int> actIDs(tNodes-nFeat, annbit.actDefault);
   int tempsize = actIDs.size();
-  // print(tempsize, "Number of activations");
   for(unsigned int i = sNodes[nLayers-1]-nFeat; i < actIDs.size(); i++){
-    // print(i, "[i], 4 input");
     actIDs[i] = SOFTMAX; 
   }
+
   // Initializing Weights
+  srand(annbit.wseed);
   std::vector<std::vector<DTYPE>> weights;
   initWeights(weights, nNodes);
+
   // Initializing Bias
   std::vector<DTYPE> bias(tNodes-nFeat, 0);
  
@@ -281,65 +258,28 @@ Ann initANN(
   ann.lossID = 0;
   ann.weights = weights;
   ann.bias = bias;
-  
-  return ann;
-}
 
-Ann initANN(struct ANN_Ambit annbit, struct Data train){
-  unsigned int nFeat = train.nFeat;
-  unsigned int nClasses = train.nClasses;
-  unsigned int nLayers = annbit.nLayers;
-  
-  if(annbit.hNodes.size() != nLayers-2){
-    errPrint(
-      "ERROR - initANN: hNodes size does not match number of hidden layers."
-    );
-    std::cout << annbit.hNodes.size() << ":" << nLayers-2 << std::endl;
-    exit(1);
-  }
-  std::vector<unsigned int> nNodes(nLayers, 0);
-  nNodes[0] = nFeat;
-  for(unsigned int i = 0; i < annbit.hNodes.size(); i++){
-    nNodes[i+1] = annbit.hNodes[i];
-  }
-  nNodes[nLayers-1] = nClasses;
-
-  if(nNodes.size() != nLayers){
-    errPrint(
-      "ERROR - initANN(ANN_Ambit, Data): nNodes.size does not match the number of layers"
-    );
-    std::cout << nNodes.size() << ":" << nLayers << std::endl;
-    exit(1);
-  }
-
-  srand(annbit.wseed);
-  
-  struct Ann ann = initANN(
-    nFeat,
-    nClasses,
-    nLayers,
-    nNodes
-  );
-
-  // Need list of node positions and what activation ID to change to
+  // Updating Activation IDs for all nodes
   for(unsigned int i = 0; i < annbit.ActIDSets.size(); i++){
     unsigned int ID = annbit.ActIDSets[i].ID;
-    for(unsigned int j = 0; j < annbit.ActIDSets[i].nodePositions.size(); j++){
-      unsigned int pos = annbit.ActIDSets[i].nodePositions[j];
-      ann.actIDs[pos] = ID;
+    if(!annbit.ActIDSets[i].layers.empty()){
+      for(unsigned int j = 0; j < sNodes.size(); j++){
+        if(inVec(i, annbit.ActIDSets[i].layers)){
+          for(unsigned int k = 0; k < nNodes[j]){
+            ann.actIDs[sNodes[j]+k] = ID;
+          }
+        }
+      }
+    }else if(!annbit.ActIDSets[i].nodePositions.empty()){
+      for(unsigned int j = 0; j < annbit.ActIDSets[i].nodePositions.size(); j++){
+        unsigned int pos = annbit.ActIDSets[i].nodePositions[j];
+        ann.actIDs[pos] = ID;
+      }
+    }else{
+      errPrint("Warning - no layers or nodes were given to set act ID. Nothing is changed.");
     }
   }
 
-  // for(unsigned int i = 0; i < annbit.ActIDSets.size(); i++){
-    // setActID(
-    //   ann,
-    //   annbit.ActIDSets[i].ID,
-    //   annbit.ActIDSets[i].layerStrt,
-    //   annbit.ActIDSets[i].layerEnd,
-    //   annbit.ActIDSets[i].nodeStrt,
-    //   annbit.ActIDSets[i].nodeEnd
-    // );
-  // }
   return ann;
 }
 
@@ -1028,56 +968,50 @@ std::vector<unsigned int> getActIDs(
   struct ANN_Ambit &annbit,
   unsigned int nClasses
 ){
+  // Get Number for each Activation ID
   srand(annbit.aseed);
-  // Getting Activation functions
-  unsigned int nActs = ACT1.size();
-  print(nActs, "nActs");
-  std::vector<unsigned int> list = count(nActs);
-  std::vector<unsigned int> order = list;
-  std::random_shuffle(order.begin(), order.end());
 
-  // Get Random numbers
+  unsigned int nActs = ACT1.size();
   unsigned int nHLayers = annbit.nLayers-2;
-  print(nHLayers, "Number of Hidden Layers");
-  std::vector<unsigned int> nNodes = annbit.hNodes;
+
+  std::vector<unsigned int> actCnts(nHLayers*nActs, 0);
+  for(unsigned int i = 0; i < nHLayers; i++){
+    actCnts[i*nActs] = nNodes[i];
+  }
+
+  std::vector<unsigned int> acSums(nActs,0);
+  for(unsigned int i = 0; i < nHLayers; i++){
+    unsigned int nNodes = annbit.hNodes[i];
+    for(unsigned int j = 0; j < nActs; j++){
+      if(j == annbit.actDefault){continue;}
+      if(inVec(j, annbit.actList)){
+        rngNum = rng(0, nNodes);
+        actCnts[i*nActs+j] = rngNum;
+        acSums[j] += rngNum;
+        nNodes -= rngNum;
+      }else{
+        actCnts[i*nActs+j] = 0;
+      }
+    }
+    actCnts[i*nActs+annbit.actDefault] = nNodes;
+    acSums[annbit.actDefault] += nNodes;
+  }
+
   
 
-  std::vector<unsigned int> v0(nHLayers, 0);
-  std::vector<std::vector<unsigned int>> actCnts(nActs);
+  // Set ActID
+  std::vector<struct ActID_set> set(actList.size());
+  for(unsigned int i = 0; i < set.size(); i++){
+    set[i].ID = annbit.actList[i];
+    set[i].position = std::vector<unsigned int> 
+  }
+  for(unsigned int i = 0; i < nHLayers; i++){
 
-  std::vector<unsigned int> tempNodes = nNodes;
-  for(unsigned int i = 0; i < nActs; i++){
-    actCnts[order[i]] = rng(nHLayers, v0, nNodes);
-    unsigned int temp = actCnts[order[i]].size();
-    subtract(tempNodes, actCnts[order[i]]);
   }
 
-  BUG(print(actCnts, "Activation Counts");)
-  setActIDs(annbit, list, actCnts);
 
-  // Getting number of nodes that are set to default (0)
-  std::vector<unsigned int> temp(nHLayers, 0);
-  for(unsigned int i = 1; i < actCnts.size(); i++){
-    for(unsigned int j = 0; j < actCnts[i].size(); j++){
-      temp[j] += actCnts[i][j];
-    }
-  }
-  print(nNodes, "Number of Nodes per layer");
-  print(temp, "Number of Nodes not Default");
-  temp = subtractR(nNodes, temp);
-  for(unsigned int i = 0; i < actCnts[0].size(); i++){
-    actCnts[0][i] = temp[i];
-  }
-
-  // Getting printout of nodes
-  std::vector<unsigned int> printOut(nHLayers*nActs, 0);
-  for(unsigned int i = 0; i < actCnts.size(); i++){
-    for(unsigned int j = 0; j < actCnts[i].size(); j++){
-      printOut[j*actCnts.size()+i] = actCnts[i][j];
-    }
-  }
   print(printOut, "Act Counts"); 
-  return printOut;
+  return actCnts;
 }
 
 void runAnalysis(

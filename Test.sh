@@ -31,13 +31,18 @@ make
 
 # LogPath <filepath> -> set the output log to go to <filepath>
 
-# setNodes x y z -> Set to actID x starting from node position y for z nodes; (setNodes <actID> <starting node> <for n nodes>)
-# setNodes x list: y1 y2 -list -> Set node poitions y1 and y2 to actID x 
+# set_actNodes x y1 y2 -> Set nodes y1 for y2 (exclusive) to activation function x; (setNodes <actID> <starting node> <for n nodes>)
+# set_actNodes x list: y1 y2 -list -> Set node poitions y1 and y2 to actID x 
 
-# Analyize -> (Default off) Runs analyizer following inputs will be:
-#   alpha {0.01, 0.001, 0.0001}
+# Analyze -> No longer supported
+
+# aseed x -> Set the seed for the activation function random selection to x
+# set_actDefault x -> Set the default activation function for all hidden layers to x
+# set_actLayer x y -> Set Layer y to activation function x
+# set_actLayers x y1 y2 -> Set Layers from y1 to y2 (exclusive) to activation function x
+# set_actLayers x list: y1 y2 ... yn :list -> Set layers y1, y2, ... and yn to activation function x
 
 # echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
 
 cd build/
-./main ../data/winequality-red.csv ID_colum 11 Adam maxIter > ../results/test-log.log
+./main ../data/Test.txt maxIter 1 set_actDefault 0 > ../results/test-log.log

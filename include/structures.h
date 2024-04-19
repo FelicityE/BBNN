@@ -21,12 +21,17 @@ enum ACTID{RELU, SIGMOID, SOFTMAX, ARGMAX};
 ///////////////////////////////////////////////////////////////////////////////
 struct ActID_Set{
   ActID_Set(){};
-  ActID_Set(unsigned int id, std::vector<unsigned int> nodePos){
+  ActID_Set(unsigned int id, std::vector<unsigned int> list, unsigned int opt = 0){
     this->ID = id;
-    this->nodePositions = nodePos;
+    if(opt == 0){
+      this->nodePositions = list;
+    }else{
+      this->layers = list
+    }
   }
   unsigned int ID;
   std::vector<unsigned int> nodePositions;
+  std::vector<unsigned int> layers;
 };
 
 struct Alpha{
@@ -68,6 +73,8 @@ struct Ann{
 struct ANN_Ambit{
   ANN_Ambit():nLayers(3), hNodes(std::vector<unsigned int>(1,2)), maxIter(1000), wseed(42), aseed(42){
     this->logpath = "../results/log.csv";
+    this->actList = count(ACT1.size());
+    this->actDefault = RELU;
   }
   unsigned int nLayers;
   std::vector<unsigned int> hNodes;
@@ -76,6 +83,8 @@ struct ANN_Ambit{
   unsigned int wseed; // weights seed
   unsigned int aseed; // weights seed
   std::string logpath; // Filepath to output
+  std::vector<unsigned int> actList; // Activation Function List
+  unsigned int actDefault;
 };
 
 struct Data{

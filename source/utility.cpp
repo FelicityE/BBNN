@@ -785,12 +785,10 @@ int getSetup(
     for(unsigned int i = 2; i < numInputs; i++){
       if(match(inputs[i], "LogPath")){
         annbit.logpath = inputs[++i];
-      }else if(match(inputs[i], "Analyze")){
-        read.analyze = true;
-      }else if(match(inputs[i], "aseed")){
-        annbit.aseed = std::stoi(inputs[++i]);
-        read.diversify = true;
       }
+      // else if(match(inputs[i], "Analyze")){
+      //   read.analyze = true;
+      // }
       
       else if(match(inputs[i], "ID_column")){
         i++;
@@ -850,7 +848,24 @@ int getSetup(
         )
       }
 
-      else if(match(inputs[i], "setNodes")){
+      else if(match(inputs[i], "aseed")){
+        annbit.aseed = std::stoi(inputs[++i]);
+        read.diversify = true;
+        if(match(inputs[++i], "list:")){
+          std::vector<unsigned int> actList;
+          while(!match(inputs[++i], ":list")){
+            actList.push_back(std::stoi(inputs[++i]));
+            if(i >= numInputs){
+              errPrint("ERROR - Setup: list: ... :list");
+              return 1;
+            }
+          }
+          std::sort(actList.begin(), actList.end()); 
+          annbit.actList = actList;
+        }
+      }else if(match(inputs[i], "set_actDefault")){
+        annbit.actDefault = std::stoi(inputs[++i]);
+      }else if(match(inputs[i], "set_actNodes")){
         BUG(
           std::cout << "Setting Nodes" << std::endl;
           print(inputs[i+1], "0");
@@ -870,7 +885,7 @@ int getSetup(
               }else{
                 errPrint("ERROR - Setup: list: was not followed by :list.");
               }
-              
+              return 1;
             }
           }
         }else{
@@ -883,8 +898,35 @@ int getSetup(
         }
         struct ActID_Set tempStruct(actID, nodePos);
         annbit.ActIDSets.push_back(tempStruct);
+      }else if(match(inputs[i], "set_actLayer")){
+        unsigned int actID = std::stoi(inputs[++i]);
+        std::vector<unsigned int> layers = inputs[++i];
+        struct ActID_set temp(actID, layers);
+        annbit.ActIDSets.push_back(temp);
+      }else if(match(inputs[i], "set_actLayers")){
+        unsigned int actID = std::stoi(inputs[++i]);
+        std::vector<unsigned int> layers;
+        if(match(inputs[++i],"list:")){          
+          while(!match(inputs[++i],":list")){
+            layers.push_back(std::stoi(inputs[++i]));
+            if(i >= numInputs){
+              errPrint("ERROR - Setup: list: was not followed by :list.");
+              return 1;
+            }
+          }
+        }else{
+          unsigned int s_lyr = std::stoi(inputs[++i]);
+          unsigned int e_lyr = std::stoi(inputs[++i]);
+          unsigned int size = e_lyr-s_lyr;
+          layers = count(size, s_lyr);
+        }
+        
+        struct ActID_set temp(actID, layers);
+        annbit.ActIDSets.push_back(temp);
       }
       
+      
+
       else{
         std::string msg = "ERROR - main input: input[" + str(inputs[i]) + "], not found.";
         errPrint(msg);

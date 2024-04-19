@@ -30,7 +30,13 @@ make
 # hNodes x y1 y2 ... yn -> set number hidden of layers = x and nodes for each hidden layer = yl, y2, ... yn (all hidden layers must be defined); default 2
 
 # setNodes x y z -> Set to actID x starting from node position y for z nodes; (setNodes <actID> <starting node> <for n nodes>)
-# setNodes x list: y1 y2 -list -> Set node poitions y1 and y2 to actID x 
+# setNodes x list: y1 y2 :list -> Set node poitions y1 and y2 to actID x 
+
+# aseed x -> Set the seed for the activation function random selection to x
+# set_actDefault set_actDefault x -> Set the default activation function for all hidden layers to x
+# set_actLayer x y -> Set Layer y to activation function x
+# set_actLayers x y1 y2 -> Set Layers from y1 to y2 (exclusive) to activation function x
+# set_actLayers x list: y1 y2 ... yn :list -> Set layers y1, y2, ... and yn to activation function x
 
 
 # echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
