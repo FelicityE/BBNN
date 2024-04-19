@@ -45,4 +45,7 @@ make
 # echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
 
 cd build/
-./main ../data/Test.txt maxIter 1 set_actDefault 0 > ../results/test-log.log
+./main ../data/Test.txt  \
+maxIter 1 \
+hNodes 2 9 6 \
+set_actLayers > ../results/test-log.log

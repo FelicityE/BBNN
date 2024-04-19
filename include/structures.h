@@ -26,7 +26,7 @@ struct ActID_Set{
     if(opt == 0){
       this->nodePositions = list;
     }else{
-      this->layers = list
+      this->layers = list;
     }
   }
   unsigned int ID;
@@ -73,7 +73,10 @@ struct Ann{
 struct ANN_Ambit{
   ANN_Ambit():nLayers(3), hNodes(std::vector<unsigned int>(1,2)), maxIter(1000), wseed(42), aseed(42){
     this->logpath = "../results/log.csv";
-    this->actList = count(ACT1.size());
+    this-> actList = std::vector<unsigned int>(ACT1.size(),0);
+    for(unsigned int i = 0; i < actList.size(); i++){
+      actList[i] = i;
+    }
     this->actDefault = RELU;
   }
   unsigned int nLayers;

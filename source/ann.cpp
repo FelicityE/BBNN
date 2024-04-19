@@ -263,14 +263,24 @@ Ann initANN(struct ANN_Ambit annbit, struct Data train){
   for(unsigned int i = 0; i < annbit.ActIDSets.size(); i++){
     unsigned int ID = annbit.ActIDSets[i].ID;
     if(!annbit.ActIDSets[i].layers.empty()){
-      for(unsigned int j = 0; j < sNodes.size(); j++){
-        if(inVec(i, annbit.ActIDSets[i].layers)){
-          for(unsigned int k = 0; k < nNodes[j]){
-            ann.actIDs[sNodes[j]+k] = ID;
+      BUG(std::cout << "Using ActID_Set.layers" << std::endl;)
+      for(unsigned int j = 1; j < nLayers-1; j++){
+        BUG(
+          print(j, "Layer");
+          print(annbit.ActIDSets[i].layers, "Layer Vector");
+          print(inVec(j, annbit.ActIDSets[i].layers), "j Found inVec");
+        )
+        if(inVec(j, annbit.ActIDSets[i].layers)){
+          std::cout << "Layer selected" << std::endl;
+          for(unsigned int k = 0; k < nNodes[j]; k++){
+            BUG(print(sNodes[j]+k-nFeat, "Node");)
+            ann.actIDs[sNodes[j]+k-nFeat] = ID;
+            BUG(print(ID, "Set to ID");)
           }
         }
       }
     }else if(!annbit.ActIDSets[i].nodePositions.empty()){
+      std::cout << "Using ActID_Set.nodePositions"  << std::endl;
       for(unsigned int j = 0; j < annbit.ActIDSets[i].nodePositions.size(); j++){
         unsigned int pos = annbit.ActIDSets[i].nodePositions[j];
         ann.actIDs[pos] = ID;
@@ -976,7 +986,7 @@ std::vector<unsigned int> getActIDs(
 
   std::vector<unsigned int> actCnts(nHLayers*nActs, 0);
   for(unsigned int i = 0; i < nHLayers; i++){
-    actCnts[i*nActs] = nNodes[i];
+    actCnts[i*nActs] = annbit.hNodes[i];
   }
 
   std::vector<unsigned int> acSums(nActs,0);
@@ -985,7 +995,7 @@ std::vector<unsigned int> getActIDs(
     for(unsigned int j = 0; j < nActs; j++){
       if(j == annbit.actDefault){continue;}
       if(inVec(j, annbit.actList)){
-        rngNum = rng(0, nNodes);
+        unsigned int rngNum = rng(0, nNodes);
         actCnts[i*nActs+j] = rngNum;
         acSums[j] += rngNum;
         nNodes -= rngNum;
@@ -1000,17 +1010,26 @@ std::vector<unsigned int> getActIDs(
   
 
   // Set ActID
-  std::vector<struct ActID_set> set(actList.size());
-  for(unsigned int i = 0; i < set.size(); i++){
-    set[i].ID = annbit.actList[i];
-    set[i].position = std::vector<unsigned int> 
+  std::vector<unsigned int> offsets(nHLayers, 0);
+  std::vector<struct ActID_Set> sets(annbit.actList.size());
+  for(unsigned int i = 0; i < sets.size(); i++){
+    unsigned int actN = annbit.actList[i];
+    sets[i].ID = actN;
+    sets[i].nodePositions = std::vector<unsigned int>(acSums[actN],0);
+
+    unsigned int count = 0; 
+    unsigned int temp = 0;
+    for(unsigned int j = 0; j < nHLayers; j++){
+      for(unsigned int k = 0; k < actCnts[j*nActs+actN]; k++){
+        sets[i].nodePositions[k+count] = temp + k + offsets[j];
+      }
+      count += actCnts[j*nActs+actN];
+      temp += annbit.hNodes[j];
+      offsets[j] += count;
+    }
   }
-  for(unsigned int i = 0; i < nHLayers; i++){
 
-  }
-
-
-  print(printOut, "Act Counts"); 
+  print(actCnts, "Activation Counts");
   return actCnts;
 }
 

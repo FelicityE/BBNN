@@ -331,19 +331,17 @@ bool match(std::vector<double> A, std::vector<double> B){
   return true;
 }
 bool match(char * A, std::string B){
-  for(unsigned int i = 0; i < B.length(); i++){
-    if(A[i] != B[i]){
-      return false;
-    }
+  if(A == B){
+    return true;
   }
-  return true;
+  return false;
 }
 
 bool inVec(unsigned int v, std::vector<unsigned int> V){
   for(unsigned int i = 0; i < V.size(); i++){
-    if(V[i] == v){return i;}
+    if(V[i] == v){return true;}
   }
-  return 0;
+  return false;
 }
 
 unsigned int dupe(std::vector<unsigned int> v){
@@ -833,19 +831,16 @@ int getSetup(
         }
         i++;
       }else if(match(inputs[i], "hNodes")){
-        annbit.nLayers = std::stoi(inputs[i+1])+2;
-        std::cout << "\nNumber of Layers: " << annbit.nLayers << std::endl;
-        i++;
-        annbit.hNodes[0] = std::stoi(inputs[i+1]);
-        i++;
+        annbit.nLayers = std::stoi(inputs[++i])+2;
+        annbit.hNodes[0] = std::stoi(inputs[++i]);
         for(unsigned int j = 1; j < annbit.nLayers-2; j++){
-          annbit.hNodes.push_back(std::stoi(inputs[i+1]));
-          i++;
+          annbit.hNodes.push_back(std::stoi(inputs[++i]));
         }
         BUG(
           print("Hidden Nodes", nHiddenNodes);
           std::cout << std::endl;
         )
+        std::cout << "Next Input: " << inputs[i+1] << std::endl;
       }
 
       else if(match(inputs[i], "aseed")){
@@ -899,29 +894,44 @@ int getSetup(
         struct ActID_Set tempStruct(actID, nodePos);
         annbit.ActIDSets.push_back(tempStruct);
       }else if(match(inputs[i], "set_actLayer")){
-        unsigned int actID = std::stoi(inputs[++i]);
-        std::vector<unsigned int> layers = inputs[++i];
-        struct ActID_set temp(actID, layers);
+        unsigned int ID = std::stoi(inputs[++i]);
+        std::vector<unsigned int> layers 
+          = std::vector<unsigned int>(1, std::stoi(inputs[++i]));
+        BUG(
+          print(ID, "set_actLayer", false);
+          print(layers);
+        )
+        struct ActID_Set temp(ID, layers, 1);
         annbit.ActIDSets.push_back(temp);
-      }else if(match(inputs[i], "set_actLayers")){
-        unsigned int actID = std::stoi(inputs[++i]);
+      }
+      else if(match(inputs[i], "set_actLayers")){
+        std::cout << inputs[i] << std::endl << std::flush;
+        i++;
+        unsigned int actID = std::stoi(inputs[i]);
+        std::cout << inputs[i] << std::endl << std::flush;
+        // print(actID, "set_actLayers", false);
+        i++;
         std::vector<unsigned int> layers;
-        if(match(inputs[++i],"list:")){          
-          while(!match(inputs[++i],":list")){
-            layers.push_back(std::stoi(inputs[++i]));
+        if(match(inputs[i],"list:")){
+          i++;
+          while(!match(inputs[i],":list")){
+            layers.push_back(std::stoi(inputs[i]));
+            print(inputs[i], "list", false);
+            i++;
             if(i >= numInputs){
               errPrint("ERROR - Setup: list: was not followed by :list.");
               return 1;
             }
           }
+          std::cout << ":list" << std::endl << std::flush;
         }else{
-          unsigned int s_lyr = std::stoi(inputs[++i]);
+          unsigned int s_lyr = std::stoi(inputs[i]);
           unsigned int e_lyr = std::stoi(inputs[++i]);
           unsigned int size = e_lyr-s_lyr;
           layers = count(size, s_lyr);
         }
         
-        struct ActID_set temp(actID, layers);
+        struct ActID_Set temp(actID, layers, 1);
         annbit.ActIDSets.push_back(temp);
       }
       
