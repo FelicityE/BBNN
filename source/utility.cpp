@@ -839,21 +839,26 @@ int getSetup(
         BUG(
           print("Hidden Nodes", nHiddenNodes);
           std::cout << std::endl;
+          std::cout << "Next Input: " << inputs[i+1] << std::endl;
         )
-        std::cout << "Next Input: " << inputs[i+1] << std::endl;
       }
 
       else if(match(inputs[i], "aseed")){
         annbit.aseed = std::stoi(inputs[++i]);
+        BUG(print(annbit.aseed, "aseed");)
         read.diversify = true;
-        if(match(inputs[++i], "list:")){
+        BUG(print(read.diversify, "diversify");)
+        if(i+1 >= numInputs){return 0;}
+        if(match(inputs[i+1], "list:")){
+          i+=2;
           std::vector<unsigned int> actList;
-          while(!match(inputs[++i], ":list")){
-            actList.push_back(std::stoi(inputs[++i]));
+          while(!match(inputs[i], ":list")){
+            actList.push_back(std::stoi(inputs[i]));
             if(i >= numInputs){
               errPrint("ERROR - Setup: list: ... :list");
               return 1;
             }
+            i++;
           }
           std::sort(actList.begin(), actList.end()); 
           annbit.actList = actList;
