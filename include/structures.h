@@ -71,12 +71,8 @@ struct Ann{
 };
 
 struct ANN_Ambit{
-  ANN_Ambit():nLayers(3), hNodes(std::vector<unsigned int>(1,2)), maxIter(1000), wseed(42), aseed(42){
+  ANN_Ambit():nLayers(3), hNodes(std::vector<unsigned int>(1,2)), maxIter(1000), wseed(42){
     this->logpath = "../results/log.csv";
-    this-> actList = std::vector<unsigned int>(ACT1.size(),0);
-    for(unsigned int i = 0; i < actList.size(); i++){
-      actList[i] = i;
-    }
     this->actDefault = RELU;
   }
   unsigned int nLayers;
@@ -84,9 +80,7 @@ struct ANN_Ambit{
   std::vector<struct ActID_Set> ActIDSets;
   unsigned int maxIter;
   unsigned int wseed; // weights seed
-  unsigned int aseed; // weights seed
   std::string logpath; // Filepath to output
-  std::vector<unsigned int> actList; // Activation Function List
   unsigned int actDefault;
 };
 
@@ -108,6 +102,10 @@ struct Read_Ambit{
     this->ratio = std::vector<double> (1,70);
     this->analyze = false;
     this->diversify = false;
+    this-> actList = std::vector<unsigned int>(ACT1.size(),0);
+    for(unsigned int i = 0; i < actList.size(); i++){
+      actList[i] = i;
+    }
   };
   Read_Ambit(std::string filepath): idp(0), skipRow(1), skipCol(0){
     this->filepath = filepath;
@@ -115,10 +113,17 @@ struct Read_Ambit{
     this->ratio = std::vector<double> (1,70);
     this->analyze = false;
     this->diversify = false;
+    this->aseed = 42;
+    this-> actList = std::vector<unsigned int>(ACT1.size(),0);
+    for(unsigned int i = 0; i < actList.size(); i++){
+      actList[i] = i;
+    }
   }
   std::string filepath; // Filepath to data
   bool analyze;
   bool diversify;
+  unsigned int aseed; // activation seed
+  std::vector<unsigned int> actList; // Activation Function List
   unsigned int idp; // Class ID column number
   unsigned int skipRow; // Number of rows to skip
   unsigned int skipCol; // Number of columns to skip

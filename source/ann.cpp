@@ -45,7 +45,6 @@ void print(struct Ann ann){
   }
   std::cout << std::endl << std::endl;
 }
-
 void print(std::vector<std::vector<DTYPE>> W, std::vector<DTYPE> B){
   std::cout << "Weights("<< getSize(W) << "): ";
   for(unsigned int i = 0; i < W.size(); i++){
@@ -91,6 +90,27 @@ void printTo(struct Scores scores, std::string filename /*= "score.log"*/){
   }
   
   file.close();
+}
+
+void setActList(std::vector<unsigned int> &list, unsigned int value){
+  BUG(
+    print(list, "Original Actlist");
+    print(value, "Default Value");
+  )
+  if(inVec(value, list)){
+    std::vector<unsigned int> newList(list.size()-1, 0);
+    unsigned int cnt = 0;
+    for(unsigned int i = 0; i < list.size(); i++){
+      BUG(print(list[i], "List[i]");)
+      if(list[i] != value){
+        newList[cnt++] = list[i];
+        BUG(std::cout << "New List Value Added" << std::endl;)
+      }
+    }
+    list = newList;
+    BUG(print(list, "New List");)
+  }
+  return;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -271,7 +291,7 @@ Ann initANN(struct ANN_Ambit annbit, struct Data train){
           print(inVec(j, annbit.ActIDSets[i].layers), "j Found inVec");
         )
         if(inVec(j, annbit.ActIDSets[i].layers)){
-          std::cout << "Layer selected" << std::endl;
+          BUG(std::cout << "Layer selected" << std::endl;)
           for(unsigned int k = 0; k < nNodes[j]; k++){
             BUG(print(sNodes[j]+k-nFeat, "Node");)
             ann.actIDs[sNodes[j]+k-nFeat] = ID;
@@ -280,7 +300,7 @@ Ann initANN(struct ANN_Ambit annbit, struct Data train){
         }
       }
     }else if(!annbit.ActIDSets[i].nodePositions.empty()){
-      std::cout << "Using ActID_Set.nodePositions"  << std::endl;
+      BUG(std::cout << "Using ActID_Set.nodePositions"  << std::endl;)
       for(unsigned int j = 0; j < annbit.ActIDSets[i].nodePositions.size(); j++){
         unsigned int pos = annbit.ActIDSets[i].nodePositions[j];
         ann.actIDs[pos] = ID;
@@ -293,6 +313,36 @@ Ann initANN(struct ANN_Ambit annbit, struct Data train){
   return ann;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+/// Setters
+///////////////////////////////////////////////////////////////////////////////
+void setHLayers(
+  struct ANN_Ambit &annbit,
+  unsigned int hLayers,
+  std::vector<unsigned int> nNodes
+){
+  annbit.nLayers = hLayers+2;
+  BUG(print(hLayers, "Number of Hidden Layers");)
+  annbit.hNodes = std::vector<unsigned int>(hLayers, 3);
+  for(unsigned int i = 0; i < nNodes.size(); i++){
+    BUG(print(i, "hLayer[i]");)
+    if(i > hLayers-1){return;}
+    annbit.hNodes[i] = nNodes[i];
+    BUG(print(nNodes[i], "Number of Nodes");)
+  }
+  for(unsigned int i = nNodes.size(); i < hLayers; i++){
+    BUG(print(i, "hLayer[i]");)
+    annbit.hNodes[i] = nNodes[nNodes.size()-1];
+    BUG(print(nNodes[nNodes.size()-1], "Number of Nodes");)
+  }
+
+  return;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Getters
+///////////////////////////////////////////////////////////////////////////////
 void getDataSets(
   struct Data &train, 
   struct Data &test, 
@@ -361,64 +411,74 @@ void getDataSets(
   test.obs = test_obs;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-/// Setters
-///////////////////////////////////////////////////////////////////////////////
-// Get Activation ID Postion
-unsigned int getAIDP(
-  std::vector<unsigned int> nNodes, 
-  unsigned int layerN, 
-  unsigned int nodeN /*0*/
+unsigned int getNodePosition(
+  std::vector<unsigned int> nNodes,
+  unsigned int Layer,
+  unsigned int node
 ){
-  // std::vector<unsigned int> pre_nNodes = {nNodes.begin(), nNodes.begin()+layerN};
-  std::vector<unsigned int> pre_nNodes = subVector(nNodes, 0, layerN);
-  unsigned int position = sum(pre_nNodes)+nodeN;
+  unsigned int position = sum(subVecR(nNodes, Layer))+node;
+  BUG(print(position, "Position");)
   return position;
 }
 
-void setActID(
-  std::vector<unsigned int> &actIDs,
+std::vector<unsigned int> getNodeActivations(
+  std::vector<struct ActID_Set> &sets,
+  std::vector<unsigned int> actList,
   std::vector<unsigned int> nNodes,
-  unsigned int ID,
-  unsigned int layerN,
-  unsigned int nodeN
+  unsigned int aseed
 ){
-  // Get position
-  unsigned int position = getAIDP(nNodes, layerN, nodeN);
-  // Set actIDs
-  actIDs[position] = ID;
-  return;
-}
+  srand(aseed);
+  unsigned int nActs = actList.size();
+  unsigned int nLayers = nNodes.size();
 
-void setActID(
-  struct Ann &ann,
-  unsigned int ID,
-  unsigned int layerNStrt,
-  unsigned int layerNEnd /*UINT_MAX*/,
-  unsigned int nodeNStrt /*0*/,
-  unsigned int nodeNEnd /*UINT_MAX*/
-){
-  // Unpack
-  std::vector<unsigned int> actIDs = ann.actIDs;
-  std::vector<unsigned int> nNodes = ann.nNodes;
-  // Get Limits
-  if(layerNEnd > nNodes.size()){layerNEnd = nNodes.size();}
-  // Get new ActIDs
-  for(unsigned int i = layerNStrt; i < layerNEnd; i++){
-    if(nodeNEnd > nNodes[i]){nodeNEnd = nNodes[i];}
-    for(unsigned int j = nodeNStrt; j < nodeNEnd; j++){
-      setActID(actIDs, nNodes, ID, i, j);
+  std::vector<unsigned int> counts(nActs*nLayers, 0);
+  std::vector<unsigned int> actout((nActs+1)*nLayers, 0);
+  std::vector<unsigned int> sums(nActs, 0);
+  std::vector<unsigned int> nodesR = nNodes;
+  for(unsigned int i = 0; i < actList.size(); i++){
+    for(unsigned int j = 0; j < nLayers; j++){
+      unsigned int rngNum = rng(0, nodesR[j]);
+      counts[i*nLayers+j] = rngNum;
+      actout[j*(nActs+1)+i+1] = rngNum;
+      sums[i] += rngNum;
+      nodesR[j] -= rngNum;
+      actout[j*(nActs+1)] = nodesR[j];
     }
   }
-  // Pack
-  ann.actIDs = actIDs;
-  
-  return;
+  BUG(
+    print(counts, "counts");
+    print(sums, "sums");
+    print(actout, "actout");
+  )
+
+  std::vector<std::vector<unsigned int>> positions(nActs);
+  std::vector<unsigned int> offsets(nLayers, 0);
+  for(unsigned int i = 0; i < nActs; i++){
+    unsigned int count = 0; 
+    unsigned int temp = 0; 
+    positions[i] = std::vector<unsigned int>(sums[i]);
+    for(unsigned int j = 0; j < nLayers; j++){
+      for(unsigned int k = 0; k < counts[i*nLayers+j]; k++){
+        positions[i][k+count] = temp + k + offsets[j];
+      }
+      count += counts[i*nLayers+j];
+      temp += nNodes[j];
+      offsets[j] += counts[i*nLayers+j];
+    }
+    BUG(
+      print(positions[i], "Positions");
+    )
+  }
+
+  // std::vector<struct ActID_Set> sets(nActs);
+  for(unsigned int i = 0; i < nActs; i++){
+    sets[i].ID = actList[i];
+    sets[i].nodePositions = positions[i];
+  }
+
+  return actout;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-/// Training and Testing
-///////////////////////////////////////////////////////////////////////////////
 void getResults(
   struct Results &result,
   std::vector<DTYPE> lastAct,
@@ -530,6 +590,9 @@ struct Scores getScores(
   return score;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+/// Training and Testing
+///////////////////////////////////////////////////////////////////////////////
 void forward(
   struct Ann ann,
   std::vector<DTYPE> &layer,
@@ -829,6 +892,9 @@ void testNN(
   return;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+/// Runners
+///////////////////////////////////////////////////////////////////////////////
 void runANN(
   struct Alpha alpha,
   struct ANN_Ambit annbit,
@@ -891,147 +957,6 @@ void runANN(
   return;
 }
 
-void setHLayers(
-  struct ANN_Ambit &annbit,
-  unsigned int hLayers,
-  std::vector<unsigned int> nNodes
-){
-  annbit.nLayers = hLayers+2;
-  BUG(print(hLayers, "Number of Hidden Layers");)
-  annbit.hNodes = std::vector<unsigned int>(hLayers, 3);
-  for(unsigned int i = 0; i < nNodes.size(); i++){
-    BUG(print(i, "hLayer[i]");)
-    if(i > hLayers-1){return;}
-    annbit.hNodes[i] = nNodes[i];
-    BUG(print(nNodes[i], "Number of Nodes");)
-  }
-  for(unsigned int i = nNodes.size(); i < hLayers; i++){
-    BUG(print(i, "hLayer[i]");)
-    annbit.hNodes[i] = nNodes[nNodes.size()-1];
-    BUG(print(nNodes[nNodes.size()-1], "Number of Nodes");)
-  }
-
-  return;
-}
-
-
-unsigned int getNodePosition(
-  std::vector<unsigned int> nNodes,
-  unsigned int Layer,
-  unsigned int node
-){
-  unsigned int position = sum(subVecR(nNodes, Layer))+node;
-  BUG(print(position, "Position");)
-  return position;
-}
-
-void setActIDs(
-  struct ANN_Ambit &annbit,
-  std::vector<unsigned int> acts,
-  std::vector<std::vector<unsigned int>> actCnts
-){
-  std::vector<unsigned int> hNodes = annbit.hNodes;
-  unsigned int nHLayers = hNodes.size();
-  
-  std::vector<struct ActID_Set> sets(acts.size()-1);
-  std::vector<std::vector<unsigned int>> positions(acts.size());
-
-  unsigned int actsSize = acts.size();
-  BUG(
-    print(actsSize, "Number of Activation Functions");
-    print(actCnts, "Activation Counts");
-  )
-  for(unsigned int i = 1; i < acts.size(); i++){
-    sets[i-1].ID = acts[i];
-    std::vector<unsigned int> temp = actCnts[i];
-    BUG(print(sum(temp), "Sum of Activiation Count");)
-    positions[i] = std::vector<unsigned int>(sum(temp), 0);
-  }
-
-  std::vector<unsigned int> offsets(nHLayers, 0);
-  for(unsigned int i = 1; i < acts.size(); i++){
-    unsigned int count = 0; 
-    unsigned int temp = 0; 
-    for(unsigned int j = 0; j < nHLayers; j++){
-      for(unsigned int k = 0; k < actCnts[i][j]; k++){
-        positions[i][k+count] = temp + k + offsets[j];
-      }
-      count += actCnts[i][j];
-      temp += hNodes[j];
-      offsets[j] += count;
-    }
-  }
-
-  BUG(print(positions, "Positions");)
-
-  for(unsigned int i = 1; i < acts.size(); i++){
-    sets[i-1].nodePositions = positions[i];
-  }
-
-  annbit.ActIDSets = sets;
-  
-
-  return;
-}
-
-std::vector<unsigned int> getActIDs(
-  struct ANN_Ambit &annbit,
-  unsigned int nClasses
-){
-  // Get Number for each Activation ID
-  srand(annbit.aseed);
-
-  unsigned int nActs = ACT1.size();
-  unsigned int nHLayers = annbit.nLayers-2;
-
-  std::vector<unsigned int> actCnts(nHLayers*nActs, 0);
-  for(unsigned int i = 0; i < nHLayers; i++){
-    actCnts[i*nActs] = annbit.hNodes[i];
-  }
-
-  std::vector<unsigned int> acSums(nActs,0);
-  for(unsigned int i = 0; i < nHLayers; i++){
-    unsigned int nNodes = annbit.hNodes[i];
-    for(unsigned int j = 0; j < nActs; j++){
-      if(j == annbit.actDefault){continue;}
-      if(inVec(j, annbit.actList)){
-        unsigned int rngNum = rng(0, nNodes);
-        actCnts[i*nActs+j] = rngNum;
-        acSums[j] += rngNum;
-        nNodes -= rngNum;
-      }else{
-        actCnts[i*nActs+j] = 0;
-      }
-    }
-    actCnts[i*nActs+annbit.actDefault] = nNodes;
-    acSums[annbit.actDefault] += nNodes;
-  }
-
-  
-
-  // Set ActID
-  std::vector<unsigned int> offsets(nHLayers, 0);
-  std::vector<struct ActID_Set> sets(annbit.actList.size());
-  for(unsigned int i = 0; i < sets.size(); i++){
-    unsigned int actN = annbit.actList[i];
-    sets[i].ID = actN;
-    sets[i].nodePositions = std::vector<unsigned int>(acSums[actN],0);
-
-    unsigned int count = 0; 
-    unsigned int temp = 0;
-    for(unsigned int j = 0; j < nHLayers; j++){
-      for(unsigned int k = 0; k < actCnts[j*nActs+actN]; k++){
-        sets[i].nodePositions[k+count] = temp + k + offsets[j];
-      }
-      count += actCnts[j*nActs+actN];
-      temp += annbit.hNodes[j];
-      offsets[j] += count;
-    }
-  }
-
-  print(actCnts, "Activation Counts");
-  return actCnts;
-}
 
 void runAnalysis(
   struct Read_Ambit &readbit,
@@ -1044,13 +969,13 @@ void runAnalysis(
   
   // Testing 
   std::vector<unsigned int> nHLayers{2, 4, 8, 16}; 
-  // std::vector<std::vector<unsigned int>> nNodes{
-  //   {10, 8},
-  //   {10, 9, 8, 7},
-  //   {10, 10, 9, 9, 8, 8, 7, 7},
-  //   {11, 11, 11, 10, 10, 10, 9, 9, 8, 8, 7, 7, 7, 6, 6, 6},
-  // };
-  std::vector<std::vector<unsigned int>> nNodes{{12}};
+  std::vector<std::vector<unsigned int>> nNodes{
+    {10, 8},
+    {10, 9, 8, 7},
+    {10, 10, 9, 9, 8, 8, 7, 7},
+    {11, 11, 11, 10, 10, 10, 9, 9, 8, 8, 7, 7, 7, 6, 6, 6},
+  };
+  // std::vector<std::vector<unsigned int>> nNodes{{12}};
   if(addheader){
     std::string header = buildHeader(nHLayers[nHLayers.size()-1], ACT1.size());
     addHeader(annbit.logpath, header, true);
@@ -1059,9 +984,16 @@ void runAnalysis(
   double s_time = omp_get_wtime();
   // Alpha Loop
   for(unsigned int j = 0; j < nHLayers.size(); j++){
-    // setHLayers(annbit, nHLayers[j], nNodes[j]); /*Use this when selecting variable number of nodes*/
-    setHLayers(annbit, nHLayers[j], nNodes[0]);
-    std::vector<unsigned int> actout = getActIDs(annbit, data.nClasses);
+    setHLayers(annbit, nHLayers[j], nNodes[j]); /*Use this when selecting variable number of nodes*/
+    // setHLayers(annbit, nHLayers[j], nNodes[0]); // Use when a single number of nodes is given
+    unsigned int nActs = readbit.actList.size();
+    annbit.ActIDSets = std::vector<struct ActID_Set>(nActs);
+    std::vector<unsigned int> actout = getNodeActivations(
+      annbit.ActIDSets,
+      readbit.actList, 
+      annbit.hNodes, 
+      readbit.aseed
+    );
     
 
     // Inner Most loop //
@@ -1081,7 +1013,7 @@ void runAnalysis(
     printTo(annbit.logpath, actout, annbit.hNodes);
     
     // Updating aseed for next run
-    annbit.aseed += 1;
+    // readbit.aseed += 1;
     fprintf(stderr, "%f, ", stamp); 
   }
   double e_time = omp_get_wtime();

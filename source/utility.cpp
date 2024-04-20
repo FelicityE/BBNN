@@ -87,7 +87,7 @@ void printTo(
   
   file << "\n" << std::setprecision(13) << stamp;
   file << ", " << annbit.maxIter << ", " << read.ratio[0]
-    << ", " << annbit.aseed << ", " << annbit.wseed << ", " << read.sseed[0]
+    << ", " << read.aseed << ", " << annbit.wseed << ", " << read.sseed[0]
     << ", " << alpha.adam << ", " << alpha.alpha
     << ", " << data.nFeat << ", " << data.nClasses << ", " << data.nSamp
     << ", " << annbit.nLayers << ", " << tNodes;
@@ -844,8 +844,8 @@ int getSetup(
       }
 
       else if(match(inputs[i], "aseed")){
-        annbit.aseed = std::stoi(inputs[++i]);
-        BUG(print(annbit.aseed, "aseed");)
+        read.aseed = std::stoi(inputs[++i]);
+        BUG(print(read.aseed, "aseed");)
         read.diversify = true;
         BUG(print(read.diversify, "diversify");)
         if(i+1 >= numInputs){return 0;}
@@ -861,7 +861,7 @@ int getSetup(
             i++;
           }
           std::sort(actList.begin(), actList.end()); 
-          annbit.actList = actList;
+          read.actList = actList;
         }
       }else if(match(inputs[i], "set_actDefault")){
         annbit.actDefault = std::stoi(inputs[++i]);

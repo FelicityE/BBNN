@@ -44,10 +44,10 @@ echo -e "stamp, time" >&2
 cd build/
 for a in {1..10}
 do
-    ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam alpha 0.001 maxIter 10000 hNodes 2 9 6 wseed $a > ../results/log.log
+    ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam alpha 0.001 maxIter 10000 hNodes 2 9 6 wseed $a >> ../results/log.log
     for b in {1..10}
     do
-        ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam alpha 0.001 maxIter 10000 hNodes 2 9 6 wseed $a aseed $b > ../results/log.log
+        ./main ../data/DB2_E1_S8-3-8_G3_C12.txt Adam alpha 0.001 maxIter 10000 hNodes 2 9 6 wseed $a aseed $b >> ../results/log.log
     done
 done
 

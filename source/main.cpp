@@ -9,6 +9,10 @@ int main(int numInputs, char * inputs[]){
   // Set changes
   if(getSetup(alpha, annbit, readbit, numInputs, inputs)){return 1;}
 
+  // Setting Act List
+  setActList(readbit.actList, annbit.actDefault);
+  BUG(print(readbit.actList, "Actlist");)
+
   // Get trainging and testing data
   struct Data data; // Full dataset
   if(getData(data, readbit)){return 1;}
@@ -31,10 +35,16 @@ int main(int numInputs, char * inputs[]){
     }
 
     unsigned int nHL = annbit.hNodes.size();
-    unsigned int nActs = ACT1.size();
+    unsigned int nActs = readbit.actList.size();
     std::vector<unsigned int> actout(nHL*nActs, 0);
     if(readbit.diversify){
-      actout = getActIDs(annbit, data.nClasses);
+      annbit.ActIDSets = std::vector<struct ActID_Set>(nActs);
+      actout = getNodeActivations(
+        annbit.ActIDSets,
+        readbit.actList, 
+        annbit.hNodes, 
+        readbit.aseed
+      );
     }else{
       for(unsigned int i = 0; i < nHL; i++){
         actout[i*nActs] = annbit.hNodes[i];
@@ -43,6 +53,8 @@ int main(int numInputs, char * inputs[]){
 
     // Get Identifier
     double stamp = omp_get_wtime();
+    // print(stamp, "Stamp", false);
+    fprintf(stdout, "stamp: %f, ", stamp);
     // Print Meta Data
     printTo(annbit, readbit, alpha, data, stamp);
     // Run ANN

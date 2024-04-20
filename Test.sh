@@ -48,4 +48,4 @@ cd build/
 ./main ../data/Test.txt  \
 maxIter 1 \
 hNodes 2 9 6 \
-set_actLayers > ../results/test-log.log
+set_actLayers >> ../results/test-log.log
