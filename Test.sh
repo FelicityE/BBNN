@@ -11,6 +11,12 @@
 make clean
 make
 
+cd build/
+./main ../data/Test.txt  \
+maxIter 1 \
+hNodes 2 9 6 \
+set_actLayers >> ../results/test-log.log
+
 # Options
 # first option must always be the filename
 # ID_column x -> set column number of class ID = x; default 0
@@ -42,10 +48,18 @@ make
 # set_actLayers x y1 y2 -> Set Layers from y1 to y2 (exclusive) to activation function x
 # set_actLayers x list: y1 y2 ... yn :list -> Set layers y1, y2, ... and yn to activation function x
 
-# echo -e "maxIter, alpha, ratio, sseed, wseed, test, train, total, testLoss, trainLoss, totalLoss" >&2 
+# Activation Functions:
+# 0 ReLU (Default)
+# 1 ELU
+# 2 Leaky ReLU
+# 3 GeLU
+# 4 Sigmoid
+# 5 Bipolar Sigmoid
+# 6 Tanh
+# ----------
+# Required Last Layer:
+# 7 Softmax (Training)
+# 8 Argmax (Testing)
 
-cd build/
-./main ../data/Test.txt  \
-maxIter 1 \
-hNodes 2 9 6 \
-set_actLayers >> ../results/test-log.log
+# Loss Functions:
+# 0 Cross Entropy

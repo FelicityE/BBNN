@@ -108,7 +108,7 @@ void setActList(std::vector<unsigned int> &list, unsigned int value){
       }
     }
     list = newList;
-    BUG(print(list, "New List");)
+    print(list, "New List");
   }
   return;
 }
@@ -306,7 +306,7 @@ Ann initANN(struct ANN_Ambit annbit, struct Data train){
         ann.actIDs[pos] = ID;
       }
     }else{
-      errPrint("Warning - no layers or nodes were given to set act ID. Nothing is changed.");
+      BUG(errPrint("Warning - no layers or nodes were given to set act ID. Nothing is changed.");)
     }
   }
 
@@ -429,21 +429,28 @@ std::vector<unsigned int> getNodeActivations(
 ){
   srand(aseed);
   unsigned int nActs = actList.size();
+  std::vector<unsigned int>  aL_Shuffle = actList;
+  std::random_shuffle(aL_Shuffle.begin(), aL_Shuffle.end());
+  BUG(
+    print(actList, "ActList");
+    print(aL_Shuffle, "Activation List Shuffled");
+  )
   unsigned int nLayers = nNodes.size();
 
   std::vector<unsigned int> counts(nActs*nLayers, 0);
   std::vector<unsigned int> actout((nActs+1)*nLayers, 0);
   std::vector<unsigned int> sums(nActs, 0);
   std::vector<unsigned int> nodesR = nNodes;
-  for(unsigned int i = 0; i < actList.size(); i++){
+  for(unsigned int i = 0; i < aL_Shuffle.size(); i++){
     for(unsigned int j = 0; j < nLayers; j++){
-      unsigned int rngNum = rng(0, nodesR[j]);
+      unsigned int rngNum = rng(0, nodesR[j]+1);
       counts[i*nLayers+j] = rngNum;
       actout[j*(nActs+1)+i+1] = rngNum;
       sums[i] += rngNum;
       nodesR[j] -= rngNum;
       actout[j*(nActs+1)] = nodesR[j];
     }
+    print(nodesR, "Remaining Nodes");
   }
   BUG(
     print(counts, "counts");
@@ -472,7 +479,7 @@ std::vector<unsigned int> getNodeActivations(
 
   // std::vector<struct ActID_Set> sets(nActs);
   for(unsigned int i = 0; i < nActs; i++){
-    sets[i].ID = actList[i];
+    sets[i].ID = aL_Shuffle[i];
     sets[i].nodePositions = positions[i];
   }
 

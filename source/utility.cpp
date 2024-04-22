@@ -860,7 +860,6 @@ int getSetup(
             }
             i++;
           }
-          std::sort(actList.begin(), actList.end()); 
           read.actList = actList;
         }
       }else if(match(inputs[i], "set_actDefault")){

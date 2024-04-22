@@ -4,16 +4,34 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Lists 
 ///////////////////////////////////////////////////////////////////////////////
-const std::vector<actT1> ACT1{relu, sigmoid};
-const std::vector<actT1> DACT1{drelu, dsigmoid};
-const std::vector<actT2> ACT2{relu, sigmoid, softmax, argmax};
-const std::vector<actT2> DACT2{drelu, dsigmoid, dsoftmax, dargmax};
+const std::vector<actT1> ACT1{
+  relu, elu, leakyrelu, gelu,
+  sigmoid, bisigmoid, tanh_
+};
+const std::vector<actT1> DACT1{
+  drelu, elu, leakyrelu, gelu,
+  dsigmoid, dbisigmoid, dtanh
+};
+const std::vector<actT2> ACT2{
+  relu, elu, leakyrelu, gelu,
+  sigmoid, bisigmoid, tanh_,
+  softmax, argmax
+};
+const std::vector<actT2> DACT2{
+  drelu, elu, leakyrelu, gelu,
+  dsigmoid, dbisigmoid, dtanh,
+  dsoftmax, dargmax
+};
 const int TYPECHANGE = ACT1.size();
+enum ACTID{
+  RELU, ELU, LEAKYRELU, GELU,
+  SIGMOID, BISIGMOID, TANH,
+  SOFTMAX, ARGMAX
+};
 
 const std::vector<lossF> LOSSF{crossentropy};
 const std::vector<lossF> DLOSSF{dcrossentropy};
-
-enum ACTID{RELU, SIGMOID, SOFTMAX, ARGMAX};
+enum LOSSID{CROSSENTROPY};
 
 
 ///////////////////////////////////////////////////////////////////////////////
