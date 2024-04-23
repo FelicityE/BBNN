@@ -751,6 +751,10 @@ unsigned int trainNN(
   }else{
     print(alpha.alpha, "alpha");
   }
+  
+  int numThreads = omp_get_max_threads();
+  if(nSamp / numThreads < 10) numThreads = nSamp / 10;
+  fprintf(stderr, "%d, ", numThreads);
 
   while(epoch < maxIter && !converged){
     epoch++;
@@ -763,9 +767,19 @@ unsigned int trainNN(
     result.vector_uint = std::vector<unsigned int>(nSamp, nClasses);
     result.vector_dtype = std::vector<DTYPE>(nSamp*nClasses, 0);
 
+    // fprintf(stderr, "alloc, ");
+    std::vector<std::vector<std::vector<DTYPE>>> threadW;
+    std::vector<std::vector<DTYPE>> threadB(numThreads, std::vector<DTYPE> (ann.bias.size(),0));
+    for(int i = 0; i < numThreads; i++){
+        threadW.push_back(zero(wsize));
+    }
+    // fprintf(stderr, "loop, ");
     // For each sample
     // Parallelize
+    #pragma omp parallel for num_threads(numThreads)
     for(unsigned int i = 0; i < nSamp; i++){
+      int tid = omp_get_thread_num();
+
       unsigned int featStride = i*nFeat;
       unsigned int obsStride = i*nClasses;
 
@@ -788,7 +802,11 @@ unsigned int trainNN(
       unsigned int lastActID = ann.actIDs[ann.actIDs.size()-1];
       std::vector<DTYPE> lastAct = subVector(act,lli,lls);
       std::vector<DTYPE> lastLayer = subVector(act,lli,lls);
-      getResults(result, lastAct, lastLayer, lastActID, ann.lossID, i, data.obs[i]);
+      #pragma omp critical
+      {
+        getResults(result, lastAct, lastLayer, lastActID, ann.lossID, i, data.obs[i]);
+      }
+
 
       // Run Back Propagation
       backProp(
@@ -796,10 +814,21 @@ unsigned int trainNN(
         data.obs[i],
         layer,
         act,
-        dW,
-        dB
+        threadW[tid],
+        threadB[tid]
       );
     }
+
+    // fprintf(stderr, "sync, ");
+    //sync deltas
+    for(int i = 0; i  < numThreads; i++){
+      for(int j = 0; j < wsize.size(); j++){
+        add(dW[j], threadW[i][j], 0, threadW[i][j].size());
+      }
+      add(dB, threadB[i], 0, threadB[i].size());
+    }
+    
+    // fprintf(stderr, "update, ");
 
     // update weights and bias
     if(alpha.adam){

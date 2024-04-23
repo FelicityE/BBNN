@@ -24,7 +24,7 @@ int main(int numInputs, char * inputs[]){
   // Add header to output log if needed
   std::string header = buildHeader(data.nClasses);
   bool addheader = addHeader(annbit.logpath, header);
-  
+
   if(readbit.analyze){
     runAnalysis(readbit, annbit, alpha, data, addheader);
   }else{
