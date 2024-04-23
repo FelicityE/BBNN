@@ -216,34 +216,61 @@ std::vector<DTYPE> dswish(std::vector<DTYPE> layer, OBS_TYPE obs){
 /// Softmax
 std::vector<DTYPE> softmax(std::vector<DTYPE> layer, OBS_TYPE obs){
   std::vector<DTYPE> temp(layer.size(),0);
+  DTYPE maxA = *std::max_element(layer.begin(),layer.end());
   DTYPE denom = 0; 
   for(unsigned int i = 0; i < layer.size(); i++){
-    denom += exp(layer[i]);
+    denom += exp(layer[i]-maxA);
   }
+  BUG(std::cout << "Denominator: " << denom << std::endl;)
+
+  BUG(std::cout << "a, Softmax: ";)
   for(unsigned int i = 0; i < layer.size(); i++){
-    temp[i]= exp(layer[i])/denom;
+    temp[i]= exp(layer[i]-maxA)/denom;
+    BUG(
+      std::cout 
+        << layer[i] << ", " 
+        << temp[i] << "; ";
+    )
   }
+  BUG(std::cout << std::endl;)
+  
   return temp;
 }
 std::vector<DTYPE> dsoftmax(std::vector<DTYPE> layer, OBS_TYPE obs){
   // dp_i/da_j e.g. dpda[0] = dp0/da0, dpda[1] = dp0/da1, dpda[2] = dp1/da0 etc.
   std::vector<std::vector<DTYPE>> dpda(layer.size());
-
+  DTYPE maxA = *std::max_element(layer.begin(),layer.end());
   DTYPE denom = 0;
   for(unsigned int i = 0; i < layer.size(); i++){
-    denom += exp(layer[i]);
+    denom += exp(layer[i]-maxA);
   }
+  BUG(
+    std::cout << "Denominator: " << denom << std::endl;
+    std::cout << "dpda[], Numers: " ;
+  )
   for(unsigned int i = 0; i < layer.size(); i++){
-    DTYPE numer = exp(layer[i]);
+    DTYPE numer = exp(layer[i]-maxA);
     dpda[i] = std::vector<DTYPE>(layer.size(),0);
+    BUG(std::cout << "[";)
     for(unsigned int j = 0; j < layer.size(); j++){
       if(j == i){
-        dpda[i][j] = ((numer*denom)-(exp(layer[j])*numer))/(denom*denom);
+        dpda[i][j] = ((numer*denom)-(exp(layer[j]-maxA)*numer))/(denom*denom);
       }else{
-        dpda[i][j] = -(exp(layer[j])*numer)/(denom*denom);
+        dpda[i][j] = -(exp(layer[j]-maxA)*numer)/(denom*denom);
       }
+      BUG(std::cout << dpda[i][j] << " ";)
     }
+    BUG(std::cout << "] " << numer << "; ";)
   }
+  BUG(std::cout << std::endl;)
+
+  BUG(
+    std::cout << "dpda[obs]: ";
+    for(unsigned int i = 0; i < dpda[obs].size(); i++){
+      std::cout << dpda[obs][i] << ", ";
+    }
+    std::cout << std::endl;
+  )
   return dpda[obs]; 
 }
 
@@ -281,6 +308,7 @@ DTYPE crossentropy(DTYPE x){
   return -log(x);
 }
 DTYPE dcrossentropy(DTYPE x){
+  BUG(std::cout << "x: " << x << std::endl; )
   return -1.0/x;
 }
 std::vector<DTYPE> crossentropy(

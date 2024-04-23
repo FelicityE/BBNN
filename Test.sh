@@ -12,10 +12,10 @@ make clean
 make
 
 cd build/
-./main ../data/Test.txt  \
-maxIter 1 \
+./main ../data/wine.csv Adam alpha 0.001 \
+maxIter 10000 \
 hNodes 2 9 6 \
-set_actLayers >> ../results/test-log.log
+set_actLayer 4 2 > ../results/test-log.log
 
 # Options
 # first option must always be the filename

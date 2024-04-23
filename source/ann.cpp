@@ -108,7 +108,7 @@ void setActList(std::vector<unsigned int> &list, unsigned int value){
       }
     }
     list = newList;
-    print(list, "New List");
+    BUG(print(list, "New List");)
   }
   return;
 }
@@ -146,7 +146,7 @@ void applyDAct(
   unsigned int obs
 ){
   if(layer.size() != aIDs.size()){
-    errPrint("ERROR applyAct: layer.size() != aIDs.size().", layer.size(), aIDs.size());
+    errPrint("ERROR applyDAct: layer.size() != aIDs.size().", layer.size(), aIDs.size());
     return;
   }
   std::vector<DTYPE> temp = layer;
@@ -170,7 +170,7 @@ std::vector<DTYPE> applyDActR(
   unsigned int obs
 ){
   if(layer.size() != aIDs.size()){
-    errPrint("ERROR applyAct: layer.size() != aIDs.size().", layer.size(), aIDs.size());
+    errPrint("ERROR applyDActR: layer.size() != aIDs.size().", layer.size(), aIDs.size());
     return layer;
   }
   std::vector<DTYPE> temp(layer.size(),0);
@@ -644,7 +644,10 @@ void forward(
     BUG(print(aIDs, "aID"));
     // apply activation function
     applyAct(wab, aIDs, 0);
-    BUG(print(wab, "a1(w*a0+b)"));    
+    BUG(
+      print(i,"i");
+      print(wab, "a_{i}(w*a_{i-1}+b)")
+    );    
     // set to act position
     set(act, wab, ali+als);
     BUG(print(act, "act-Update"));
@@ -675,7 +678,9 @@ void backProp(
   unsigned int strtB = ann.sNodes[ll]-nFeat;
   std::vector<unsigned int> aIDs = subVector(ann.actIDs, strtB, size);
   std::vector<DTYPE> l = subVector(layer, strtA, size);
+  BUG(print(dLoss, "dLoss");)
   std::vector<DTYPE> delta = dot(dLoss, applyDActR(l, aIDs, obs));
+  BUG(print(delta, "Delta");)
   
   // Set Last Layer dB and dW
   add(dB, delta, strtB, size);

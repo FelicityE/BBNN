@@ -837,9 +837,7 @@ int getSetup(
           annbit.hNodes.push_back(std::stoi(inputs[++i]));
         }
         BUG(
-          print("Hidden Nodes", nHiddenNodes);
-          std::cout << std::endl;
-          std::cout << "Next Input: " << inputs[i+1] << std::endl;
+          print(annbit.hNodes, "Hidden Nodes");
         )
       }
 
