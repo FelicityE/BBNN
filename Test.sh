@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #SBATCH --job-name=BBNN-Test
-#SBATCH --output=/home/fhe2/Code/BBNN/results/test-log.out
-#SBATCH --error=/home/fhe2/Code/BBNN/results/test-log.err
+#SBATCH --output=/home/bwd29/BBNN-1/results/test-log.out
+#SBATCH --error=/home/bwd29/BBNN-1/results/test-log.err
 
 #SBATCH --time=1:00
 #SBATCH --mem=300
@@ -13,9 +13,9 @@ make
 
 cd build/
 ./main ../data/wine.csv Adam alpha 0.001 \
-maxIter 10000 \
+maxIter 100 \
 hNodes 2 9 6 \
-set_actLayer 4 2 > ../results/test-log.log
+set_actLayer 0 2 > ../results/test-log.log
 
 # Options
 # first option must always be the filename

@@ -1006,6 +1006,7 @@ int getData(struct Data &data, struct Read_Ambit read){
       }
     }
   }
+
   // Get number of classes 
   nClasses = max(obs)+1;
 
@@ -1025,6 +1026,33 @@ int getData(struct Data &data, struct Read_Ambit read){
     );
     return 1;
   }
+
+  #if NORMALIZE
+  // print(feat, "Feat:");
+  std::vector<std::vector<DTYPE>> tempData(nFeat, std::vector<DTYPE>(nSamples));
+    for(int i = 0; i < nFeat; i++){
+      for(int j = 0; j < nSamples; j++){
+        tempData[i][j] = feat[j*nFeat+i];
+      }
+    }
+
+    for(int i = 0; i < nFeat; i++){
+      DTYPE max = *max_element(tempData[i].begin(), tempData[i].end());
+      DTYPE min = *min_element(tempData[i].begin(), tempData[i].end());
+      DTYPE denom = max - min;
+      for(int j = 0; j < nSamples; j++){
+        tempData[i][j] = (tempData[i][j] - min) / denom;
+      }
+    }
+
+    for(int i = 0; i < nFeat; i++){
+      for(int j = 0; j < nSamples; j++){
+        feat[j*nFeat+i] = tempData[i][j];
+      }
+    }
+
+    // print(feat, "Neat:");
+  #endif
 
   // Pack
   data.nFeat = nFeat;

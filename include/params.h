@@ -21,6 +21,7 @@
 #define TRAINPRINT false
 #define DEBUG false
 #define COLOR false
+#define NORMALIZE true
 
 #define DTYPE double
 
