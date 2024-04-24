@@ -36,25 +36,20 @@ int main(int numInputs, char * inputs[]){
 
     unsigned int nHL = annbit.hNodes.size();
     unsigned int nActs = readbit.actList.size();
-    std::vector<unsigned int> actout(nHL*nActs, 0);
     if(readbit.diversify){
       annbit.ActIDSets = std::vector<struct ActID_Set>(nActs);
-      actout = getNodeActivations(
+      getNodeActivations(
         annbit.ActIDSets,
         readbit.actList, 
         annbit.hNodes, 
         readbit.aseed
       );
-    }else{
-      for(unsigned int i = 0; i < nHL; i++){
-        actout[i*nActs] = annbit.hNodes[i];
-      }
     }
 
     // Get Identifier
     double stamp = omp_get_wtime();
     // print(stamp, "Stamp", false);
-    fprintf(stdout, "stamp: %f, ", stamp);
+    fprintf(stdout, "stamp: %f ", stamp);
     // Print Meta Data
     printTo(annbit, readbit, alpha, data, stamp);
     // Run ANN
@@ -64,8 +59,8 @@ int main(int numInputs, char * inputs[]){
       data,
       stamp
     );
-
-    printTo(annbit.logpath, actout, annbit.hNodes);
+    BUG(print(annbit.actCnts, "Main - Activation Counts");)
+    printTo(annbit.logpath, annbit.actCnts, annbit.hNodes);
 
     double e_time = omp_get_wtime();
     fprintf(stderr, "%f, %f\n", stamp, e_time-stamp); 

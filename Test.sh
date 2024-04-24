@@ -1,15 +1,17 @@
 #!/bin/bash
 
 #SBATCH --job-name=BBNN-Test
-#SBATCH --output=/home/bwd29/BBNN-1/results/test-log.out
-#SBATCH --error=/home/bwd29/BBNN-1/results/test-log.err
+#SBATCH --output=/home/fhe2/Code/BBNN/results/log.out
+#SBATCH --error=/home/fhe2/Code/BBNN/results/log.err
+# #SBATCH --output=/home/bwd29/BBNN-1/results/test-log.out
+# #SBATCH --error=/home/bwd29/BBNN-1/results/test-log.err
 
-#SBATCH --time=10:00
+#SBATCH --time=1:00
 #SBATCH --mem=0
-#SBATCH -c 1
-#SBATCH --partition=gowanlock
-#SBATCH --account=gowanlock_condo
-#SBATCH -w cn2
+#SBATCH -c 12
+# #SBATCH --partition=gowanlock
+# #SBATCH --account=gowanlock_condo
+# #SBATCH -w cn2
 
 
 make clean
@@ -17,8 +19,9 @@ make
 
 cd build/
 ./main ../data/wine.csv Adam alpha 0.001 \
-maxIter 100000 \
+maxIter 1 \
 hNodes 4 10 10 10 10 \
+set_actDefault 1 \
 set_actLayer 4 4 > ../results/test-log.log
 
 # Options

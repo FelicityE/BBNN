@@ -100,6 +100,7 @@ struct ANN_Ambit{
   unsigned int wseed; // weights seed
   std::string logpath; // Filepath to output
   unsigned int actDefault;
+  std::vector<unsigned int> actCnts;
 };
 
 struct Data{

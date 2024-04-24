@@ -42,7 +42,7 @@ void initWeights(
 );
 void initWeights(struct Ann &ann);
 
-Ann initANN(struct ANN_Ambit annbit, struct Data train);
+Ann initANN(struct ANN_Ambit &annbit, struct Data train);
 
 
 
@@ -71,7 +71,8 @@ unsigned int getNodePosition(
   unsigned int node
 );
 
-std::vector<unsigned int> getNodeActivations(
+// std::vector<unsigned int> getNodeActivations(
+void getNodeActivations(
   std::vector<struct ActID_Set> &sets,
   std::vector<unsigned int> actList,
   std::vector<unsigned int> nNodes,
@@ -135,7 +136,7 @@ void testNN(
 ///////////////////////////////////////////////////////////////////////////////
 void runANN(
   struct Alpha alpha,
-  struct ANN_Ambit annbit,
+  struct ANN_Ambit &annbit,
   struct Data data,
   double stamp
 );

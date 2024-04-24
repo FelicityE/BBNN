@@ -212,7 +212,7 @@ void initWeights(struct Ann &ann){
   return;
 }
 
-Ann initANN(struct ANN_Ambit annbit, struct Data train){
+Ann initANN(struct ANN_Ambit &annbit, struct Data train){
   unsigned int nFeat = train.nFeat;
   unsigned int nClasses = train.nClasses;
   unsigned int nLayers = annbit.nLayers;
@@ -269,16 +269,6 @@ Ann initANN(struct ANN_Ambit annbit, struct Data train){
   // Initializing Bias
   std::vector<DTYPE> bias(tNodes-nFeat, 0);
  
- // Packing
-  ann.nLayers = nLayers;
-  ann.nNodes = nNodes;
-  ann.sNodes = sNodes;
-  ann.tNodes = tNodes;
-  ann.actIDs = actIDs;
-  ann.lossID = 0;
-  ann.weights = weights;
-  ann.bias = bias;
-
   // Updating Activation IDs for all nodes
   for(unsigned int i = 0; i < annbit.ActIDSets.size(); i++){
     unsigned int ID = annbit.ActIDSets[i].ID;
@@ -294,7 +284,7 @@ Ann initANN(struct ANN_Ambit annbit, struct Data train){
           BUG(std::cout << "Layer selected" << std::endl;)
           for(unsigned int k = 0; k < nNodes[j]; k++){
             BUG(print(sNodes[j]+k-nFeat, "Node");)
-            ann.actIDs[sNodes[j]+k-nFeat] = ID;
+            actIDs[sNodes[j]+k-nFeat] = ID;
             BUG(print(ID, "Set to ID");)
           }
         }
@@ -303,13 +293,46 @@ Ann initANN(struct ANN_Ambit annbit, struct Data train){
       BUG(std::cout << "Using ActID_Set.nodePositions"  << std::endl;)
       for(unsigned int j = 0; j < annbit.ActIDSets[i].nodePositions.size(); j++){
         unsigned int pos = annbit.ActIDSets[i].nodePositions[j];
-        ann.actIDs[pos] = ID;
+        actIDs[pos] = ID;
       }
     }else{
       BUG(errPrint("Warning - no layers or nodes were given to set act ID. Nothing is changed.");)
     }
   }
 
+  std::cout << std::endl;
+  std::vector<unsigned int> actCnts(ACT1.size()*(nLayers-2), 0);
+  unsigned int cnt = 0;
+  for(unsigned int i = 1; i < nNodes.size()-1; i++){
+    for(unsigned int j = 0; j < nNodes[i]; j++){
+      actCnts[(i-1)*ACT1.size()+actIDs[cnt]] ++;
+      cnt++;
+    }
+  }
+  
+  BUG(
+    std::cout << "Activation Counts: ";
+    for(unsigned int i = 0; i < nLayers-2; i++){
+      for(unsigned int j = 0; j < ACT1.size(); j++){
+        std::cout << actCnts[i*ACT1.size()+j] << " ";
+      }
+      std::cout << "; ";
+    }
+    std::cout << std::endl;
+  )
+
+ // Packing
+  annbit.actCnts = actCnts;
+  BUG(print(annbit.actCnts, "initANN - Activation Counts");)
+  ann.nLayers = nLayers;
+  ann.nNodes = nNodes;
+  ann.sNodes = sNodes;
+  ann.tNodes = tNodes;
+  ann.actIDs = actIDs;
+  ann.lossID = 0;
+  ann.weights = weights;
+  ann.bias = bias;
+  
   return ann;
 }
 
@@ -421,7 +444,8 @@ unsigned int getNodePosition(
   return position;
 }
 
-std::vector<unsigned int> getNodeActivations(
+// std::vector<unsigned int> getNodeActivations(
+void getNodeActivations(
   std::vector<struct ActID_Set> &sets,
   std::vector<unsigned int> actList,
   std::vector<unsigned int> nNodes,
@@ -438,19 +462,19 @@ std::vector<unsigned int> getNodeActivations(
   unsigned int nLayers = nNodes.size();
 
   std::vector<unsigned int> counts(nActs*nLayers, 0);
-  std::vector<unsigned int> actout((nActs+1)*nLayers, 0);
+  std::vector<unsigned int> actout(TYPECHANGE*nLayers, 0);
   std::vector<unsigned int> sums(nActs, 0);
   std::vector<unsigned int> nodesR = nNodes;
   for(unsigned int i = 0; i < aL_Shuffle.size(); i++){
     for(unsigned int j = 0; j < nLayers; j++){
       unsigned int rngNum = rng(0, nodesR[j]+1);
       counts[i*nLayers+j] = rngNum;
-      actout[j*(nActs+1)+i+1] = rngNum;
+      actout[j*aL_Shuffle[i]] = rngNum;
       sums[i] += rngNum;
       nodesR[j] -= rngNum;
-      actout[j*(nActs+1)] = nodesR[j];
+      // actout[j*(nActs+1)] = nodesR[j];
     }
-    print(nodesR, "Remaining Nodes");
+    BUG(print(nodesR, "Remaining Nodes");)
   }
   BUG(
     print(counts, "counts");
@@ -482,8 +506,9 @@ std::vector<unsigned int> getNodeActivations(
     sets[i].ID = aL_Shuffle[i];
     sets[i].nodePositions = positions[i];
   }
-
-  return actout;
+  // actCounts = actout;
+  // return actout;
+  return;
 }
 
 void getResults(
@@ -739,17 +764,19 @@ unsigned int trainNN(
   std::vector<std::vector<DTYPE>> vtW;
   std::vector<DTYPE> vtB;
   if(alpha.adam){
-    print(alpha.adam, "Adam", false);
-    print(alpha.alpha, "Alpha", false);
-    print(alpha.beta1, "beta1", false);
-    print(alpha.beta2, "beta2");
+    BUG(
+      print(alpha.adam, "Adam", false);
+      print(alpha.alpha, "Alpha", false);
+      print(alpha.beta1, "beta1", false);
+      print(alpha.beta2, "beta2");
+    )
     
     mtW = zero(wsize); //1st Moment std::vector
     mtB = std::vector<DTYPE> (ann.bias.size(), 0); // 1st Moment std::vector
     vtW = zero(wsize); // 2nd Moment std::vector
     vtB = std::vector<DTYPE> (ann.bias.size(), 0); // 2nd Moment std::vector
   }else{
-    print(alpha.alpha, "alpha");
+    BUG(print(alpha.alpha, "alpha");)
   }
   
   int numThreads = omp_get_max_threads();
@@ -867,7 +894,7 @@ unsigned int trainNN(
 
     if((result.double_ambit < alpha.gamma) || (result.uint_ambit == nSamp)){
       converged = true;
-      print(epoch, "Epoch"); print(converged, "Converged, In IF");
+      BUG(print(epoch, "Epoch"); print(converged, "Converged, In IF");)
       return epoch;
     }
   }
@@ -938,7 +965,7 @@ void testNN(
 ///////////////////////////////////////////////////////////////////////////////
 void runANN(
   struct Alpha alpha,
-  struct ANN_Ambit annbit,
+  struct ANN_Ambit &annbit,
   struct Data data,
   double stamp
 ){
@@ -956,8 +983,10 @@ void runANN(
 
   // Build ANN
   struct Ann ann = initANN(annbit, train);
-  BUG(std::cout << "\nGetting ANN" << std::endl;);
-  print(ann);
+  BUG(
+    std::cout << "\nGetting ANN" << std::endl;
+    print(ann);
+  )
   
   std::string annPath = "../results/ann.csv";
   printTo(
@@ -969,19 +998,22 @@ void runANN(
   // Train
   struct Results train_results(train.nSamp, train.nClasses);
   unsigned int epoch = trainNN(ann, train, train_results, alpha, annbit.maxIter);
-  
-  std::cout << "\nUpdated Weights and Bias" << std::endl;
-  print(ann.weights, ann.bias);
-  std::cout << "\nTraining Results" << std::endl;
-  print(train_results);
+  BUG(
+    std::cout << "\nUpdated Weights and Bias" << std::endl;
+    print(ann.weights, ann.bias);
+    std::cout << "\nTraining Results" << std::endl;
+    print(train_results);
+  )
   struct Scores trainScores = getScores(train_results, train.nClasses);
   
   // Test
   struct Results test_results(test.nSamp, test.nClasses);
   testNN(ann, test, test_results);
   
-  std::cout << "\nTesting Results" << std::endl;
-  print(test_results);
+  BUG(
+    std::cout << "\nTesting Results" << std::endl;
+    print(test_results);
+  )
 
   struct Scores testScores = getScores(test_results, test.nClasses);
 
@@ -994,6 +1026,8 @@ void runANN(
     trainScores,
     total
   );
+
+  BUG(print(annbit.actCnts, "runANN - Activation Counts");)
 
   return;
 }
@@ -1029,10 +1063,10 @@ void runAnalysis(
     // setHLayers(annbit, nHLayers[j], nNodes[0]); // Use when a single number of nodes is given
     unsigned int nActs = readbit.actList.size();
     annbit.ActIDSets = std::vector<struct ActID_Set>(nActs);
-    std::vector<unsigned int> actout = getNodeActivations(
+    getNodeActivations(
       annbit.ActIDSets,
       readbit.actList, 
-      annbit.hNodes, 
+      annbit.hNodes,
       readbit.aseed
     );
     
@@ -1051,7 +1085,7 @@ void runAnalysis(
       stamp
     );
     // Inner Most Loop // 
-    printTo(annbit.logpath, actout, annbit.hNodes);
+    printTo(annbit.logpath, annbit.actCnts, annbit.hNodes);
     
     // Updating aseed for next run
     // readbit.aseed += 1;

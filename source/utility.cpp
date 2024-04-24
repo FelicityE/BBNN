@@ -776,7 +776,7 @@ int getSetup(
   for(unsigned int i = 0; i < numInputs; i++){
     std::cout << inputs[i] << " ";
   }
-  std::cout << std::endl;
+  // std::cout << std::endl;
 
 
   if(numInputs > 2){
