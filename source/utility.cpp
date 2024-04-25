@@ -159,6 +159,37 @@ void printTo(
   file.close();
 }
 
+void print(std::vector<struct ActID_Set> sets){
+  for(unsigned int i = 0; i < sets.size(); i++){
+    std::cout << "set[" << i << "]" << std::endl;
+    if(!sets[i].nodePositions.empty()){
+      std::cout << "ID: " << sets[i].ID
+        << " Node Positions: ";
+      for(unsigned int j = 0; j < sets[i].nodePositions.size(); j++){
+        std::cout << sets[i].nodePositions[j] << " " ;
+      }
+      std::cout << std::endl;
+    }else if(!sets[i].layers.empty()){
+      std::cout << "ID: " << sets[i].ID
+        << " Layers: ";
+      for(unsigned int j = 0; j < sets[i].layers.size(); j++){
+        std::cout << sets[i].layers[j] << " " ;
+      }
+      std::cout << std::endl;
+    }else if(!sets[i].ID_list.empty()){
+      std::cout << "ID_list: ";
+      for(unsigned int j = 0; j < sets[i].ID_list.size(); j++){
+        std::cout << sets[i].ID_list[j] << " " ;
+      }
+      std::cout << "Divide: " << sets[i].divide << std::endl;
+    }else if(sets[i].divide){
+      std::cout << "Divide: " << sets[i].divide << std::endl;
+    }else{
+      std::cout << "ERROR: ActID_Set is empty." << std::endl;
+    }
+  }
+}
+
 void print(struct Data data){
   std::cout 
     << "Number of Features: " << data.nFeat << "; "
@@ -936,9 +967,36 @@ int getSetup(
         struct ActID_Set temp(actID, layers, 1);
         annbit.ActIDSets.push_back(temp);
       }
-      
-      
 
+      else if(match(inputs[i], "set_actDivide")){
+        // unsigned int divider = std::stoi(inputs[++i]);
+        // BUG(print(divider, 'Divide by');)
+        
+        bool divide = true;
+        if(i+1 >= numInputs){
+          struct ActID_Set temp(divide);
+          annbit.ActIDSets.push_back(temp);
+          return 0;
+        }
+        if(match(inputs[i+1], "list:")){
+          i+=2;
+          std::vector<unsigned int> idList;
+          while(!match(inputs[i], ":list")){
+            idList.push_back(std::stoi(inputs[i]));
+            if(i >= numInputs){
+              errPrint("ERROR - Setup: list: ... :list");
+              return 1;
+            }
+            i++;
+          }
+          struct ActID_Set temp(divide, idList);
+          annbit.ActIDSets.push_back(temp);
+        }else{
+          struct ActID_Set temp(divide);
+          annbit.ActIDSets.push_back(temp);
+        }
+      }
+        
       else{
         std::string msg = "ERROR - main input: input[" + str(inputs[i]) + "], not found.";
         errPrint(msg);

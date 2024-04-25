@@ -45,10 +45,11 @@ int main(int numInputs, char * inputs[]){
         annbit.hNodes, 
         readbit.aseed
       );
+      for(unsigned int i = 0; i < temp.size(); i++){
+        annbit.ActIDSets.push_back(temp[i]);
+      }
     }
-    for(unsigned int i = 0; i < temp.size(); i++){
-      annbit.ActIDSets.push_back(temp[i]);
-    }
+    
     
 
     // Get Identifier

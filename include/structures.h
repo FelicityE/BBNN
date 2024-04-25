@@ -38,8 +38,26 @@ enum LOSSID{CROSSENTROPY};
 // Structs
 ///////////////////////////////////////////////////////////////////////////////
 struct ActID_Set{
-  ActID_Set(){};
-  ActID_Set(unsigned int id, std::vector<unsigned int> list, unsigned int opt = 0){
+  ActID_Set():divide(false){};
+  ActID_Set(bool divide){
+    this->divide = divide;
+  };
+  ActID_Set(bool divide, std::vector<unsigned int> ids){
+    this->ID_list = ids;
+    this->divide = divide;
+  };
+  // ActID_Set(unsigned int divider){
+  //   this->divider = divider;
+  // };
+  // ActID_Set(std::vector<unsigned int> ids, unsigned int divider){
+  //   this->ID_list = ids;
+  //   this->divider = divider;
+  // };
+  ActID_Set(
+    unsigned int id, 
+    std::vector<unsigned int> list, 
+    unsigned int opt = 0
+  ):divide(false){
     this->ID = id;
     if(opt == 0){
       this->nodePositions = list;
@@ -47,6 +65,9 @@ struct ActID_Set{
       this->layers = list;
     }
   }
+  std::vector<unsigned int> ID_list;
+  // unsigned int divider;
+  bool divide;
   unsigned int ID;
   std::vector<unsigned int> nodePositions;
   std::vector<unsigned int> layers;

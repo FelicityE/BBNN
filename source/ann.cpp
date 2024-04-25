@@ -92,27 +92,6 @@ void printTo(struct Scores scores, std::string filename /*= "score.log"*/){
   file.close();
 }
 
-void setActList(std::vector<unsigned int> &list, unsigned int value){
-  BUG(
-    print(list, "Original Actlist");
-    print(value, "Default Value");
-  )
-  if(inVec(value, list)){
-    std::vector<unsigned int> newList(list.size()-1, 0);
-    unsigned int cnt = 0;
-    for(unsigned int i = 0; i < list.size(); i++){
-      BUG(print(list[i], "List[i]");)
-      if(list[i] != value){
-        newList[cnt++] = list[i];
-        BUG(std::cout << "New List Value Added" << std::endl;)
-      }
-    }
-    list = newList;
-    BUG(print(list, "New List");)
-  }
-  return;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 /// Applying Activation Functions
 ///////////////////////////////////////////////////////////////////////////////
@@ -270,35 +249,37 @@ Ann initANN(struct ANN_Ambit &annbit, struct Data train){
   std::vector<DTYPE> bias(tNodes-nFeat, 0);
  
   // Updating Activation IDs for all nodes
-  for(unsigned int i = 0; i < annbit.ActIDSets.size(); i++){
-    unsigned int ID = annbit.ActIDSets[i].ID;
-    if(!annbit.ActIDSets[i].layers.empty()){
-      BUG(std::cout << "Using ActID_Set.layers" << std::endl;)
-      for(unsigned int j = 1; j < nLayers-1; j++){
-        BUG(
-          print(j, "Layer");
-          print(annbit.ActIDSets[i].layers, "Layer Vector");
-          print(inVec(j, annbit.ActIDSets[i].layers), "j Found inVec");
-        )
-        if(inVec(j, annbit.ActIDSets[i].layers)){
-          BUG(std::cout << "Layer selected" << std::endl;)
-          for(unsigned int k = 0; k < nNodes[j]; k++){
-            BUG(print(sNodes[j]+k-nFeat, "Node");)
-            actIDs[sNodes[j]+k-nFeat] = ID;
-            BUG(print(ID, "Set to ID");)
-          }
-        }
-      }
-    }else if(!annbit.ActIDSets[i].nodePositions.empty()){
-      BUG(std::cout << "Using ActID_Set.nodePositions"  << std::endl;)
-      for(unsigned int j = 0; j < annbit.ActIDSets[i].nodePositions.size(); j++){
-        unsigned int pos = annbit.ActIDSets[i].nodePositions[j];
-        actIDs[pos] = ID;
-      }
-    }else{
-      BUG(errPrint("Warning - no layers or nodes were given to set act ID. Nothing is changed.");)
-    }
-  }
+  setActID(actIDs, annbit.ActIDSets, nNodes, sNodes);
+  
+  // for(unsigned int i = 0; i < annbit.ActIDSets.size(); i++){
+  //   unsigned int ID = annbit.ActIDSets[i].ID;
+  //   if(!annbit.ActIDSets[i].layers.empty()){
+  //     BUG(std::cout << "Using ActID_Set.layers" << std::endl;)
+  //     for(unsigned int j = 1; j < nLayers-1; j++){
+  //       BUG(
+  //         print(j, "Layer");
+  //         print(annbit.ActIDSets[i].layers, "Layer Vector");
+  //         print(inVec(j, annbit.ActIDSets[i].layers), "j Found inVec");
+  //       )
+  //       if(inVec(j, annbit.ActIDSets[i].layers)){
+  //         BUG(std::cout << "Layer selected" << std::endl;)
+  //         for(unsigned int k = 0; k < nNodes[j]; k++){
+  //           BUG(print(sNodes[j]+k-nFeat, "Node");)
+  //           actIDs[sNodes[j]+k-nFeat] = ID;
+  //           BUG(print(ID, "Set to ID");)
+  //         }
+  //       }
+  //     }
+  //   }else if(!annbit.ActIDSets[i].nodePositions.empty()){
+  //     BUG(std::cout << "Using ActID_Set.nodePositions"  << std::endl;)
+  //     for(unsigned int j = 0; j < annbit.ActIDSets[i].nodePositions.size(); j++){
+  //       unsigned int pos = annbit.ActIDSets[i].nodePositions[j];
+  //       actIDs[pos] = ID;
+  //     }
+  //   }else{
+  //     BUG(errPrint("Warning - no layers or nodes were given to set act ID. Nothing is changed.");)
+  //   }
+  // }
 
   std::cout << std::endl;
   std::vector<unsigned int> actCnts(ACT1.size()*(nLayers-2), 0);
@@ -340,6 +321,182 @@ Ann initANN(struct ANN_Ambit &annbit, struct Data train){
 ///////////////////////////////////////////////////////////////////////////////
 /// Setters
 ///////////////////////////////////////////////////////////////////////////////
+void set_actLayers(
+  std::vector<unsigned int> &actIDs,
+  unsigned int id,
+  std::vector<unsigned int> layers,
+  std::vector<unsigned int> nNodes,
+  std::vector<unsigned int> sNodes
+){
+  if(id > ACT1.size()){
+    fprintf(
+      stderr, 
+      "ERROR - set_actLayers: %d is not an Activation Function Option.",
+      id
+    ); 
+  }
+  BUG(std::cout << "set_ActLayers()" << std::endl);
+  unsigned int nLayers = nNodes.size();
+  unsigned int nFeat = nNodes[0];
+  // For each hidden layer
+  for(unsigned int i = 1; i < nLayers-1; i++){
+    BUG(
+      print(i, "Layer");
+      print(layers, "Layer Vector");
+      print(inVec(i, layers), "i Found inVec");
+    )
+    // If setting layer i
+    if(inVec(i, layers)){
+      BUG(std::cout << "Layer selected" << std::endl;)
+      // For each node in layer i
+      for(unsigned int k = 0; k < nNodes[i]; k++){
+        BUG(print(sNodes[i]+k-nFeat, "Node");)
+        // Set the actID to the new ID
+        actIDs[sNodes[i]+k-nFeat] = id;
+        BUG(print(ID, "Set to ID");)
+      }
+    }
+  }
+  return;
+}
+
+void set_actNodes(
+  std::vector<unsigned int> &actIDs,
+  unsigned int id,
+  std::vector<unsigned int> nodes
+){
+  BUG(std::cout << "set_actNodes()" << std::endl;)
+  if(id > ACT1.size()){
+    fprintf(
+      stderr, 
+      "ERROR - set_actNodes: %d is not an Activation Function Option.",
+      id
+    ); 
+  }
+  // For each node
+  for(unsigned int i = 0; i < nodes.size(); i++){
+    if(nodes[i] > actIDs.size()){
+      fprintf(
+        stderr, 
+        "ERROR - set_actNodes: %d is greater than total number of nodes.",
+        id
+      ); 
+    }
+    // Set the node to the new ID
+    actIDs[nodes[i]] = id;
+  }
+  return;
+}
+
+void set_actDivide(
+  std::vector<unsigned int> &actIDs,
+  std::vector<unsigned int> id_list,
+  std::vector<unsigned int> nNodes
+){
+  BUG(std::cout << "\nset_actDivide()" << std::endl;)
+  unsigned int nLayers = nNodes.size();
+  unsigned int divider = id_list.size();
+  unsigned int nodeCnt = 0;
+  BUG(
+    print(nLayers, "Number of Layers", false);
+    print(divider, "Number of Activation IDs", false);
+    print(nodeCnt, "Node Count");
+  )
+  // For each Hidden Layer
+  for(unsigned int i = 1; i < nLayers-1; i++){
+    // Get total number of nodes per layer
+    unsigned int tNPL = nNodes[i];
+    // Get the number of nodes to be set in each layer
+    unsigned int sNN = floor(tNPL/divider);
+    unsigned int setCnt = 0;
+    unsigned int listCnt = 0;
+    BUG(
+      print(tNPL, "Total Nodes/Layer", false);
+      print(sNN, "n Nodes to be Set");
+      print(setCnt, "Set Count", false);
+      print(listCnt, "ID List Count");
+    )
+    // For each node
+    for(unsigned int j = 0; j < nNodes[i]; j++){
+      if(listCnt >= id_list.size()){
+        BUG(std::cout << "Break" << std::endl;)
+        break;
+      }
+      // Set n nodes to the id in list
+      actIDs[nodeCnt+j] = id_list[listCnt];
+      BUG(
+        print(nodeCnt+j, "Node", false);
+        print(id_list[listCnt], "Act ID", false);
+        print(setCnt, "Set Count");
+      )
+      setCnt++;
+      if(setCnt >= sNN){
+        listCnt++;
+        setCnt = 0;
+        BUG(
+          print(listCnt, "List Count", false);
+          print(setCnt, "Set Count");
+        )
+      }
+    }
+    nodeCnt += nNodes[i]; 
+    BUG(print(nodeCnt, "Node Count");)
+  }
+  return;
+}
+
+void setActID(
+  std::vector<unsigned int> &actIDs,
+  std::vector<struct ActID_Set> sets,
+  std::vector<unsigned int> nNodes,
+  std::vector<unsigned int> sNodes
+){
+  // For each ActID_Set Update the actIDs vector
+  BUG(print(sets);)
+  for(unsigned int i = 0; i < sets.size(); i++){
+    // If Setting A full Layer
+    if(!sets[i].layers.empty()){
+      set_actLayers(actIDs, sets[i].ID, sets[i].layers, nNodes, sNodes);
+    }
+    // Else if Setting from Nodes
+    else if(!sets[i].nodePositions.empty()){
+      set_actNodes(actIDs, sets[i].ID, sets[i].nodePositions);
+    }else if(sets[i].divide){
+      // If an ID list is given
+      if(!sets[i].ID_list.empty()){
+        set_actDivide(actIDs,sets[i].ID_list, nNodes);
+      }else{
+        set_actDivide(actIDs,count(ACT1.size()), nNodes);
+      }
+    }
+    else{
+      BUG(errPrint("Warning - setActID: Nothing is changed.");)
+    }
+  }
+  return;
+}
+
+void setActList(std::vector<unsigned int> &list, unsigned int value){
+  BUG(
+    print(list, "Original Actlist");
+    print(value, "Default Value");
+  )
+  if(inVec(value, list)){
+    std::vector<unsigned int> newList(list.size()-1, 0);
+    unsigned int cnt = 0;
+    for(unsigned int i = 0; i < list.size(); i++){
+      BUG(print(list[i], "List[i]");)
+      if(list[i] != value){
+        newList[cnt++] = list[i];
+        BUG(std::cout << "New List Value Added" << std::endl;)
+      }
+    }
+    list = newList;
+    BUG(print(list, "New List");)
+  }
+  return;
+}
+
 void setHLayers(
   struct ANN_Ambit &annbit,
   unsigned int hLayers,

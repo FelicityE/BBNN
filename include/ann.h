@@ -13,7 +13,7 @@ void printTo(
   std::string filename = "scores.log"
 );
 
-void setActList(std::vector<unsigned int> &list, unsigned int value);
+
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Applying Activation Functions
@@ -44,16 +44,33 @@ void initWeights(struct Ann &ann);
 
 Ann initANN(struct ANN_Ambit &annbit, struct Data train);
 
-
-
-
 ///////////////////////////////////////////////////////////////////////////////
 /// Setters
 ///////////////////////////////////////////////////////////////////////////////
+void setActList(std::vector<unsigned int> &list, unsigned int value);
+
 void setHLayers(
   struct ANN_Ambit &annbit,
   unsigned int hLayers,
   std::vector<unsigned int> nNodes
+);
+
+void set_actNodes(
+  std::vector<unsigned int> &actIDs,
+  unsigned int id,
+  std::vector<unsigned int> nodes
+);
+void set_actDivide(
+  std::vector<unsigned int> &actIDs,
+  std::vector<unsigned int> id_list,
+  unsigned int divider,
+  std::vector<unsigned int> nNodes
+);
+void setActID(
+  std::vector<unsigned int> &actIDs,
+  std::vector<struct ActID_Set> sets,
+  std::vector<unsigned int> nNodes,
+  std::vector<unsigned int> sNodes
 );
 
 ///////////////////////////////////////////////////////////////////////////////
