@@ -36,6 +36,7 @@ int main(int numInputs, char * inputs[]){
 
     unsigned int nHL = annbit.hNodes.size();
     unsigned int nActs = readbit.actList.size();
+    std::vector<struct ActID_Set> temp = annbit.ActIDSets;
     if(readbit.diversify){
       annbit.ActIDSets = std::vector<struct ActID_Set>(nActs);
       getNodeActivations(
@@ -45,6 +46,10 @@ int main(int numInputs, char * inputs[]){
         readbit.aseed
       );
     }
+    for(unsigned int i = 0; i < temp.size(); i++){
+      annbit.ActIDSets.push_back(temp[i]);
+    }
+    
 
     // Get Identifier
     double stamp = omp_get_wtime();
