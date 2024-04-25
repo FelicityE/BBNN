@@ -4,7 +4,7 @@
 #SBATCH --output=/home/fhe2/Code/BBNN/results/log.out
 #SBATCH --error=/home/fhe2/Code/BBNN/results/log.err
 
-#SBATCH --time=300:00
+#SBATCH --time=34:00:00
 #SBATCH --mem=500
 #SBATCH -c 12
 
@@ -13,13 +13,8 @@ make
 
 echo -e "stamp, time" >&2
 cd build/
-for c in {91..100}
-do
-    ./main ../data/wine.csv Adam alpha 0.001 maxIter 10000 hNodes 4 10 10 10 10 wseed 55 set_actLayer 4 4 aseed $c list: 1 2 3 :list >> ../results/log.log
-    ./main ../data/wine.csv Adam alpha 0.001 maxIter 10000 hNodes 4 10 10 10 10 wseed 55 set_actDefault 4 set_actLayer 4 4 aseed $c list: 5 6 :list >> ../results/log.log
-done
 
-for a in {56..100}
+for a in {1..100}
 do
     for b in {0..6}
     do
@@ -27,16 +22,9 @@ do
     done
     for c in {1..100}
     do
+        ./main ../data/wine.csv Adam alpha 0.001 maxIter 10000 hNodes 4 10 10 10 10 wseed $a set_actLayer 4 4 aseed $b >> ../results/log.log
         ./main ../data/wine.csv Adam alpha 0.001 maxIter 10000 hNodes 4 10 10 10 10 wseed $a set_actLayer 4 4 aseed $c list: 1 2 3 :list >> ../results/log.log
         ./main ../data/wine.csv Adam alpha 0.001 maxIter 10000 hNodes 4 10 10 10 10 wseed $a set_actDefault 4 set_actLayer 4 4 aseed $c list: 5 6 :list >> ../results/log.log
-    done
-done
-
-for a in {1..100}
-do
-    for b in {1..100}
-    do
-        ./main ../data/wine.csv Adam alpha 0.001 maxIter 10000 hNodes 4 10 10 10 10 wseed $a set_actLayer 4 4 aseed $b >> ../results/log.log
     done
 done
 
