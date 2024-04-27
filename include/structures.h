@@ -5,27 +5,32 @@
 // Lists 
 ///////////////////////////////////////////////////////////////////////////////
 const std::vector<actT1> ACT1{
-  relu, elu, leakyrelu, gelu,
-  sigmoid, bisigmoid, tanh_
+  relu, elu, leakyrelu, gelu, swish,
+  sigmoid, bisigmoid, tanh_,
+  gaussian
 };
 const std::vector<actT1> DACT1{
-  drelu, elu, leakyrelu, gelu,
-  dsigmoid, dbisigmoid, dtanh
+  drelu, delu, dleakyrelu, dgelu, dswish,
+  dsigmoid, dbisigmoid, dtanh,
+  dgaussian
 };
 const std::vector<actT2> ACT2{
-  relu, elu, leakyrelu, gelu,
+  relu, elu, leakyrelu, gelu, swish,
   sigmoid, bisigmoid, tanh_,
+  gaussian,
   softmax, argmax
 };
 const std::vector<actT2> DACT2{
-  drelu, elu, leakyrelu, gelu,
+  drelu, delu, dleakyrelu, dgelu, dswish,
   dsigmoid, dbisigmoid, dtanh,
+  dgaussian,
   dsoftmax, dargmax
 };
 const int TYPECHANGE = ACT1.size();
 enum ACTID{
-  RELU, ELU, LEAKYRELU, GELU,
+  RELU, ELU, LEAKYRELU, GELU, SWISH,
   SIGMOID, BISIGMOID, TANH,
+  GAUSSIAN,
   SOFTMAX, ARGMAX
 };
 

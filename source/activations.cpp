@@ -117,6 +117,28 @@ std::vector<DTYPE> dgelu(std::vector<DTYPE> layer, OBS_TYPE obs){
   return dA;
 }
 
+/// Swish
+DTYPE swish(DTYPE x){
+  return x*sigmoid(x);
+}
+DTYPE dswish(DTYPE x){
+  return (1+exp(-x)+x*exp(-x))/pow(1+exp(-x),2);
+}
+std::vector<DTYPE> swish(std::vector<DTYPE> layer, OBS_TYPE obs){
+  std::vector<DTYPE> temp(layer.size(), 0);
+  for(unsigned int i = 0; i < layer.size(); i++){
+    temp[i] = swish(layer[i]);
+  }
+  return temp;
+}
+std::vector<DTYPE> dswish(std::vector<DTYPE> layer, OBS_TYPE obs){
+  std::vector<DTYPE> temp(layer.size(),0);
+  for(unsigned int i = 0; i < layer.size(); i++){
+    temp[i] = dswish(layer[i]);
+  }
+  return temp;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Sigmoid
 DTYPE sigmoid(DTYPE x){
@@ -190,27 +212,29 @@ std::vector<DTYPE> dtanh(std::vector<DTYPE> layer, OBS_TYPE obs){
   return temp;
 }
 
-/// Swish
-DTYPE swish(DTYPE x){
-  return x*sigmoid(x);
+///////////////////////////////////////////////////////////////////////////////
+/// Gaussian
+DTYPE gaussian(DTYPE x){
+  return exp(pow(-x,2));
 }
-DTYPE dswish(DTYPE x){
-  return (1+exp(-x)+x*exp(-x))/pow(1+exp(-x),2);
+DTYPE dgaussian(DTYPE x){
+  return -2*x*exp(pow(-x,2));
 }
-std::vector<DTYPE> swish(std::vector<DTYPE> layer, OBS_TYPE obs){
+std::vector<DTYPE> gaussian(std::vector<DTYPE> layer, OBS_TYPE obs){
   std::vector<DTYPE> temp(layer.size(), 0);
   for(unsigned int i = 0; i < layer.size(); i++){
-    temp[i] = swish(layer[i]);
+    temp[i] = gaussian(layer[i]);
   }
   return temp;
 }
-std::vector<DTYPE> dswish(std::vector<DTYPE> layer, OBS_TYPE obs){
+std::vector<DTYPE> dgaussian(std::vector<DTYPE> layer, OBS_TYPE obs){
   std::vector<DTYPE> temp(layer.size(),0);
   for(unsigned int i = 0; i < layer.size(); i++){
-    temp[i] = dswish(layer[i]);
+    temp[i] = dgaussian(layer[i]);
   }
   return temp;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Softmax

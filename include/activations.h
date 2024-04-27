@@ -30,6 +30,12 @@ DTYPE dgelu(DTYPE x);
 std::vector<DTYPE> gelu(std::vector<DTYPE> layer, OBS_TYPE obs);
 std::vector<DTYPE> dgelu(std::vector<DTYPE> layer, OBS_TYPE obs);
 
+/// Swish
+DTYPE swish(DTYPE x);
+DTYPE dswish(DTYPE x);
+std::vector<DTYPE> swish(std::vector<DTYPE> layer, OBS_TYPE obs);
+std::vector<DTYPE> dswish(std::vector<DTYPE> layer, OBS_TYPE obs);
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Sigmoid
 DTYPE sigmoid(DTYPE x);
@@ -49,11 +55,12 @@ DTYPE dtanh(DTYPE x);
 std::vector<DTYPE> tanh_(std::vector<DTYPE> layer, OBS_TYPE obs);
 std::vector<DTYPE> dtanh(std::vector<DTYPE> layer, OBS_TYPE obs);
 
-/// Swish
-DTYPE swish(DTYPE x);
-DTYPE dswish(DTYPE x);
-std::vector<DTYPE> swish(std::vector<DTYPE> layer, OBS_TYPE obs);
-std::vector<DTYPE> dswish(std::vector<DTYPE> layer, OBS_TYPE obs);
+///////////////////////////////////////////////////////////////////////////////
+/// Gaussian
+DTYPE gaussian(DTYPE x);
+DTYPE dgaussian(DTYPE x);
+std::vector<DTYPE> gaussian(std::vector<DTYPE> layer, OBS_TYPE obs);
+std::vector<DTYPE> dgaussian(std::vector<DTYPE> layer, OBS_TYPE obs);
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Softmax

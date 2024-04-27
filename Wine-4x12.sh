@@ -1,43 +1,64 @@
 #!/bin/bash
 
-#SBATCH --job-name=BBNN-Analysis
-#SBATCH --output=/home/fhe2/Code/BBNN/results/wine_log.out
-#SBATCH --error=/home/fhe2/Code/BBNN/results/wine_log.err
+#SBATCH --job-name=Wine-4x12-v1
+#SBATCH --output=/home/fhe2/Code/BBNN/results/4x12/v1/wine.out
+#SBATCH --error=/home/fhe2/Code/BBNN/results/4x12/v1/wine.err
 
-#SBATCH --time=8:00:00
+#SBATCH --time=4:50:00
 #SBATCH --mem=500
 #SBATCH -c 12
 
 # make clean
-make
+# make
 
 echo -e "stamp, time" >&2
 cd build/
 
-# (3500, 17:48)
-for a in {1..100}
+# (4320, 4:48:00)
+for a in {1..10}
 do
-  # 3 Types (35)
-  for b in {0..6}
+  # 36*12
+  for b in {0..8}
   do
-    for c in $(seq $(($b+1)) 6)
+    for c in $(seq $(($b+1)) 8)
     do
-      for d in $(seq $(($c+1)) 6)
+      for d in {0..12}
       do
-        for e in $(seq $(($d+1)) 6)
-        do
-          ./main ../data/wine.csv LogPath ../results/wine-log.csv ANN_Path ../results/wine-ann.csv\
-          Adam alpha 0.001 maxIter 1000 wseed $a \
-          hNodes 4 12 10 8 6 \
+        ./main ../data/wine.csv \
+          LogPath ../results/4x12/v1/wine.csv ANN_Path ../results/4x12/v1/wine-ann.csv \
+          Adam alpha 0.001 maxIter 10000 wseed $a \
+          hNodes 4 12 12 12 12 \
           set_actDefault $b \
-          set_actDivide list: $b $c $d $e :list \
-          set_actLayer 4 4 >> ../results/wine_log.log
-        done
+          set_actNodes $c 0 $d \
+          set_actNodes $c 12 $d \
+          set_actNodes $c 24 $d \
+          set_actNodes $c 36 $d >> ../results/4x12/v1/wine.log
       done
     done
   done
 done
 
+# Activation Functions:
+  # -- ReLU Type --
+  # 0 ReLU (Default)
+  # 1 ELU
+  # 2 Leaky ReLU
+  # 3 GeLU
+  # 4 Swish
+  # -- Sigmoid Type --
+  # 5 Sigmoid
+  # 6 Bipolar Sigmoid
+  # 7 Tanh
+  # -- Gaus Type --
+  # 8 Gaussian
+  # 
+  # ----------
+  # Required Last Layer:
+  # 9 Softmax (Training)
+  # 10 Argmax (Testing)
+
+# Loss Functions:
+  # 0 Cross Entropy
 
 # Options
 # first option must always be the filename
@@ -89,19 +110,3 @@ done
     # Note: Order matters in terminal for these options
     # Error: x is not an activation function
     # Error: y is greater than the number of nodes
-
-# Activation Functions:
-# 0 ReLU (Default)
-# 1 ELU
-# 2 Leaky ReLU
-# 3 GeLU
-# 4 Sigmoid
-# 5 Bipolar Sigmoid
-# 6 Tanh
-# ----------
-# Required Last Layer:
-# 7 Softmax (Training)
-# 8 Argmax (Testing)
-
-# Loss Functions:
-# 0 Cross Entropy
