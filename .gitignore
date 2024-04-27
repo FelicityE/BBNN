@@ -4,3 +4,5 @@ results/*
 !results/
 data/*
 !data/
+/.old
+/.vscode

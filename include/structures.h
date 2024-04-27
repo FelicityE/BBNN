@@ -112,6 +112,7 @@ struct Ann{
 struct ANN_Ambit{
   ANN_Ambit():nLayers(3), hNodes(std::vector<unsigned int>(1,2)), maxIter(1000), wseed(42){
     this->logpath = "../results/log.csv";
+    this->annpath = "../results/ann.csv";
     this->actDefault = RELU;
   }
   unsigned int nLayers;
@@ -120,6 +121,7 @@ struct ANN_Ambit{
   unsigned int maxIter;
   unsigned int wseed; // weights seed
   std::string logpath; // Filepath to output
+  std::string annpath;
   unsigned int actDefault;
   std::vector<unsigned int> actCnts;
 };

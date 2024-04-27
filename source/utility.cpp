@@ -814,6 +814,8 @@ int getSetup(
     for(unsigned int i = 2; i < numInputs; i++){
       if(match(inputs[i], "LogPath")){
         annbit.logpath = inputs[++i];
+      }else if(match(inputs[i], "ANN_Path")){
+        annbit.annpath = inputs[++i];
       }
       // else if(match(inputs[i], "Analyze")){
       //   read.analyze = true;

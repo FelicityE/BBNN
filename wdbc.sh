@@ -4,33 +4,46 @@
 #SBATCH --output=/home/fhe2/Code/BBNN/results/log.out
 #SBATCH --error=/home/fhe2/Code/BBNN/results/log.err
 
-#SBATCH --time=34:00:00
+#SBATCH --time=8:00:00
 #SBATCH --mem=500
 #SBATCH -c 12
 
-make clean
-make
+# make clean
+# make
 
 echo -e "stamp, time" >&2
 cd build/
 
+# (2800)
 for a in {1..100}
 do
-    for b in {0..6}
+  # 2 Types (7+21)
+  for b in {0..6}
+  do
+    ./main ../data/wdbc.data Adam alpha 0.001 maxIter 10000 wseed $a \
+    hNodes 4 30 20 10 6 \
+    set_actDefault $b \
+    set_actLayer 4 4 >> ../results/log.log
+
+    for c in $(seq $(($b+1)) 6)
     do
-        ./main ../data/wine.csv Adam alpha 0.001 maxIter 10000 hNodes 4 10 10 10 10 wseed $a set_actDefault $b set_actLayer 4 4 >> ../results/log.log
+        ./main ../data/wdbc.data Adam alpha 0.001 maxIter 10000 wseed $a \
+        hNodes 4 30 20 10 6 \
+        set_actDefault $b \
+        set_actDivide list: $b $c :list \
+        set_actLayer 4 4 >> ../results/log.log
     done
-    for c in {1..100}
-    do
-        ./main ../data/wine.csv Adam alpha 0.001 maxIter 10000 hNodes 4 10 10 10 10 wseed $a set_actLayer 4 4 aseed $c >> ../results/log.log
-        ./main ../data/wine.csv Adam alpha 0.001 maxIter 10000 hNodes 4 10 10 10 10 wseed $a set_actLayer 4 4 aseed $c list: 1 2 3 :list >> ../results/log.log
-        ./main ../data/wine.csv Adam alpha 0.001 maxIter 10000 hNodes 4 10 10 10 10 wseed $a set_actDefault 4 set_actLayer 4 4 aseed $c list: 5 6 :list >> ../results/log.log
-    done
+  
+  done
 done
 
 
 # Options
 # first option must always be the filename
+
+# LogPath str -> Set log output path; defautlt ../results/log.csv
+# ANN_Path str -> Set ann output path; defautlt ../results/ann.csv
+
 # ID_column x -> set column number of class ID = x; default 0
 # skip_row x -> skips the first x rows, use for headers; default 1
 # skip_column x -> skips the first x columns; default 0

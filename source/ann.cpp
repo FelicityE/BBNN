@@ -1145,10 +1145,10 @@ void runANN(
     print(ann);
   )
   
-  std::string annPath = "../results/ann.csv";
+  // std::string annPath = "../results/ann.csv";
   printTo(
     ann,
-    annPath,
+    annbit.annpath,
     stamp
   );
 
