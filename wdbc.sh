@@ -1,27 +1,35 @@
 #!/bin/bash
 
-#SBATCH --job-name=Wine-Test
-#SBATCH --output=/home/fhe2/Code/BBNN/results/wine-Test.out
-#SBATCH --error=/home/fhe2/Code/BBNN/results/wine-Test.err
+#SBATCH --job-name=WDBC
+#SBATCH --output=/home/fhe2/Code/BBNN/results/wdbc/out.out
+#SBATCH --error=/home/fhe2/Code/BBNN/results/wdbc/err.err
 
-#SBATCH --time=5:00
-#SBATCH --mem=500
-#SBATCH -c 12
+#SBATCH --time=30:00
+#SBATCH --mem=3
+#SBATCH -c 16
 
 # make clean
 # make
 
-echo -e "stamp, time" >&2
+echo -e "threads, stamp, time" >&2
 cd build/
 
-for a in {0..10}
+# 210 30:00
+for w in {0..9}
 do
-  ./main ../data/wine.csv \
-    LogPath ../results/wine-Test.csv ANN_Path ../results/wine-ann-Test.csv \
-    Adam alpha 0.001 maxIter 1000 wseed $a\
-    hNodes 4 12 12 12 12 \
-    set_actDefault 0 \
-    >> ../results/wine-Test.log
+  for a in {0..7}
+  do
+    for b in $(seq $(($a+1)) 7)
+    do
+      ./main ../data/wdbc.data \
+        LogPath ../results/wdbc/wdbc.csv ANN_Path ../results/wdbc/ann.csv \
+        Adam alpha 0.001 maxIter 10000 skip_row 0 wseed $w \
+        hNodes 1 20 \
+        set_actDefault $a \
+        set_actDivide list: $a $b :list \
+        >> ../results/wdbc/log.log
+    done
+  done
 done
 
 # Activation Functions:
@@ -57,7 +65,7 @@ done
   # skip_column x -> skips the first x columns; default 0
 
   # maxIter x -> sets maxIter = x; default 1000
-  # ratio x -> set ratio of training to test set to x:(100-x); default 70
+  # ratio x -> set ratio of training to wdbc set to x:(100-x); default 70
   # sseed x -> set sample seed to x; default 0
   # wseed x -> set random initial weights to x; default 42
 
