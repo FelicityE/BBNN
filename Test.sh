@@ -4,9 +4,10 @@
 #SBATCH --output=/home/fhe2/Code/BBNN/results/test/out.out
 #SBATCH --error=/home/fhe2/Code/BBNN/results/test/err.err
 
-#SBATCH --time=5:00
-#SBATCH --mem=3
-#SBATCH -c 16
+#SBATCH --time=1:00:00
+#SBATCH --mem=0
+#SBATCH -c 64
+#SBATCH -w cn3
 
 # make clean
 # make
@@ -15,10 +16,10 @@ echo -e "threads, stamp, time" >&2
 cd build/
 
 
-./main ../data/wdbc.data \
-  LogPath ../results/test/wdbc.csv ANN_Path ../results/test/ann.csv \
-  Adam alpha 0.001 maxIter 10000 skip_row 0 \
-  hNodes 1 20 \
+./main ../data/mnist.csv \
+  LogPath ../results/test/mnist.csv ANN_Path ../results/test/ann.csv \
+  Adam alpha 0.001 maxIter 10000 \
+  hNodes 2 50 50 \
   >> ../results/test/log.log
 
 # Activation Functions:

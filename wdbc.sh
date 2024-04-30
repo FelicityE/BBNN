@@ -14,7 +14,7 @@
 echo -e "threads, stamp, time" >&2
 cd build/
 
-# 210 30:00
+# 280 30:00
 for w in {0..9}
 do
   for a in {0..7}
