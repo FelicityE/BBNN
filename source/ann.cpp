@@ -504,7 +504,7 @@ void setHLayers(
 ){
   annbit.nLayers = hLayers+2;
   BUG(print(hLayers, "Number of Hidden Layers");)
-  annbit.hNodes = std::vector<unsigned int>(hLayers, 3);
+  annbit.hNodes = std::vector<unsigned int>(hLayers, -1);
   for(unsigned int i = 0; i < nNodes.size(); i++){
     BUG(print(i, "hLayer[i]");)
     if(i > hLayers-1){return;}
@@ -704,9 +704,9 @@ void getScores(
   std::vector<unsigned int> pre,
   std::vector<bool> cor
 ){
-  std::vector<unsigned int> obsCnt(3,0);
-  std::vector<unsigned int> preCnt(3,0);
-  std::vector<unsigned int> corCnt(3,0);
+  std::vector<unsigned int> obsCnt(score.nClass,0);
+  std::vector<unsigned int> preCnt(score.nClass,0);
+  std::vector<unsigned int> corCnt(score.nClass,0);
   
   for(unsigned int i = 0; i < obs.size(); i++){
     obsCnt[obs[i]]++;
@@ -728,7 +728,7 @@ void getScores(
 
   score.accuracy = (double)sum(corCnt)/(double)cor.size();
   
-  for(unsigned int i = 0; i < 3; i++){
+  for(unsigned int i = 0; i < score.nClass; i++){
     if(obsCnt[i] == 0){
       score.recall[i] = -1;
     }else{
@@ -760,6 +760,7 @@ void getScores(
   )
   return;
 }
+
 struct Scores getScores(
   struct Results result,
   unsigned int nClasses

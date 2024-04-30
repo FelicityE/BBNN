@@ -211,6 +211,7 @@ struct Results{
 struct Scores{
   Scores(){}
   Scores(unsigned int nClass){
+    this->nClass = nClass;
     this->accuracy = 0;
     this->precision = std::vector<double>(nClass,0);
     this->recall = std::vector<double>(nClass,0);
@@ -220,4 +221,5 @@ struct Scores{
   std::vector<double> precision;
   std::vector<double> recall;
   std::vector<double> F1;
+  unsigned int nClass;
 };

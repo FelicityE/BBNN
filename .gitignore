@@ -1,8 +1,8 @@
 build/*
-!build/
+!build/.gitkeep
 results/*
-!results/
+!results/.gitkeep
 data/*
-!data/
+!data/.gitkeep
 /.old
 /.vscode
