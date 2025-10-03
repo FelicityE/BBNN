@@ -7,7 +7,7 @@ authors:
   - family-names: "Donnelly"
     given-names: "Brian"
     orcid: "https://orcid.org/000−0002−7484−3778"
-title: "BB Neural Network"
+title: "Building Basic Neural Networks (BBNN)"
 version: 3.0.0
 date-released: 2024-04-18
 url: "https://github.com/FelicityE/BBNN"
