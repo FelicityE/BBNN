@@ -1,5 +1,5 @@
 
-# 💫 BBNN – Basic Build Neural Network
+# 💫 BBNN – Building Basic Neural Networks
 
 **BBNN** is a lightweight C++ framework for constructing and training fully connected feed-forward neural networks with **heterogeneous activation functions**. Unlike most neural network libraries, BBNN allows activation functions to be assigned **per layer or per node**, enabling fine-grained experimentation with network structure.
 
