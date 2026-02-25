@@ -2,7 +2,7 @@
 
 #include <iostream> // For std::cout
 #include <vector> // For std::vector
-#include <math.h> // For exp(), log(), sqrt(), ect.
+#include <math.h> // For exp(), log(), sqrt(), erf()
 #include <climits> // For UINT_MAX
 #include <float.h> // For DBL_MAX
 #include <algorithm> // For std::find
@@ -21,12 +21,14 @@
 #define TRAINPRINT false
 #define DEBUG false
 #define COLOR false
+#define NORMALIZE true
 
 #define DTYPE double
 
 typedef std::vector<DTYPE> (*lossF)(std::vector<DTYPE> /*last Layer*/, unsigned int /*observed class*/);
+
 typedef DTYPE (*actT1)(DTYPE /*value*/);
-typedef std::vector<DTYPE> (*actT2)(std::vector<DTYPE> /*Layer*/, unsigned int /*obs or meta*/);
+typedef std::vector<DTYPE> (*actT2)(std::vector<DTYPE> /*Layer*/, unsigned int  /*obs*/);
 
 #if(DEBUG)
   #define BUG(x) x

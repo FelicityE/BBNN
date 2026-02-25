@@ -39,6 +39,7 @@ void printTo(
   std::vector<unsigned int> hNodes
 );
 
+void print(std::vector<struct ActID_Set> sets);
 void print(struct Data data);
 void print(struct Results re);
 

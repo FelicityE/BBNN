@@ -13,6 +13,8 @@ void printTo(
   std::string filename = "scores.log"
 );
 
+
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Applying Activation Functions
 ///////////////////////////////////////////////////////////////////////////////
@@ -39,58 +41,61 @@ void initWeights(
   std::vector<unsigned int> nNodes
 );
 void initWeights(struct Ann &ann);
-Ann initANN(
-  unsigned int nFeat, 
-  unsigned int nClasses, 
-  unsigned int nLayers
-);
-Ann initANN(
-	unsigned int nFeat, 
-	unsigned int nClasses, 
-	unsigned int nLayers,
-	std::vector<unsigned int> nNodes
-);
-Ann initANN(struct ANN_Ambit annbit, struct Data train);
 
+Ann initANN(struct ANN_Ambit &annbit, struct Data train);
+
+///////////////////////////////////////////////////////////////////////////////
+/// Setters
+///////////////////////////////////////////////////////////////////////////////
+void setActList(std::vector<unsigned int> &list, unsigned int value);
+
+void setHLayers(
+  struct ANN_Ambit &annbit,
+  unsigned int hLayers,
+  std::vector<unsigned int> nNodes
+);
+
+void set_actNodes(
+  std::vector<unsigned int> &actIDs,
+  unsigned int id,
+  std::vector<unsigned int> nodes
+);
+void set_actDivide(
+  std::vector<unsigned int> &actIDs,
+  std::vector<unsigned int> id_list,
+  unsigned int divider,
+  std::vector<unsigned int> nNodes
+);
+void setActID(
+  std::vector<unsigned int> &actIDs,
+  std::vector<struct ActID_Set> sets,
+  std::vector<unsigned int> nNodes,
+  std::vector<unsigned int> sNodes
+);
+
+///////////////////////////////////////////////////////////////////////////////
+/// Getters
+///////////////////////////////////////////////////////////////////////////////
 void getDataSets(
   struct Data &train, 
   struct Data &test, 
   struct Data data
 );
 
-
-///////////////////////////////////////////////////////////////////////////////
-/// Setters
-///////////////////////////////////////////////////////////////////////////////
-/// ANN 
-// Get Activation ID Position
-unsigned int getAIDP(
-  std::vector<unsigned int> nNodes, 
-  unsigned int layerN, 
-  unsigned int nodeN = 0
-);
-
-void setActID(
-  std::vector<unsigned int> &actIDs,
+unsigned int getNodePosition(
   std::vector<unsigned int> nNodes,
-  unsigned int ID,
-  unsigned int layerN,
-  unsigned int nodeN
+  unsigned int Layer,
+  unsigned int node
 );
 
-// setActID(..., start<inclusive>, end<exclusive>, ...)
-void setActID(
-  struct Ann &ann,
-  unsigned int ID,
-  unsigned int layerNStrt = 0,
-  unsigned int layerNEnd = UINT_MAX,
-  unsigned int nodeNStrt = 0,
-  unsigned int nodeNEnd = UINT_MAX
+// std::vector<unsigned int> getNodeActivations(
+void getNodeActivations(
+  std::vector<struct ActID_Set> &sets,
+  std::vector<unsigned int> actList,
+  std::vector<unsigned int> nNodes,
+  unsigned int aseed
 );
 
-///////////////////////////////////////////////////////////////////////////////
-/// Training and Testing
-///////////////////////////////////////////////////////////////////////////////
 void getResults(
   struct Results &result,
   std::vector<DTYPE> lastAct,
@@ -100,7 +105,6 @@ void getResults(
   unsigned int sampleIndex,
   unsigned int obs
 );
-
 void getScores(
   struct Scores &score,
   std::vector<unsigned int> obs,
@@ -112,7 +116,9 @@ struct Scores getScores(
   unsigned int nClasses
 );
 
-
+///////////////////////////////////////////////////////////////////////////////
+/// Training and Testing
+///////////////////////////////////////////////////////////////////////////////
 void forward(
   struct Ann ann,
   std::vector<DTYPE> &layer,
@@ -142,35 +148,14 @@ void testNN(
   struct Results &result
 );
 
+///////////////////////////////////////////////////////////////////////////////
+/// Runners
+///////////////////////////////////////////////////////////////////////////////
 void runANN(
   struct Alpha alpha,
-  struct ANN_Ambit annbit,
+  struct ANN_Ambit &annbit,
   struct Data data,
   double stamp
-);
-
-///////////////////////////////////////////////////////////////////////////////
-/// Analyzing and Running
-///////////////////////////////////////////////////////////////////////////////
-void setHLayers(
-  struct ANN_Ambit &annbit,
-  unsigned int hLayers,
-  std::vector<unsigned int> nNodes
-);
-unsigned int getNodePosition(
-  std::vector<unsigned int> nNodes,
-  unsigned int Layer,
-  unsigned int node
-);
-void setActIDs(
-  struct ANN_Ambit &annbit,
-  std::vector<unsigned int> acts,
-  std::vector<std::vector<unsigned int>> actCnts
-);
-
-std::vector<unsigned int> getActIDs(
-  struct ANN_Ambit &annbit,
-  unsigned int nClasses
 );
 
 void runAnalysis(

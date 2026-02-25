@@ -87,7 +87,7 @@ void printTo(
   
   file << "\n" << std::setprecision(13) << stamp;
   file << ", " << annbit.maxIter << ", " << read.ratio[0]
-    << ", " << annbit.aseed << ", " << annbit.wseed << ", " << read.sseed[0]
+    << ", " << read.aseed << ", " << annbit.wseed << ", " << read.sseed[0]
     << ", " << alpha.adam << ", " << alpha.alpha
     << ", " << data.nFeat << ", " << data.nClasses << ", " << data.nSamp
     << ", " << annbit.nLayers << ", " << tNodes;
@@ -157,6 +157,37 @@ void printTo(
     file << ", " << actCnts[i];
   }
   file.close();
+}
+
+void print(std::vector<struct ActID_Set> sets){
+  for(unsigned int i = 0; i < sets.size(); i++){
+    std::cout << "set[" << i << "]" << std::endl;
+    if(!sets[i].nodePositions.empty()){
+      std::cout << "ID: " << sets[i].ID
+        << " Node Positions: ";
+      for(unsigned int j = 0; j < sets[i].nodePositions.size(); j++){
+        std::cout << sets[i].nodePositions[j] << " " ;
+      }
+      std::cout << std::endl;
+    }else if(!sets[i].layers.empty()){
+      std::cout << "ID: " << sets[i].ID
+        << " Layers: ";
+      for(unsigned int j = 0; j < sets[i].layers.size(); j++){
+        std::cout << sets[i].layers[j] << " " ;
+      }
+      std::cout << std::endl;
+    }else if(!sets[i].ID_list.empty()){
+      std::cout << "ID_list: ";
+      for(unsigned int j = 0; j < sets[i].ID_list.size(); j++){
+        std::cout << sets[i].ID_list[j] << " " ;
+      }
+      std::cout << "Divide: " << sets[i].divide << std::endl;
+    }else if(sets[i].divide){
+      std::cout << "Divide: " << sets[i].divide << std::endl;
+    }else{
+      std::cout << "ERROR: ActID_Set is empty." << std::endl;
+    }
+  }
 }
 
 void print(struct Data data){
@@ -331,19 +362,17 @@ bool match(std::vector<double> A, std::vector<double> B){
   return true;
 }
 bool match(char * A, std::string B){
-  for(unsigned int i = 0; i < B.length(); i++){
-    if(A[i] != B[i]){
-      return false;
-    }
+  if(A == B){
+    return true;
   }
-  return true;
+  return false;
 }
 
 bool inVec(unsigned int v, std::vector<unsigned int> V){
   for(unsigned int i = 0; i < V.size(); i++){
-    if(V[i] == v){return i;}
+    if(V[i] == v){return true;}
   }
-  return 0;
+  return false;
 }
 
 unsigned int dupe(std::vector<unsigned int> v){
@@ -778,19 +807,19 @@ int getSetup(
   for(unsigned int i = 0; i < numInputs; i++){
     std::cout << inputs[i] << " ";
   }
-  std::cout << std::endl;
+  // std::cout << std::endl;
 
 
   if(numInputs > 2){
     for(unsigned int i = 2; i < numInputs; i++){
       if(match(inputs[i], "LogPath")){
         annbit.logpath = inputs[++i];
-      }else if(match(inputs[i], "Analyze")){
-        read.analyze = true;
-      }else if(match(inputs[i], "aseed")){
-        annbit.aseed = std::stoi(inputs[++i]);
-        read.diversify = true;
+      }else if(match(inputs[i], "ANN_Path")){
+        annbit.annpath = inputs[++i];
       }
+      // else if(match(inputs[i], "Analyze")){
+      //   read.analyze = true;
+      // }
       
       else if(match(inputs[i], "ID_column")){
         i++;
@@ -835,22 +864,38 @@ int getSetup(
         }
         i++;
       }else if(match(inputs[i], "hNodes")){
-        annbit.nLayers = std::stoi(inputs[i+1])+2;
-        std::cout << "\nNumber of Layers: " << annbit.nLayers << std::endl;
-        i++;
-        annbit.hNodes[0] = std::stoi(inputs[i+1]);
-        i++;
+        annbit.nLayers = std::stoi(inputs[++i])+2;
+        annbit.hNodes[0] = std::stoi(inputs[++i]);
         for(unsigned int j = 1; j < annbit.nLayers-2; j++){
-          annbit.hNodes.push_back(std::stoi(inputs[i+1]));
-          i++;
+          annbit.hNodes.push_back(std::stoi(inputs[++i]));
         }
         BUG(
-          print("Hidden Nodes", nHiddenNodes);
-          std::cout << std::endl;
+          print(annbit.hNodes, "Hidden Nodes");
         )
       }
 
-      else if(match(inputs[i], "setNodes")){
+      else if(match(inputs[i], "aseed")){
+        read.aseed = std::stoi(inputs[++i]);
+        BUG(print(read.aseed, "aseed");)
+        read.diversify = true;
+        BUG(print(read.diversify, "diversify");)
+        if(i+1 >= numInputs){return 0;}
+        if(match(inputs[i+1], "list:")){
+          i+=2;
+          std::vector<unsigned int> actList;
+          while(!match(inputs[i], ":list")){
+            actList.push_back(std::stoi(inputs[i]));
+            if(i >= numInputs){
+              errPrint("ERROR - Setup: list: ... :list");
+              return 1;
+            }
+            i++;
+          }
+          read.actList = actList;
+        }
+      }else if(match(inputs[i], "set_actDefault")){
+        annbit.actDefault = std::stoi(inputs[++i]);
+      }else if(match(inputs[i], "set_actNodes")){
         BUG(
           std::cout << "Setting Nodes" << std::endl;
           print(inputs[i+1], "0");
@@ -870,7 +915,7 @@ int getSetup(
               }else{
                 errPrint("ERROR - Setup: list: was not followed by :list.");
               }
-              
+              return 1;
             }
           }
         }else{
@@ -883,8 +928,77 @@ int getSetup(
         }
         struct ActID_Set tempStruct(actID, nodePos);
         annbit.ActIDSets.push_back(tempStruct);
+      }else if(match(inputs[i], "set_actLayer")){
+        unsigned int ID = std::stoi(inputs[++i]);
+        std::vector<unsigned int> layers 
+          = std::vector<unsigned int>(1, std::stoi(inputs[++i]));
+        BUG(
+          print(ID, "set_actLayer", false);
+          print(layers);
+        )
+        struct ActID_Set temp(ID, layers, 1);
+        annbit.ActIDSets.push_back(temp);
       }
-      
+      else if(match(inputs[i], "set_actLayers")){
+        std::cout << inputs[i] << std::endl << std::flush;
+        i++;
+        unsigned int actID = std::stoi(inputs[i]);
+        std::cout << inputs[i] << std::endl << std::flush;
+        // print(actID, "set_actLayers", false);
+        i++;
+        std::vector<unsigned int> layers;
+        if(match(inputs[i],"list:")){
+          i++;
+          while(!match(inputs[i],":list")){
+            layers.push_back(std::stoi(inputs[i]));
+            print(inputs[i], "list", false);
+            i++;
+            if(i >= numInputs){
+              errPrint("ERROR - Setup: list: was not followed by :list.");
+              return 1;
+            }
+          }
+          std::cout << ":list" << std::endl << std::flush;
+        }else{
+          unsigned int s_lyr = std::stoi(inputs[i]);
+          unsigned int e_lyr = std::stoi(inputs[++i]);
+          unsigned int size = e_lyr-s_lyr;
+          layers = count(size, s_lyr);
+        }
+        
+        struct ActID_Set temp(actID, layers, 1);
+        annbit.ActIDSets.push_back(temp);
+      }
+
+      else if(match(inputs[i], "set_actDivide")){
+        // unsigned int divider = std::stoi(inputs[++i]);
+        // BUG(print(divider, 'Divide by');)
+        
+        bool divide = true;
+        if(i+1 >= numInputs){
+          struct ActID_Set temp(divide);
+          annbit.ActIDSets.push_back(temp);
+          return 0;
+        }
+        if(match(inputs[i+1], "list:")){
+          i+=2;
+          std::vector<unsigned int> idList;
+          while(!match(inputs[i], ":list")){
+            idList.push_back(std::stoi(inputs[i]));
+            if(i >= numInputs){
+              errPrint("ERROR - Setup: list: ... :list");
+              return 1;
+            }
+            i++;
+          }
+          struct ActID_Set temp(divide, idList);
+          annbit.ActIDSets.push_back(temp);
+        }else{
+          struct ActID_Set temp(divide);
+          annbit.ActIDSets.push_back(temp);
+        }
+      }
+        
       else{
         std::string msg = "ERROR - main input: input[" + str(inputs[i]) + "], not found.";
         errPrint(msg);
@@ -952,6 +1066,7 @@ int getData(struct Data &data, struct Read_Ambit read){
       }
     }
   }
+
   // Get number of classes 
   nClasses = max(obs)+1;
 
@@ -971,6 +1086,33 @@ int getData(struct Data &data, struct Read_Ambit read){
     );
     return 1;
   }
+
+  #if NORMALIZE
+  // print(feat, "Feat:");
+  std::vector<std::vector<DTYPE>> tempData(nFeat, std::vector<DTYPE>(nSamples));
+    for(int i = 0; i < nFeat; i++){
+      for(int j = 0; j < nSamples; j++){
+        tempData[i][j] = feat[j*nFeat+i];
+      }
+    }
+
+    for(int i = 0; i < nFeat; i++){
+      DTYPE max = *max_element(tempData[i].begin(), tempData[i].end());
+      DTYPE min = *min_element(tempData[i].begin(), tempData[i].end());
+      DTYPE denom = max - min;
+      for(int j = 0; j < nSamples; j++){
+        tempData[i][j] = (tempData[i][j] - min) / denom;
+      }
+    }
+
+    for(int i = 0; i < nFeat; i++){
+      for(int j = 0; j < nSamples; j++){
+        feat[j*nFeat+i] = tempData[i][j];
+      }
+    }
+
+    // print(feat, "Neat:");
+  #endif
 
   // Pack
   data.nFeat = nFeat;

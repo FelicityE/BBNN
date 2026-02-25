@@ -4,29 +4,78 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Lists 
 ///////////////////////////////////////////////////////////////////////////////
-const std::vector<actT1> ACT1{relu, sigmoid};
-const std::vector<actT1> DACT1{drelu, dsigmoid};
-const std::vector<actT2> ACT2{relu, sigmoid, softmax, argmax};
-const std::vector<actT2> DACT2{drelu, dsigmoid, dsoftmax, dargmax};
+const std::vector<actT1> ACT1{
+  relu, elu, leakyrelu, gelu, swish,
+  sigmoid, bisigmoid, tanh_,
+  gaussian
+};
+const std::vector<actT1> DACT1{
+  drelu, delu, dleakyrelu, dgelu, dswish,
+  dsigmoid, dbisigmoid, dtanh,
+  dgaussian
+};
+const std::vector<actT2> ACT2{
+  relu, elu, leakyrelu, gelu, swish,
+  sigmoid, bisigmoid, tanh_,
+  gaussian,
+  softmax, argmax
+};
+const std::vector<actT2> DACT2{
+  drelu, delu, dleakyrelu, dgelu, dswish,
+  dsigmoid, dbisigmoid, dtanh,
+  dgaussian,
+  dsoftmax, dargmax
+};
 const int TYPECHANGE = ACT1.size();
+enum ACTID{
+  RELU, ELU, LEAKYRELU, GELU, SWISH,
+  SIGMOID, BISIGMOID, TANH,
+  GAUSSIAN,
+  SOFTMAX, ARGMAX
+};
 
 const std::vector<lossF> LOSSF{crossentropy};
 const std::vector<lossF> DLOSSF{dcrossentropy};
-
-enum ACTID{RELU, SIGMOID, SOFTMAX, ARGMAX};
+enum LOSSID{CROSSENTROPY};
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Structs
 ///////////////////////////////////////////////////////////////////////////////
 struct ActID_Set{
-  ActID_Set(){};
-  ActID_Set(unsigned int id, std::vector<unsigned int> nodePos){
+  ActID_Set():divide(false){};
+  ActID_Set(bool divide){
+    this->divide = divide;
+  };
+  ActID_Set(bool divide, std::vector<unsigned int> ids){
+    this->ID_list = ids;
+    this->divide = divide;
+  };
+  // ActID_Set(unsigned int divider){
+  //   this->divider = divider;
+  // };
+  // ActID_Set(std::vector<unsigned int> ids, unsigned int divider){
+  //   this->ID_list = ids;
+  //   this->divider = divider;
+  // };
+  ActID_Set(
+    unsigned int id, 
+    std::vector<unsigned int> list, 
+    unsigned int opt = 0
+  ):divide(false){
     this->ID = id;
-    this->nodePositions = nodePos;
+    if(opt == 0){
+      this->nodePositions = list;
+    }else{
+      this->layers = list;
+    }
   }
+  std::vector<unsigned int> ID_list;
+  // unsigned int divider;
+  bool divide;
   unsigned int ID;
   std::vector<unsigned int> nodePositions;
+  std::vector<unsigned int> layers;
 };
 
 struct Alpha{
@@ -66,16 +115,20 @@ struct Ann{
 };
 
 struct ANN_Ambit{
-  ANN_Ambit():nLayers(3), hNodes(std::vector<unsigned int>(1,2)), maxIter(1000), wseed(42), aseed(42){
+  ANN_Ambit():nLayers(3), hNodes(std::vector<unsigned int>(1,2)), maxIter(1000), wseed(42){
     this->logpath = "../results/log.csv";
+    this->annpath = "../results/ann.csv";
+    this->actDefault = RELU;
   }
   unsigned int nLayers;
   std::vector<unsigned int> hNodes;
   std::vector<struct ActID_Set> ActIDSets;
   unsigned int maxIter;
   unsigned int wseed; // weights seed
-  unsigned int aseed; // weights seed
   std::string logpath; // Filepath to output
+  std::string annpath;
+  unsigned int actDefault;
+  std::vector<unsigned int> actCnts;
 };
 
 struct Data{
@@ -96,6 +149,10 @@ struct Read_Ambit{
     this->ratio = std::vector<double> (1,70);
     this->analyze = false;
     this->diversify = false;
+    this-> actList = std::vector<unsigned int>(ACT1.size(),0);
+    for(unsigned int i = 0; i < actList.size(); i++){
+      actList[i] = i;
+    }
   };
   Read_Ambit(std::string filepath): idp(0), skipRow(1), skipCol(0){
     this->filepath = filepath;
@@ -103,10 +160,17 @@ struct Read_Ambit{
     this->ratio = std::vector<double> (1,70);
     this->analyze = false;
     this->diversify = false;
+    this->aseed = 42;
+    this-> actList = std::vector<unsigned int>(ACT1.size(),0);
+    for(unsigned int i = 0; i < actList.size(); i++){
+      actList[i] = i;
+    }
   }
   std::string filepath; // Filepath to data
   bool analyze;
   bool diversify;
+  unsigned int aseed; // activation seed
+  std::vector<unsigned int> actList; // Activation Function List
   unsigned int idp; // Class ID column number
   unsigned int skipRow; // Number of rows to skip
   unsigned int skipCol; // Number of columns to skip
@@ -147,6 +211,7 @@ struct Results{
 struct Scores{
   Scores(){}
   Scores(unsigned int nClass){
+    this->nClass = nClass;
     this->accuracy = 0;
     this->precision = std::vector<double>(nClass,0);
     this->recall = std::vector<double>(nClass,0);
@@ -156,4 +221,5 @@ struct Scores{
   std::vector<double> precision;
   std::vector<double> recall;
   std::vector<double> F1;
+  unsigned int nClass;
 };

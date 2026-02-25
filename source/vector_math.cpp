@@ -78,13 +78,13 @@ std::vector<DTYPE> dot(
   for(unsigned int i = 0; i < a_row; i++){
     for(unsigned int j = 0; j < a_col; j++){
       for(unsigned int k = 0; k < b_col; k++){
-        BUG(
-          std::cout 
-            << "C[" << i*c_col+k 
-            << "] = A[" << i*a_col+j 
-            << "] * B[" << k*b_row+j << "]" 
-          << std::endl;
-        )
+        // BUG(
+        //   std::cout 
+        //     << "C[" << i*c_col+k 
+        //     << "] = A[" << i*a_col+j 
+        //     << "] * B[" << k*b_row+j << "]" 
+        //   << std::endl;
+        // )
         C[i*c_col+k] += A[i*a_col+j] * B[k*b_row+j];
       }
     }

@@ -9,6 +9,10 @@ int main(int numInputs, char * inputs[]){
   // Set changes
   if(getSetup(alpha, annbit, readbit, numInputs, inputs)){return 1;}
 
+  // Setting Act List
+  setActList(readbit.actList, annbit.actDefault);
+  BUG(print(readbit.actList, "Actlist");)
+
   // Get trainging and testing data
   struct Data data; // Full dataset
   if(getData(data, readbit)){return 1;}
@@ -20,7 +24,7 @@ int main(int numInputs, char * inputs[]){
   // Add header to output log if needed
   std::string header = buildHeader(data.nClasses);
   bool addheader = addHeader(annbit.logpath, header);
-  
+
   if(readbit.analyze){
     runAnalysis(readbit, annbit, alpha, data, addheader);
   }else{
@@ -31,18 +35,27 @@ int main(int numInputs, char * inputs[]){
     }
 
     unsigned int nHL = annbit.hNodes.size();
-    unsigned int nActs = ACT1.size();
-    std::vector<unsigned int> actout(nHL*nActs, 0);
+    unsigned int nActs = readbit.actList.size();
+    std::vector<struct ActID_Set> temp = annbit.ActIDSets;
     if(readbit.diversify){
-      actout = getActIDs(annbit, data.nClasses);
-    }else{
-      for(unsigned int i = 0; i < nHL; i++){
-        actout[i*nActs] = annbit.hNodes[i];
+      annbit.ActIDSets = std::vector<struct ActID_Set>(nActs);
+      getNodeActivations(
+        annbit.ActIDSets,
+        readbit.actList, 
+        annbit.hNodes, 
+        readbit.aseed
+      );
+      for(unsigned int i = 0; i < temp.size(); i++){
+        annbit.ActIDSets.push_back(temp[i]);
       }
     }
+    
+    
 
     // Get Identifier
     double stamp = omp_get_wtime();
+    // print(stamp, "Stamp", false);
+    fprintf(stdout, "stamp: %f ", stamp);
     // Print Meta Data
     printTo(annbit, readbit, alpha, data, stamp);
     // Run ANN
@@ -52,8 +65,8 @@ int main(int numInputs, char * inputs[]){
       data,
       stamp
     );
-
-    printTo(annbit.logpath, actout, annbit.hNodes);
+    BUG(print(annbit.actCnts, "Main - Activation Counts");)
+    printTo(annbit.logpath, annbit.actCnts, annbit.hNodes);
 
     double e_time = omp_get_wtime();
     fprintf(stderr, "%f, %f\n", stamp, e_time-stamp); 
